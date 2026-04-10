@@ -1,0 +1,55 @@
+survey_date: "2026-04-10"
+topic: "Neural Network Architectures for Image Classification"
+summary: >
+  Survey of foundational architectures for image classification tasks.
+  Three architectures selected as baselines: FFNN (fully-connected), CNN (convolutional),
+  and ResNet-18 (residual network). MNIST used for simpler baselines; CIFAR-10 for
+  the deeper model.
+
+papers:
+  - title: "LeCun et al. (1998): Gradient-Based Learning Applied to Document Recognition"
+    key_finding: >
+      Introduced LeNet-style CNNs. Showed that local receptive fields and weight sharing
+      give convnets a strong inductive bias for 2D signals, outperforming fully-connected
+      networks on MNIST with far fewer parameters.
+    relevance: "Motivates CNN baseline on MNIST."
+
+  - title: "He et al. (2016): Deep Residual Learning for Image Recognition"
+    key_finding: >
+      Residual (skip) connections allow very deep networks to train without degradation.
+      ResNet-18 achieves strong accuracy on CIFAR-10 / ImageNet. The trick is identity
+      shortcuts that let gradients flow through many layers.
+    relevance: "Motivates ResNet-18 baseline on CIFAR-10."
+
+  - title: "Kingma & Ba (2015): Adam: A Method for Stochastic Optimization"
+    key_finding: >
+      Adaptive learning rate optimizer that combines momentum and RMSProp. Typically
+      converges faster than SGD on image tasks, making it a good default for baselines.
+    relevance: "All three experiments use Adam."
+
+architecture_notes:
+  ffnn:
+    description: "Fully-connected: 784 -> 256 -> 128 -> 10 with ReLU + BatchNorm + Dropout"
+    parameters: "~236K"
+    expected_mnist_accuracy: "97-98%"
+    weakness: "No spatial inductive bias; treats pixels as flat vectors."
+
+  cnn:
+    description: "2 conv blocks (32, 64 filters) + global avg pool + FC(10)"
+    parameters: "~120K"
+    expected_mnist_accuracy: "99%+"
+    strength: "Spatial weight sharing; translation equivariant."
+
+  resnet18:
+    description: "ResNet-18 adapted for 32x32 CIFAR (smaller stem, no initial maxpool)"
+    parameters: "~11M"
+    expected_cifar10_accuracy: "93-95%"
+    strength: "Deep residual learning; scales well."
+
+experimental_plan:
+  datasets: [mnist, cifar10]
+  models: [ffnn, cnn, resnet18]
+  optimizer: adam
+  seeds: [0, 1, 2, 3, 4]
+  metrics: [val_accuracy, val_loss, test_accuracy, num_parameters]
+  primary_comparison: accuracy vs parameter_count
