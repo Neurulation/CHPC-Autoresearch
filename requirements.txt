@@ -1,6 +1,6 @@
 torch
 torchvision
-hydra-core
+hydra-core>=1.3.0
 omegaconf
 numpy>=1.22,<2.0
 wandb
