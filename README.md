@@ -66,11 +66,13 @@ python -m autoresearch.train --multirun experiment=mnist_ffnn_adam
 
 ## Leaderboard
 
-| Project | Iteration | Model | Dataset | Accuracy (mean +/- std) | Params | Status |
-|---------|-----------|-------|---------|------------------------|--------|--------|
-| Image Processing NN | 1 | -- | -- | -- | -- | Planned |
+| Project | Iteration | Model | Dataset | Accuracy (mean ± std) | Params | Status |
+|---------|-----------|-------|---------|----------------------|--------|--------|
+| Image Processing NN | 1 | CNN (2 conv + 1 FC) | MNIST | **99.17% ± 0.10%** | 422K | ✅ Done |
+| Image Processing NN | 1 | FFNN (784-256-128-10) | MNIST | 98.06% ± 0.15% | 235K | ✅ Done |
+| Image Processing NN | 1 | ResNet-18 (CIFAR-modified) | CIFAR-10 | 83.56% ± 0.36% | 11.2M | ✅ Done |
 
-*Updated as experiments complete.*
+*Updated 2026-04-10. W&B: [image_processing_nn_iter1_summary](https://wandb.ai/arneschreuder/chpc_autoresearch/runs/jy2d7rv2)*
 
 ## CHPC Usage
 

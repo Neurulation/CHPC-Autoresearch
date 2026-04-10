@@ -1,6 +1,6 @@
 project: image_processing_nn
 iteration: 1
-status: analyze
+status: completed
 goal: >
   Establish baseline results: FFNN on MNIST, CNN on MNIST, ResNet-18 on CIFAR-10.
   Run each with 5 seeds. Collect accuracy, loss, and parameter counts.
@@ -21,8 +21,20 @@ phase_history:
   - phase: analyze
     completed: "2026-04-10"
     notes: "metrics.json written. W&B summary run logged (jy2d7rv2) with artifact image_processing_nn_iter1_metrics."
+  - phase: conclude
+    completed: "2026-04-10"
+    notes: "conclusions.yaml written. README leaderboard updated. project.yaml best_result updated. ResNet underperformed — propose SGD+momentum for iter 2."
 outcomes:
-  summary: null
-  key_metrics: {}
-  artifacts: []
+  summary: >
+    CNN (99.17% ± 0.10%) outperforms FFNN (98.06% ± 0.15%) on MNIST with 1.8x params.
+    ResNet-18 on CIFAR-10 reached only 83.56% ± 0.36% — Adam with default LR suboptimal;
+    full 100 epochs ran without early stopping. SGD+momentum recommended for iter 2.
+  key_metrics:
+    mnist_ffnn_adam_mean_acc: 98.06
+    mnist_cnn_adam_mean_acc: 99.17
+    cifar10_resnet18_mean_acc: 83.56
+  artifacts:
+    - projects/image_processing_nn/iterations/001/metrics.json
+    - projects/image_processing_nn/iterations/001/conclusions.yaml
+    - projects/image_processing_nn/iterations/001/literature.yaml
 human_feedback: null
