@@ -1,0 +1,43 @@
+date: "2026-04-10"
+iteration: 1
+
+findings:
+  - finding: "CNN dramatically outperforms FFNN on MNIST despite only 1.8x more parameters."
+    evidence: "CNN: 99.17% ± 0.10% vs FFNN: 98.06% ± 0.15%. Spatial weight sharing provides a strong inductive bias for 2D images."
+
+  - finding: "FFNN is most parameter-efficient in terms of accuracy-per-parameter on MNIST."
+    evidence: "FFNN achieves 98.06% with 235K params (417 acc-pts/Mparam) vs CNN at 235 acc-pts/Mparam."
+
+  - finding: "ResNet-18 on CIFAR-10 underperformed expectations (83.6% vs expected 93-95%)."
+    evidence: >
+      All 5 seeds ran the full 100 epochs without early stopping, suggesting the model
+      was still improving. Adam with default lr=1e-3 may be suboptimal for ResNet on
+      CIFAR-10 — SGD+momentum or learning rate scheduling is typically used.
+
+  - finding: "All experiments showed low variance across seeds (std < 0.4%), confirming reproducibility."
+    evidence: "Std: FFNN 0.15%, CNN 0.10%, ResNet 0.36%."
+
+best_result:
+  model: cnn
+  dataset: mnist
+  experiment_config: mnist_cnn_adam
+  mean_val_acc: 99.17
+  std_val_acc: 0.10
+  best_seed_acc: 99.30
+  num_params: 421642
+
+next_iteration_proposals:
+  - id: A
+    description: "ResNet-18 on CIFAR-10 with SGD+momentum + cosine LR schedule"
+    rationale: "Adam underperformed on ResNet. SGD+momentum with LR warmup/cosine decay is the standard recipe and should push accuracy toward 93-95%."
+    priority: high
+
+  - id: B
+    description: "ResNet-18 on CIFAR-10 with Adam + OneCycleLR scheduler"
+    rationale: "Simpler than SGD tuning. OneCycleLR with Adam is often competitive and easier to tune."
+    priority: medium
+
+  - id: C
+    description: "CNN on CIFAR-10 as intermediate step before ResNet"
+    rationale: "Understand the gap between CNN and ResNet on CIFAR-10 directly."
+    priority: low

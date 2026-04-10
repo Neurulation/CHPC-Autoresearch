@@ -12,7 +12,10 @@ human_direction: >
   Start with MNIST baselines (FFNN, CNN), then CIFAR-10 (ResNet-18).
   Compare accuracy vs parameter count. Use 5 seeds for statistical robustness.
 best_result:
-  model: null
-  dataset: null
-  accuracy: null
-  experiment_config: null
+  model: cnn
+  dataset: mnist
+  accuracy: 99.17
+  experiment_config: mnist_cnn_adam
+  num_params: 421642
+  iteration: 1
+  wandb_run: jy2d7rv2
