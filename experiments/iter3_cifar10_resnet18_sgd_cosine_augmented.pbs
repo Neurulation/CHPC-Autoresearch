@@ -3,7 +3,7 @@
 #PBS -q gpu_1
 #PBS -P CSCI1166
 #PBS -l select=1:ncpus=8:mem=64gb:ngpus=1
-#PBS -l walltime=16:00:00
+#PBS -l walltime=12:00:00
 #PBS -o /mnt/lustre/users/aschreuder/CHPC-Autoresearch/logs/iter3_cifar10_resnet18_sgd_cosine_augmented.out
 #PBS -e /mnt/lustre/users/aschreuder/CHPC-Autoresearch/logs/iter3_cifar10_resnet18_sgd_cosine_augmented.err
 #PBS -m abe -M arneschreuder@icloud.com
