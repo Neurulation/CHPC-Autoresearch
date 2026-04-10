@@ -1,0 +1,17 @@
+submitted_date: "2026-04-10"
+chpc_host: lengau.chpc.ac.za
+chpc_user: aschreuder
+
+experiments:
+  - name: iter2_cifar10_resnet18_sgd_cosine
+    pbs_script: experiments/iter2_cifar10_resnet18_sgd_cosine.pbs
+    job_id: "7167689.sched01"
+    experiment_config: cifar10_resnet18_sgd_cosine
+    seeds: [0, 1, 2, 3, 4]
+    queue: gpu_1
+    walltime: "12:00:00"
+    status: queued
+    submitted: "2026-04-10"
+    completed: null
+    output_log: /mnt/lustre/users/aschreuder/CHPC-Autoresearch/logs/iter2_cifar10_resnet18_sgd_cosine.out
+    error_log: /mnt/lustre/users/aschreuder/CHPC-Autoresearch/logs/iter2_cifar10_resnet18_sgd_cosine.err
