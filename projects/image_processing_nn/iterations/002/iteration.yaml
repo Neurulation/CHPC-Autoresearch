@@ -1,6 +1,6 @@
 project: image_processing_nn
 iteration: 2
-status: experiment
+status: analyze
 goal: >
   ResNet-18 on CIFAR-10 with SGD+momentum (lr=0.1, momentum=0.9, weight_decay=5e-4)
   + cosine annealing LR schedule. Target 93-95% accuracy.
