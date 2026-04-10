@@ -1,6 +1,6 @@
 project: image_processing_nn
 iteration: 2
-status: analyze
+status: completed
 goal: >
   ResNet-18 on CIFAR-10 with SGD+momentum (lr=0.1, momentum=0.9, weight_decay=5e-4)
   + cosine annealing LR schedule. Target 93-95% accuracy.
@@ -12,8 +12,23 @@ phase_history:
     completed: "2026-04-10"
   - phase: experiment
     completed: "2026-04-10"
+  - phase: analyze
+    completed: "2026-04-10"
+  - phase: conclude
+    completed: "2026-04-10"
 outcomes:
-  summary: null
-  key_metrics: {}
-  artifacts: []
+  summary: "SGD+cosine annealing underperformed vs Adam (78.87% vs 83.56%); target of 93-95% not met"
+  key_metrics:
+    mean_accuracy: 78.87
+    std_accuracy: 0.94
+    best_accuracy: 80.12
+    mean_loss: 0.5962
+    best_seed: 4
+    early_stopping_epoch: 29
+  artifacts:
+    - experiments/iter2_cifar10_resnet18_sgd_cosine.pbs
+    - src/autoresearch/configs/experiment/cifar10_resnet18_sgd_cosine.yaml
+    - src/autoresearch/configs/scheduler/cosine.yaml
+    - projects/image_processing_nn/iterations/002/metrics.json
+    - projects/image_processing_nn/iterations/002/conclusions.yaml
 human_feedback: null

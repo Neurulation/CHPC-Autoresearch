@@ -66,13 +66,16 @@ python -m autoresearch.train --multirun experiment=mnist_ffnn_adam
 
 ## Leaderboard
 
-| Project | Iteration | Model | Dataset | Accuracy (mean ± std) | Params | Status |
-|---------|-----------|-------|---------|----------------------|--------|--------|
-| Image Processing NN | 1 | CNN (2 conv + 1 FC) | MNIST | **99.17% ± 0.10%** | 422K | ✅ Done |
-| Image Processing NN | 1 | FFNN (784-256-128-10) | MNIST | 98.06% ± 0.15% | 235K | ✅ Done |
-| Image Processing NN | 1 | ResNet-18 (CIFAR-modified) | CIFAR-10 | 83.56% ± 0.36% | 11.2M | ✅ Done |
+| Project | Iteration | Model | Dataset | Optimizer | Accuracy (mean ± std) | Best | Status |
+|---------|-----------|-------|---------|-----------|----------------------|------|--------|
+| Image Processing NN | 1 | CNN (2 conv + 1 FC) | MNIST | Adam | **99.17% ± 0.10%** | 99.27% | ✅ Done |
+| Image Processing NN | 1 | FFNN (784-256-128-10) | MNIST | Adam | 98.06% ± 0.15% | 98.26% | ✅ Done |
+| Image Processing NN | 1 | ResNet-18 | CIFAR-10 | Adam | 83.56% ± 0.36% | 84.18% | ✅ Done |
+| Image Processing NN | 2 | ResNet-18 | CIFAR-10 | SGD+Cosine | **78.87% ± 0.94%** | 80.12% | ✅ Done |
 
-*Updated 2026-04-10. W&B: [image_processing_nn_iter1_summary](https://wandb.ai/arneschreuder/chpc_autoresearch/runs/jy2d7rv2)*
+*Updated 2026-04-10.*
+- *Iter 1: [W&B summary](https://wandb.ai/arneschreuder/chpc_autoresearch/runs/jy2d7rv2)*
+- *Iter 2: SGD+cosine underperforms Adam on CIFAR-10 (ResNet-18: 78.87% vs 83.56%), suggesting Adam is better suited for this task*
 
 ## CHPC Usage
 

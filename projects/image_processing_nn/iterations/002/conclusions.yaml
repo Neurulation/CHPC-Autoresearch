@@ -1,0 +1,32 @@
+summary: >
+  Tested SGD with momentum + cosine annealing LR schedule on CIFAR-10 ResNet-18.
+  While a reasonable optimization strategy, it underperformed compared to Adam (iter1).
+  Mean accuracy: 78.87% vs Adam's 83.56%. Early stopping triggered at epoch 29,
+  indicating potential overfitting despite the LR schedule. Adam remains the better
+  choice for this architecture/dataset combination.
+
+key_findings:
+  - SGD+cosine annealing: 78.87% ± 0.94% accuracy (target was 93-95%)
+  - Best seed (seed 4): 80.12% accuracy
+  - Consistent results across seeds (std = 0.94%), but lower than expected
+  - Early stopping effective: stopped at epoch 29/200 with patience=20
+  - Adam optimizer (iter1) significantly outperforms SGD on CIFAR-10: 83.56% vs 78.87%
+
+recommendations:
+  - SGD with cosine annealing didn't meet the 93-95% target; not recommended for this task
+  - Adam remains the optimizer of choice for ResNet-18 on CIFAR-10
+  - Next iteration: explore other factors (learning rate tuning, different architectures, data augmentation)
+  - Consider why target of 93-95% wasn't reached—may need stronger regularization or different approach
+
+artifacts:
+  - experiments/iter2_cifar10_resnet18_sgd_cosine.pbs
+  - src/autoresearch/configs/experiment/cifar10_resnet18_sgd_cosine.yaml
+  - src/autoresearch/configs/scheduler/cosine.yaml
+  - outputs/train/cifar10_resnet18_sgd_cosine/{0,1,2,3,4}/ (5 seed runs)
+  - metrics.json with full statistical summary
+
+next_steps:
+  - Iteration 3: Explore data augmentation (mixup, cutmix, or standard augmentation)
+  - Or: Try different learning rates or warmup strategies with SGD
+  - Or: Experiment with different architectures (DenseNet, EfficientNet, etc.)
+  - Decision: Human direction needed for next iteration focus
