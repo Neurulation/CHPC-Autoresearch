@@ -1,5 +1,5 @@
 projects:
   - slug: image_processing_nn
     status: active
-    current_iteration: 1
+    current_iteration: 2
     path: projects/image_processing_nn
