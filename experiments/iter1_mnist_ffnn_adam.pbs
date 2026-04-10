@@ -15,6 +15,7 @@ module load chpc/python/anaconda/3-2024.10.1
 
 cd /mnt/lustre/users/aschreuder/CHPC-Autoresearch
 source .venv/bin/activate
+pip install -e . --quiet
 
 echo "=========================================="
 echo "Job: iter1_mnist_ffnn_adam"
