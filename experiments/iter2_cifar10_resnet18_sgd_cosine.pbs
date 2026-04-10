@@ -1,4 +1,10 @@
 #!/bin/sh
+# NOTE: This script was generated with placeholder values.
+# Before submitting, populate CHPC_PROJECT_ID, CHPC_LUSTRE_PATH, CHPC_REPO_NAME,
+# and CHPC_EMAIL in your .env file, then regenerate with:
+#   python scripts/generate_pbs.py --name iter2_cifar10_resnet18_sgd_cosine \
+#     --queue gpu_1 --walltime 12:00:00 --ncpus 8 --mem 64gb --ngpus 1 \
+#     --commands "python -m autoresearch.train --multirun experiment=cifar10_resnet18_sgd_cosine"
 #PBS -N iter2_cifar10_resnet18_sgd_cosine
 #PBS -q gpu_1
 #PBS -P CSCI0000

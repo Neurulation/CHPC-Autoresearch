@@ -1,6 +1,5 @@
 # CosineAnnealingLR scheduler
-# T_max is overridden at runtime to match cfg.epochs
+# T_max is set at runtime to match cfg.epochs
 
 _target_: torch.optim.lr_scheduler.CosineAnnealingLR
-T_max: 200
 eta_min: 0
