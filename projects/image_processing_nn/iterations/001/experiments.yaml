@@ -1,0 +1,43 @@
+submitted_date: "2026-04-10"
+chpc_host: lengau.chpc.ac.za
+chpc_user: aschreuder
+
+experiments:
+  - name: iter1_mnist_ffnn_adam
+    pbs_script: experiments/iter1_mnist_ffnn_adam.pbs
+    job_id: "7167373.sched01"
+    experiment_config: mnist_ffnn_adam
+    seeds: [0, 1, 2, 3, 4]
+    queue: gpu_1
+    walltime: "04:00:00"
+    status: queued
+    submitted: "2026-04-10"
+    completed: null
+    output_log: /mnt/lustre/users/aschreuder/CHPC-Autoresearch/logs/iter1_mnist_ffnn_adam.out
+    error_log: /mnt/lustre/users/aschreuder/CHPC-Autoresearch/logs/iter1_mnist_ffnn_adam.err
+
+  - name: iter1_mnist_cnn_adam
+    pbs_script: experiments/iter1_mnist_cnn_adam.pbs
+    job_id: "7167375.sched01"
+    experiment_config: mnist_cnn_adam
+    seeds: [0, 1, 2, 3, 4]
+    queue: gpu_1
+    walltime: "04:00:00"
+    status: queued
+    submitted: "2026-04-10"
+    completed: null
+    output_log: /mnt/lustre/users/aschreuder/CHPC-Autoresearch/logs/iter1_mnist_cnn_adam.out
+    error_log: /mnt/lustre/users/aschreuder/CHPC-Autoresearch/logs/iter1_mnist_cnn_adam.err
+
+  - name: iter1_cifar10_resnet18_adam
+    pbs_script: experiments/iter1_cifar10_resnet18_adam.pbs
+    job_id: "7167376.sched01"
+    experiment_config: cifar10_resnet18_adam
+    seeds: [0, 1, 2, 3, 4]
+    queue: gpu_1
+    walltime: "12:00:00"
+    status: queued
+    submitted: "2026-04-10"
+    completed: null
+    output_log: /mnt/lustre/users/aschreuder/CHPC-Autoresearch/logs/iter1_cifar10_resnet18_adam.out
+    error_log: /mnt/lustre/users/aschreuder/CHPC-Autoresearch/logs/iter1_cifar10_resnet18_adam.err
