@@ -1,0 +1,40 @@
+# @package _global_
+# CIFAR-10 + ResNet-18 + SGD+cosine + standard augmentation (RandomFlip + RandomCrop)
+
+defaults:
+  - override /dataset: cifar10_augmented
+  - override /model: resnet18
+  - override /optimizer: sgd
+  - override /loss_fn: cross_entropy
+  - override /scheduler: cosine
+
+experiment_group: cifar10_resnet18_sgd_cosine_augmented
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 200
+num_workers: 4
+validation_split: 0.1
+
+early_stopping:
+  enabled: true
+  patience: 40
+  min_delta: 0.001
+  metric: val_loss
+  mode: min
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - cifar10
+    - resnet18
+    - sgd
+    - cosine_annealing
+    - augmented
+    - cross_entropy
+    - iter3
+  notes: "ResNet-18 on CIFAR-10 with RandomFlip + RandomCrop augmentation, SGD+momentum, and cosine annealing"

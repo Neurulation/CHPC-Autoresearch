@@ -1,0 +1,19 @@
+# @package _global_.dataset
+# CIFAR-10 dataset with standard augmentation (RandomHorizontalFlip + RandomCrop)
+
+_target_: torchvision.datasets.CIFAR10
+root: ./data
+download: true
+transform:
+  _target_: torchvision.transforms.Compose
+  transforms:
+    - _target_: torchvision.transforms.RandomHorizontalFlip
+      p: 0.5
+    - _target_: torchvision.transforms.RandomCrop
+      size: 32
+      padding: 4
+      padding_mode: reflect
+    - _target_: torchvision.transforms.ToTensor
+    - _target_: torchvision.transforms.Normalize
+      mean: [0.4914, 0.4822, 0.4465]
+      std: [0.2470, 0.2435, 0.2616]

@@ -1,0 +1,38 @@
+# @package _global_
+# CIFAR-10 + ResNet-18 + Adam + standard augmentation (RandomFlip + RandomCrop)
+
+defaults:
+  - override /dataset: cifar10_augmented
+  - override /model: resnet18
+  - override /optimizer: adam
+  - override /loss_fn: cross_entropy
+
+experiment_group: cifar10_resnet18_adam_augmented
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 100
+num_workers: 4
+validation_split: 0.1
+
+early_stopping:
+  enabled: true
+  patience: 15
+  min_delta: 0.001
+  metric: val_loss
+  mode: min
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - cifar10
+    - resnet18
+    - adam
+    - augmented
+    - cross_entropy
+    - iter3
+  notes: "ResNet-18 on CIFAR-10 with RandomFlip + RandomCrop augmentation and Adam optimizer"
