@@ -7,9 +7,9 @@ experiments:
     optimizer: "adam"
     augmentation: true
     pbs_script: "experiments/iter3_cifar10_resnet18_adam_augmented.pbs"
-    job_id: null
-    status: "pending_submission"
-    submitted: null
+    job_id: "7167952"
+    status: "submitted"
+    submitted: "2026-04-10"
     notes: "Adam optimizer with standard augmentation (RandomFlip+RandomCrop), 100 epochs, patience=15"
 
   - name: "iter3_cifar10_resnet18_sgd_cosine_augmented"
@@ -17,7 +17,7 @@ experiments:
     optimizer: "sgd_cosine"
     augmentation: true
     pbs_script: "experiments/iter3_cifar10_resnet18_sgd_cosine_augmented.pbs"
-    job_id: null
-    status: "pending_submission"
-    submitted: null
+    job_id: "7167955"
+    status: "submitted"
+    submitted: "2026-04-10"
     notes: "SGD+cosine with standard augmentation, 200 epochs, patience=40 (increased to allow full cosine schedule)"
