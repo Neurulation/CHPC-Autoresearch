@@ -5,7 +5,7 @@ chpc_user: aschreuder
 experiments:
   - name: iter1_mnist_ffnn_adam
     pbs_script: experiments/iter1_mnist_ffnn_adam.pbs
-    job_id: "7167413.sched01"
+    job_id: "7167425.sched01"
     experiment_config: mnist_ffnn_adam
     seeds: [0, 1, 2, 3, 4]
     queue: gpu_1
@@ -18,7 +18,7 @@ experiments:
 
   - name: iter1_mnist_cnn_adam
     pbs_script: experiments/iter1_mnist_cnn_adam.pbs
-    job_id: "7167414.sched01"
+    job_id: "7167426.sched01"
     experiment_config: mnist_cnn_adam
     seeds: [0, 1, 2, 3, 4]
     queue: gpu_1
@@ -31,7 +31,7 @@ experiments:
 
   - name: iter1_cifar10_resnet18_adam
     pbs_script: experiments/iter1_cifar10_resnet18_adam.pbs
-    job_id: "7167415.sched01"
+    job_id: "7167427.sched01"
     experiment_config: cifar10_resnet18_adam
     seeds: [0, 1, 2, 3, 4]
     queue: gpu_1
