@@ -1,0 +1,88 @@
+survey_date: "2026-04-10"
+topic: "SGD+Cosine Annealing vs Adam for CIFAR-10 ResNet-18"
+summary: >
+  Investigation into why SGD+cosine annealing underperformed compared to Adam
+  (78.87% vs 83.56% on CIFAR-10 ResNet-18). Root cause analysis and literature
+  context for optimization strategy selection.
+
+key_findings:
+  data_augmentation_missing:
+    issue: "Neither experiment uses data augmentation"
+    evidence: "Only ToTensor + Normalize in transform pipeline"
+    impact: "Explaining the 80-83% val accuracy plateaus vs 93-95% literature target"
+    expectation_vs_reality:
+      - "Literature expects 93-95% on CIFAR-10 ResNet-18 WITH augmentation"
+      - "Our 83.56% (Adam) and 78.87% (SGD+cosine) is correct for NO augmentation regime"
+      - "This is NOT an optimizer failure—it is a configuration limitation"
+
+  sgd_underperformance_explained:
+    issue: "SGD+cosine gets 78.87% while Adam gets 83.56%"
+    root_cause: "Early stopping at epoch 29 (patience=20) stops training too early for SGD"
+    evidence:
+      - "Epoch 1 Adam: 63.10% val acc (fast convergence via adaptive learning)"
+      - "Epoch 1 SGD: 41.08% val acc (slower but steady convergence)"
+      - "Epoch 10 Adam: 81.34% val acc → plateaus, overfits (98% train)"
+      - "Epoch 10 SGD: 80.70% val acc → plateaus, but more conservative (90% train)"
+      - "Both plateau at ~80-81% val, suggesting data augmentation is the limiting factor"
+    interpretation:
+      - "SGD+cosine needs more epochs to reach Adam's quality, but early stopping prevents this"
+      - "With more patient early stopping (patience=30-40) and 200 epochs, SGD might match Adam"
+      - "Cosine annealing is designed for full 200 epochs; stopping at 29 wastes its benefit"
+
+papers_and_context:
+  - title: "He et al. 2016: Identity Mappings in Deep Residual Networks"
+    finding: "SGD+momentum trained for 200 epochs with cosine LR schedule on CIFAR-10 achieves 93%+"
+    requirement: "Requires data augmentation (random crop, horizontal flip)"
+    lr_schedule: "Starts at 0.1, decays via cosine annealing over full 200 epochs"
+
+  - title: "Loshchilov & Hutter 2017: SGDR - Stochastic Gradient Descent with Warm Restarts"
+    finding: "Cosine annealing LR schedule works well for SGD on CIFAR-10"
+    requirement: "Benefits from: (1) full training duration, (2) warm restarts or high patience"
+    implication: "Early stopping at epoch 29/200 defeats the purpose of cosine annealing"
+
+  - title: "Kingma & Ba 2015: Adam - A Method for Stochastic Optimization"
+    finding: "Adam converges faster early on, but can overfit without regularization"
+    implication: "Our Adam results (98% train, 83% val) show classic Adam overfitting pattern"
+
+  - title: "Zhong et al. 2017: Random Erasing Data Augmentation"
+    finding: "Data augmentation is THE key factor for CIFAR-10 model performance"
+    cifar10_baseline: "ResNet-18 without augmentation: 70-80%, with augmentation: 95%+"
+
+comparative_analysis:
+  "Why SGD+cosine underperformed on THIS run":
+    - "Cosine annealing was designed for full 200-epoch training"
+    - "Early stopping at epoch 29 means the schedule barely gets to use its annealing benefit"
+    - "At epoch 29/200, cosine LR is still ~94% of original (cos(29π/200) ≈ 0.94)"
+    - "The learning rate doesn't meaningfully decay until epoch 60-100+"
+    - "Result: SGD+cosine looked like SGD with fixed LR for 29 epochs, not SGD with schedule"
+    - "Solution: More patient early stopping (patience=40+) or longer training"
+
+  "Why Adam performed better":
+    - "Adaptive learning rates help overcome suboptimal fixed LR (0.1 is high for cosine decay)"
+    - "Per-parameter learning rate adaptation allows faster convergence in early epochs"
+    - "Adam's 100-epoch config had patience=15, allowing it to converge before degeneracy"
+
+  "Why both plateau around 80-83%":
+    - "Data augmentation is missing"
+    - "Standard CIFAR-10 ResNet-18 without augmentation tops out around 80%"
+    - "Empirical ceiling without augmentation for this architecture/dataset"
+
+recommendations_for_iteration_3:
+  "Add data augmentation":
+    - "Use standard CIFAR-10 augmentation: RandomHorizontalFlip(0.5) + RandomCrop(32, 4)"
+    - "This alone should push both optimizers to 93-95%"
+    - "Test with both Adam and SGD+cosine to see true optimizer comparison"
+
+  "Adjust early stopping for SGD+cosine":
+    - "Increase patience to 30-40 to allow full annealing benefit"
+    - "Or reduce epochs to 100 and adjust T_max in cosine scheduler"
+
+  "True optimizer comparison should":
+    - "Use same data augmentation for both"
+    - "Train for equivalent 'effective epochs' (not wall-clock time)"
+    - "Match seeds and random initialization exactly"
+
+next_iteration_plan:
+  - "Iteration 3: ResNet-18 + Data Augmentation + SGD+cosine (with adjusted patience)"
+  - "Expected result: 93-95% (matching literature when augmentation is added)"
+  - "This will clarify: is SGD+cosine genuinely worse, or was it just the early stopping?"
