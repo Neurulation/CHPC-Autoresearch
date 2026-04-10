@@ -1,6 +1,6 @@
 project: image_processing_nn
 iteration: 1
-status: experiment
+status: analyze
 goal: >
   Establish baseline results: FFNN on MNIST, CNN on MNIST, ResNet-18 on CIFAR-10.
   Run each with 5 seeds. Collect accuracy, loss, and parameter counts.
@@ -15,6 +15,12 @@ phase_history:
   - phase: implement
     completed: "2026-04-10"
     notes: "FFNN, CNN, ResNet-18 models implemented. Experiment configs: mnist_ffnn_adam, mnist_cnn_adam, cifar10_resnet18_adam. All use 5-seed sweeps."
+  - phase: experiment
+    completed: "2026-04-10"
+    notes: "All 3 jobs ran successfully on CHPC gpu_1. 5 seeds each. FFNN: ~4 min, CNN: ~4.4 min, ResNet: ~33 min."
+  - phase: analyze
+    completed: "2026-04-10"
+    notes: "metrics.json written. W&B summary run logged (jy2d7rv2) with artifact image_processing_nn_iter1_metrics."
 outcomes:
   summary: null
   key_metrics: {}
