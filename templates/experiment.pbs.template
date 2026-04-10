@@ -15,6 +15,7 @@ module load {python_module}
 
 cd {lustre_path}/{repo_name}
 source .venv/bin/activate
+pip install -e . --quiet
 
 echo "=========================================="
 echo "Job: {job_name}"
