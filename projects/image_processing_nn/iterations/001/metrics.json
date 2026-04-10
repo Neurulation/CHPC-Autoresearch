@@ -1,0 +1,68 @@
+{
+  "iteration": 1,
+  "project": "image_processing_nn",
+  "analysed_date": "2026-04-10",
+  "experiments": {
+    "mnist_ffnn_adam": {
+      "dataset": "mnist",
+      "model": "ffnn",
+      "optimizer": "adam",
+      "num_params": 235146,
+      "seeds": [0, 1, 2, 3, 4],
+      "best_val_acc_per_seed": [98.12, 98.25, 97.85, 98.12, 97.98],
+      "best_val_loss_per_seed": [0.06631, 0.06533, 0.07071, 0.08329, 0.07752],
+      "mean_val_acc": 98.064,
+      "std_val_acc": 0.151,
+      "best_val_acc": 98.25,
+      "best_seed": 1,
+      "mean_val_loss": 0.07263,
+      "std_val_loss": 0.00698,
+      "early_stopping_epochs": [50, 21, 23, 18, 21],
+      "wall_time_minutes": 3.9
+    },
+    "mnist_cnn_adam": {
+      "dataset": "mnist",
+      "model": "cnn",
+      "optimizer": "adam",
+      "num_params": 421642,
+      "seeds": [0, 1, 2, 3, 4],
+      "best_val_acc_per_seed": [99.30, 99.27, 99.12, 99.08, 99.10],
+      "best_val_loss_per_seed": [0.02714, 0.02469, 0.03274, 0.03872, 0.03541],
+      "mean_val_acc": 99.174,
+      "std_val_acc": 0.097,
+      "best_val_acc": 99.30,
+      "best_seed": 0,
+      "mean_val_loss": 0.03174,
+      "std_val_loss": 0.00570,
+      "early_stopping_epochs": [19, 22, 25, 19, 18],
+      "wall_time_minutes": 4.4
+    },
+    "cifar10_resnet18_adam": {
+      "dataset": "cifar10",
+      "model": "resnet18",
+      "optimizer": "adam",
+      "num_params": 11173962,
+      "seeds": [0, 1, 2, 3, 4],
+      "best_val_acc_per_seed": [83.24, 83.64, 83.46, 84.14, 83.34],
+      "best_val_loss_per_seed": [0.62488, 0.53606, 0.64873, 0.62504, 0.61040],
+      "mean_val_acc": 83.564,
+      "std_val_acc": 0.355,
+      "best_val_acc": 84.14,
+      "best_seed": 3,
+      "mean_val_loss": 0.60902,
+      "std_val_loss": 0.04069,
+      "early_stopping_epochs": [100, 100, 100, 100, 100],
+      "wall_time_minutes": 33.0
+    }
+  },
+  "summary": {
+    "best_overall_model": "mnist_cnn_adam",
+    "best_overall_acc": 99.30,
+    "most_param_efficient": "mnist_ffnn_adam",
+    "acc_per_mparam": {
+      "mnist_ffnn_adam": 417.0,
+      "mnist_cnn_adam": 235.3,
+      "cifar10_resnet18_adam": 7.5
+    }
+  }
+}
