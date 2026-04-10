@@ -460,6 +460,7 @@ def train(
     wandb_run_id: Optional[str],
     wandb_enabled: bool,
     run_dir: Path,
+    scheduler: Optional[Any] = None,
 ) -> None:
     """Run the main training loop."""
     checkpoint_dir = run_dir / "checkpoints"
@@ -502,6 +503,19 @@ def train(
             log_epoch_metrics(
                 epoch, cfg.epochs, train_metrics, val_metrics, wandb_enabled
             )
+
+            # Step LR scheduler
+            if scheduler is not None:
+                scheduler.step()
+                if wandb_enabled:
+                    import wandb
+
+                    wandb.log(
+                        {
+                            "train/lr": scheduler.get_last_lr()[0],
+                            "epoch": epoch,
+                        }
+                    )
 
             # Save checkpoint
             if cfg.checkpoint.enabled and epoch % cfg.checkpoint.save_frequency == 0:
@@ -598,6 +612,11 @@ def main(cfg: DictConfig) -> None:
     optimizer = instantiate(cfg.optimizer, params=model.parameters())
     loss_fn = instantiate(cfg.loss_fn)
 
+    # Setup LR scheduler (optional)
+    scheduler = None
+    if cfg.get("scheduler") is not None:
+        scheduler = instantiate(cfg.scheduler, optimizer=optimizer, T_max=cfg.epochs)
+
     # Handle checkpoint resuming
     start_epoch = 1
     best_metric = float("inf")
@@ -666,6 +685,7 @@ def main(cfg: DictConfig) -> None:
         wandb_run_id,
         wandb_enabled,
         run_dir,
+        scheduler,
     )
 
 

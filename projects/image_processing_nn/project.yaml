@@ -6,7 +6,7 @@ description: >
   Research different neural network architectures for image classification.
   Starting with FFNN and CNN on MNIST, progressing to ResNet-18 on CIFAR-10.
   Focus on accuracy, convergence speed, and parameter efficiency.
-current_iteration: 1
+current_iteration: 2
 branch: project/image-processing-nn
 human_direction: >
   Start with MNIST baselines (FFNN, CNN), then CIFAR-10 (ResNet-18).

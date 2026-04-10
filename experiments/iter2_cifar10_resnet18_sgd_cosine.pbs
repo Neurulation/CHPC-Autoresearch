@@ -1,0 +1,31 @@
+#!/bin/sh
+#PBS -N iter2_cifar10_resnet18_sgd_cosine
+#PBS -q gpu_1
+#PBS -P CSCI1166
+#PBS -l select=1:ncpus=8:mem=64gb:ngpus=1
+#PBS -l walltime=12:00:00
+#PBS -o /mnt/lustre/users/aschreuder/CHPC-Autoresearch/logs/iter2_cifar10_resnet18_sgd_cosine.out
+#PBS -e /mnt/lustre/users/aschreuder/CHPC-Autoresearch/logs/iter2_cifar10_resnet18_sgd_cosine.err
+#PBS -m abe -M arneschreuder@icloud.com
+
+set -euo pipefail
+
+module purge
+module load chpc/python/anaconda/3-2024.10.1
+
+cd /mnt/lustre/users/aschreuder/CHPC-Autoresearch
+source .venv/bin/activate
+
+echo "=========================================="
+echo "Job: iter2_cifar10_resnet18_sgd_cosine"
+echo "=========================================="
+echo "Start time: $(date)"
+echo ""
+
+python -m autoresearch.train --multirun experiment=cifar10_resnet18_sgd_cosine
+
+echo ""
+echo "=========================================="
+echo "JOB COMPLETED"
+echo "=========================================="
+echo "End time: $(date)"

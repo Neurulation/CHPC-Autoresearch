@@ -4,6 +4,7 @@ defaults:
   - model: ffnn
   - optimizer: adam
   - loss_fn: cross_entropy
+  - scheduler: null
   - experiment: null
 
 experiment_group: default_train
