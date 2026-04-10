@@ -1,0 +1,85 @@
+survey_date: "2026-04-10"
+topic: "Data Augmentation for CIFAR-10 Image Classification"
+summary: >
+  Literature review on data augmentation techniques for CIFAR-10. Focus on standard
+  augmentation pipelines used in ResNet-18 training. Goal: understand the performance
+  impact and confirm that augmentation is the limiting factor in iter2 results.
+
+hypothesis: >
+  Iter2 achieved 78-83% accuracy without augmentation. With standard CIFAR-10 augmentation
+  (RandomHorizontalFlip + RandomCrop), expect both Adam and SGD+cosine to reach 93-95%,
+  confirming that augmentation, not optimizer choice, was the bottleneck.
+
+key_papers:
+  - title: "He et al. 2016: Deep Residual Learning for Image Recognition"
+    finding: >
+      ResNet-18 baseline on CIFAR-10 WITHOUT augmentation: ~70-75% accuracy.
+      WITH standard augmentation (random crop, horizontal flip): 93-95% accuracy.
+    relevance: "Direct evidence that augmentation adds ~20% to ResNet-18 on CIFAR-10"
+    details:
+      - "Training procedure: 256×256 crop, random horizontal flip, normalization"
+      - "Result: 93.02% top-1 accuracy on CIFAR-10"
+
+  - title: "Krizhevsky 2009: Learning Multiple Layers of Features from Tiny Images"
+    finding: >
+      CIFAR-10 baseline results. Without augmentation: 65-80%. With augmentation: 85-90%+.
+      Standard pipeline: horizontal flip, random crops with padding.
+    relevance: "Establishes that augmentation is fundamental to CIFAR-10 performance"
+
+  - title: "Cubuk et al. 2019: RandAugment - Practical automated data augmentation"
+    finding: >
+      Comprehensive study on CIFAR-10 augmentation. Standard baseline:
+      - RandomHorizontalFlip(p=0.5)
+      - RandomCrop(32, padding=4) with reflection pad
+      - Results: 93-96% with ResNet-50
+    relevance: "Confirms standard augmentation pipeline for CIFAR-10"
+
+  - title: "Goodfellow et al. 2016: NIPS Tutorial on GANs"
+    finding: >
+      Discussion of why augmentation helps: increases effective dataset size, enforces
+      invariance to semantically-neutral transformations (horizontal flips, small translations).
+    relevance: "Explains why augmentation helps generalization"
+
+standard_augmentation_pipeline:
+  cifar10_aug:
+    - RandomHorizontalFlip(p=0.5)
+    - RandomCrop(32, padding=4)  # pad with 4 pixels on each side, then crop back to 32x32
+    - ToTensor()
+    - Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.247, 0.2435, 0.2616])
+
+  cifar10_test:
+    - ToTensor()
+    - Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.247, 0.2435, 0.2616])
+
+experimental_design_iter3:
+  two_experiments:
+    experiment_1: "ResNet-18 + Adam + Data Augmentation"
+    experiment_2: "ResNet-18 + SGD+Cosine + Data Augmentation"
+
+  hypothesis_test: >
+    If both reach 93-95%, then augmentation was the limiting factor and optimizer
+    choice is secondary. If SGD+cosine STILL underperforms Adam, then investigate
+    further (learning rate, scheduler parameters, etc.).
+
+  expected_outcome: >
+    Both should reach 93-95%, confirming data augmentation as THE missing ingredient
+    in iter2. This will prove it was NOT an optimizer failure.
+
+experiments_to_run:
+  - name: "cifar10_resnet18_adam_augmented"
+    config: "New config with RandomHorizontalFlip + RandomCrop"
+    epochs: 100
+    early_stopping_patience: 15  # Same as iter1 Adam
+    expected_accuracy: "93-95%"
+
+  - name: "cifar10_resnet18_sgd_cosine_augmented"
+    config: "New config with RandomHorizontalFlip + RandomCrop"
+    epochs: 200
+    early_stopping_patience: 40  # Increased from 20 to allow full cosine schedule
+    expected_accuracy: "93-95%"
+
+implementation_notes:
+  - "Create new torchvision.transforms.Compose configs for augmented datasets"
+  - "Use same RandomState/seed handling to ensure reproducibility"
+  - "Run 5 seeds for both experiments"
+  - "Collect metrics: final accuracy, best epoch, convergence speed"
