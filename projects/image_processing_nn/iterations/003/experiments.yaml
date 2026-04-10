@@ -1,0 +1,23 @@
+# Iteration 3 Experiments
+# Track job submissions and results
+
+experiments:
+  - name: "iter3_cifar10_resnet18_adam_augmented"
+    config: "cifar10_resnet18_adam_augmented"
+    optimizer: "adam"
+    augmentation: true
+    pbs_script: "experiments/iter3_cifar10_resnet18_adam_augmented.pbs"
+    job_id: null
+    status: "pending_submission"
+    submitted: null
+    notes: "Adam optimizer with standard augmentation (RandomFlip+RandomCrop), 100 epochs, patience=15"
+
+  - name: "iter3_cifar10_resnet18_sgd_cosine_augmented"
+    config: "cifar10_resnet18_sgd_cosine_augmented"
+    optimizer: "sgd_cosine"
+    augmentation: true
+    pbs_script: "experiments/iter3_cifar10_resnet18_sgd_cosine_augmented.pbs"
+    job_id: null
+    status: "pending_submission"
+    submitted: null
+    notes: "SGD+cosine with standard augmentation, 200 epochs, patience=40 (increased to allow full cosine schedule)"

@@ -1,6 +1,6 @@
 project: image_processing_nn
 iteration: 3
-status: implement
+status: experiment
 goal: >
   ResNet-18 on CIFAR-10 with standard data augmentation (RandomHorizontalFlip + RandomCrop).
   Test both Adam and SGD+cosine with augmentation to prove data augmentation was THE limiting
@@ -10,6 +10,8 @@ phase_history:
   - phase: planned
     completed: "2026-04-10"
   - phase: survey
+    completed: "2026-04-10"
+  - phase: implement
     completed: "2026-04-10"
 outcomes:
   summary: null
