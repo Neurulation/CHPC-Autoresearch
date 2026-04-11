@@ -47,7 +47,18 @@ phase_history:
       Energy ~2.5k/batch (dec reconstruction over 784 dims dominates; expected).
   - phase: experiment
     started: "2026-04-11"
-    notes: "5-seed CHPC run — submitting in parallel with PC-RNN (iter5)."
+    notes: >
+      First run (job 7169448) failed: raw energy O(B×dims) vs CE O(1)/sample
+      — CE was <1% of total gradient. Network learned only reconstruction,
+      reaching ~33% val_acc after 30 epochs (expected 90%+).
+      Root cause: combined_loss = energy + ce_weight*CE where energy is
+      batch-summed and CE is per-sample mean. With energy≈200/batch and
+      CE≈2.17/sample, ce_weight=1.0 means CE is 0.2% of the loss.
+      Fix (job 7169576): scheduled convex combination Y*(F/B)+(1-Y)*CE.
+        - Normalize energy by B → per-sample scale
+        - Linear ramp Y=0→0.5 over epochs 1-15, hold at 0.5
+        - Y=0 at epoch 1 = pure CE: smoke test jumped to 88.53% (vs 8.65%)
+      Resubmitted as job 7169576 after clearing CHPC outputs. Currently queued.
 experiment:
   config: mnist_pc_enc_dec_adam
   pbs_script: experiments/anp_pcnn_iter6_pc_enc_dec_adam.pbs

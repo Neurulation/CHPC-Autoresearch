@@ -8,7 +8,7 @@ jobs:
   - job_id: "7169360"
     job_name: anp_pcnn_iter5_pc_rnn_adam
     queue: gpu_1
-    status: queued
+    status: running
     submitted: "2026-04-11"
     pbs_script: experiments/anp_pcnn_iter5_pc_rnn_adam.pbs
     log_out: logs/anp_pcnn_iter5_pc_rnn_adam.out
