@@ -1,6 +1,6 @@
 project: anp_pcnn
 iteration: 2
-status: implement
+status: experiment
 goal: >
   PC-FFNN v2: Fix training-evaluation objective mismatch from iter 1.
   Add a CE classification head on r_{L-1} (last hidden representation, 128-dim)
