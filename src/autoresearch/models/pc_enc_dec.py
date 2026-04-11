@@ -290,7 +290,16 @@ class PCEncDec(nn.Module):
         return combined_loss, energy.detach(), logits.detach()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Evaluation: free PC inference, classify via cls_head(r_{L-1}).
+        """Evaluation: pure feedforward classify via cls_head(enc_{L-1}(x)).
+
+        Bypasses PC inference entirely at eval time — representations are
+        taken directly from the feedforward encoder pass, exactly matching
+        what cls_head was trained on in pc_loss (which uses enc_layers[:-1]
+        to compute the CE gradient, not inference-modified reps).
+
+        Running PC inference at eval would feed inference-modified r_{L-1}
+        to cls_head, which was never trained on those vectors — a train/val
+        mismatch that degrades accuracy.
 
         Args:
             x: Input images (B, C, H, W) or (B, input_size)
@@ -299,10 +308,7 @@ class PCEncDec(nn.Module):
             logits: (B, num_classes)
         """
         B = x.shape[0]
-        x_flat = x.view(B, -1)
-
-        reps_init = self._bottom_up(x_flat)
-        reps_final = self._run_inference(reps_init, clamp_last=None)
-
-        # reps_final[-2] = r_{L-1} (the last hidden layer, index n_hidden)
-        return self.cls_head(reps_final[-2])
+        h = x.view(B, -1)
+        for i, layer in enumerate(self.enc_layers[:-1]):
+            h = self._enc_act(i, layer(h))
+        return self.cls_head(h)

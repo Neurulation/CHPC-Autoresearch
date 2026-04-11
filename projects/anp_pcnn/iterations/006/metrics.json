@@ -1,0 +1,13 @@
+{
+  "experiment_group": "mnist_pc_enc_dec_adam",
+  "seeds": [0, 1, 2, 3, 4],
+  "best_val_acc_per_seed": [93.55, 93.27, 93.20, 92.60, 93.02],
+  "best_epoch_per_seed": [10, 9, 14, 8, 12],
+  "best_val_loss_at_best_acc": [0.2331, 0.2362, 0.2526, 0.2579, 0.2512],
+  "mean_accuracy": 93.13,
+  "std_accuracy": 0.35,
+  "best_seed": 0,
+  "best_accuracy": 93.55,
+  "num_params": 470948,
+  "notes": "Energy schedule fix resolved the <1% CE gradient problem (old: ~31% val_acc). Val accuracy plateaus ~93% due to train/val mismatch: cls_head trained on pure-feedforward r_2 but validated on inference-modified r_2. Train loss increases (0.87→1.58) as Y ramps to 0.5 — energy dominates gradient budget. Y_max=0.5 too agressive: reconstruction competes equally with classification. Fix planned in iter7: pure-feedforward forward() + Y_max=0.1."
+}

@@ -1,0 +1,68 @@
+# @package _global_
+# ANP-PCNN Iter 7 — PC-EncDec v2 on MNIST — val mismatch fix + lower Y_max.
+#
+# Two fixes over iter 6 (93.13% ± 0.35%):
+#
+# Fix 1 — train/val mismatch:
+#   cls_head was trained on pure-feedforward r_2 = enc1(enc0(x)) but
+#   validated on inference-modified r_2 (20 PC inference steps alter r_2
+#   to satisfy energy landscape). forward() now uses pure feedforward,
+#   matching the CE training path exactly.
+#
+# Fix 2 — Y_max: 0.5 → 0.1:
+#   At Y=0.5, reconstruction and classification compete equally (β=1 VAE).
+#   VAE representations are known to be suboptimal for discrimination.
+#   Y=0.1 keeps CE dominant (90% gradient) with mild generative regularisation
+#   (10%). warmup_epochs: 15→10 (shorter ramp for smaller Y target).
+
+defaults:
+  - override /dataset: mnist
+  - override /model: pc_enc_dec
+  - override /optimizer: adam_pc
+
+experiment_group: mnist_pc_enc_dec_v2_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 30
+num_workers: 4
+validation_split: 0.1
+max_grad_norm: 0.5
+
+model:
+  T_pc: 20
+  lr_pc: 0.05
+  dec_weight: 0.5
+
+energy_schedule:
+  max: 0.1
+  warmup_epochs: 10
+
+early_stopping:
+  enabled: true
+  patience: 7
+  min_delta: 0.01
+  metric: val_accuracy
+  mode: max
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - pc_enc_dec
+    - predictive_coding
+    - encoder_decoder
+    - bidirectional_pc
+    - reconstruction
+    - skip_connections
+    - adam
+    - anp
+    - anp-pcnn
+    - proto_spcnn
+    - energy_schedule
+    - val_fix
+  notes: "ANP-PCNN Iter 7 — PC-EncDec v2: pure-feedforward forward() + Y_max=0.1 (was 0.5)."

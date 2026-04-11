@@ -1,6 +1,6 @@
 project: anp_pcnn
 iteration: 6
-status: experiment
+status: completed
 goal: >
   PC-EncDec (proto-SPCNN) — bidirectional predictive coding with explicit
   top-down decoder weights alongside the bottom-up encoder. Creates a full
@@ -47,8 +47,41 @@ phase_history:
       Energy ~2.5k/batch (dec reconstruction over 784 dims dominates; expected).
   - phase: experiment
     started: "2026-04-11"
+    completed: "2026-04-12"
     notes: >
-      First run (job 7169448) failed: raw energy O(B×dims) vs CE O(1)/sample
+      Job 7169576 completed. All 5 seeds ran to early stopping (ep 15-21).
+      Energy schedule fix confirmed: epoch 1 val_acc ~88% (vs ~31% in failed run).
+  - phase: analyze
+    completed: "2026-04-12"
+    notes: >
+      Per-seed best val_acc (at best val_acc checkpoint):
+        Seed 0: 93.55% (epoch 10) — early stopped ep 17
+        Seed 1: 93.27% (epoch  9) — early stopped ep 16
+        Seed 2: 93.20% (epoch 14) — early stopped ep 21
+        Seed 3: 92.60% (epoch  8) — early stopped ep 15
+        Seed 4: 93.02% (epoch 12) — early stopped ep 19
+      Mean: 93.13% ± 0.35%. Best: 93.55% (seed 0). Params: 470,948.
+      Train loss increases (0.87→1.58) as Y ramps to 0.5 — energy increasingly
+      dominates the gradient budget even as accuracy plateaus.
+      Energy spikes at epoch 1 (~5800-6100) then monotonically decreases to ~350
+      by end of training. Confirmed the spike = CE training moving encoder while
+      decoder is frozen (Y=0 warmup phase).
+  - phase: conclude
+    completed: "2026-04-12"
+    notes: >
+      Energy schedule fix (Y*(F/B)+(1-Y)*CE) successfully resolved the original
+      <1% CE-gradient problem: val_acc 31%→93.13%. However 93.13% is still 4pp
+      below PC-FFNN v3 (97.30%) and lags all other models.
+      Root cause of gap: two bugs identified for iter7.
+      (1) Train/val mismatch: cls_head trained on pure-feedforward r_2 but at
+          val time receives inference-modified r_2 (20 inference steps alter r_2
+          to satisfy the energy landscape, drifting from feedforward features).
+      (2) Y_max=0.5 too aggressive: at steady state, reconstruction and CE
+          compete equally. From a variational perspective this is β=1 (standard
+          VAE) — known to produce suboptimal discriminative representations.
+          Y=0.1 (β=0.1) will keep CE dominant (90% gradient) with mild
+          generative regularisation (10%).
+      best_result stays at PC-FFNN v3 (97.30%). Advancing to iter 7 with fixes.
       — CE was <1% of total gradient. Network learned only reconstruction,
       reaching ~33% val_acc after 30 epochs (expected 90%+).
       Root cause: combined_loss = energy + ce_weight*CE where energy is

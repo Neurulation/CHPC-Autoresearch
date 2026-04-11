@@ -1,0 +1,43 @@
+project: anp_pcnn
+iteration: 7
+status: implement
+goal: >
+  PC-EncDec v2 — fix the two root causes preventing PC-EncDec from reaching
+  its potential as a generative classifier on MNIST.
+  Fix 1: train/val mismatch — cls_head trained on pure-feedforward r_2 but
+  validated on inference-modified r_2. Pure-feedforward forward() now matches
+  the CE training path exactly, closing the distribution mismatch.
+  Fix 2: Y_max 0.5→0.1 — at Y=0.5 the model is a standard VAE (β=1), where
+  reconstruction and classification compete equally. Y=0.1 keeps classification
+  dominant (90% gradient) with mild generative regularisation (10%).
+  Expected result: significantly better val accuracy, likely approaching
+  PC-FFNN v3 (97.30%) if the mismatch was the primary bottleneck.
+created: "2026-04-12"
+phase_history:
+  - phase: planned
+    completed: "2026-04-12"
+    notes: >
+      Planned after iter 6 concluded at 93.13% ± 0.35%. Two root causes
+      identified: (1) train/val mismatch in forward(); (2) Y_max=0.5 too high,
+      reconstruction gradient dominates. Variational framing: β=0.1 (mild
+      regularisation), not β=1 (equal reconstruction/classification).
+  - phase: survey
+    completed: "2026-04-12"
+    notes: >
+      Higgins et al. (2017) β-VAE: β controls the tradeoff between
+      reconstruction fidelity and posterior regularisation. Small β → better
+      discriminative representations; β=1 standard VAE → suboptimal for
+      classification. Our Y_max = β in the energy/CE blend. Y=0.1 is β=0.1.
+      The train/val mismatch is identical in nature to iter6 of anp_pcnn (iter1
+      calibration failure) — CE-trained cls_head cannot handle PC-inference
+      modified representations at eval time.
+  - phase: implement
+    completed: "2026-04-12"
+    notes: >
+      Fix 1 (pc_enc_dec.py forward()): replaced PC inference + cls_head(r_{L-1})
+      with pure feedforward enc_layers[:-1] → cls_head. Exactly matches what
+      cls_head sees during training. No inference at eval time.
+      Fix 2 (mnist_pc_enc_dec_v2_adam.yaml): energy_schedule.max 0.5→0.1,
+      warmup_epochs 15→10. CE dominates throughout: at steady state
+      Y=0.1 → 90% CE gradient, 10% energy gradient.
+      PBS script: experiments/anp_pcnn_iter7_pc_enc_dec_v2_adam.pbs (12h, 64gb).
