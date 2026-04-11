@@ -1,0 +1,105 @@
+survey:
+  topic: "LSTM and RNN architectures for sequential MNIST classification"
+  date: "2026-04-11"
+
+  key_papers:
+    - title: "Long Short-Term Memory"
+      authors: "Hochreiter & Schmidhuber"
+      year: 1997
+      venue: "Neural Computation"
+      relevance: >
+        Original LSTM paper. Introduces cell state, input/forget/output gates to
+        solve the vanishing/exploding gradient problem in vanilla RNNs. The gating
+        mechanism allows gradients to flow over hundreds of timesteps — critical for
+        sequential MNIST where the sequence length is 784 (pixel-by-pixel) or 28
+        (row-by-row). Direct foundation for our implementation.
+      key_findings:
+        - Cell state acts as conveyor belt — additive updates prevent gradient decay
+        - Forget gate allows selective memory erasure
+        - Demonstrated on long-lag tasks impossible for vanilla RNN
+
+    - title: "Learning Phrase Representations using RNN Encoder-Decoder for Statistical Machine Translation"
+      authors: "Cho et al."
+      year: 2014
+      venue: "EMNLP"
+      relevance: >
+        Introduces GRU — a simplified LSTM with reset and update gates only (no
+        separate cell state). Comparable performance to LSTM with fewer parameters.
+        Foundation for Iter 2 (GRU baseline). GRU is often preferred for shorter
+        sequences where full LSTM gating is unnecessary.
+      key_findings:
+        - GRU merges cell and hidden state — simpler, fewer params
+        - Reset gate controls how much past hidden state to forget
+        - Update gate controls how much new vs old state to retain
+
+    - title: "On the difficulty of training recurrent neural networks"
+      authors: "Pascanu, Mikolov & Bengio"
+      year: 2013
+      venue: "ICML"
+      relevance: >
+        Formal analysis of vanishing/exploding gradient problem in vanilla RNNs.
+        Establishes why LSTM/GRU are needed for sequences >~20 steps. Sequential
+        MNIST (28 or 784 steps) is firmly in this regime — vanilla RNN (Iter 3)
+        expected to underperform LSTM/GRU significantly.
+      key_findings:
+        - Gradient norms decay/explode exponentially with sequence length
+        - Gradient clipping is a practical fix for explosion
+        - Vanishing gradient cannot be fixed by clipping — needs architectural change
+
+    - title: "Recurrent Batch Normalization"
+      authors: "Cooijmans et al."
+      year: 2016
+      venue: "ICLR"
+      relevance: >
+        Shows batch normalisation applied to LSTM hidden states accelerates
+        convergence on sequential MNIST. Not implementing here but informative
+        for ablations; our baseline uses layer norm (more stable for RNNs).
+
+    - title: "An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling"
+      authors: "Bai, Kolter & Koltun"
+      year: 2018
+      venue: "arXiv"
+      relevance: >
+        Benchmarks LSTM and GRU against TCN (temporal convolutional) on sequential
+        MNIST. Reports LSTM ~98.9%, GRU ~98.7% at pixel-level (784 steps). Provides
+        concrete accuracy targets for our experiments.
+      key_findings:
+        - LSTM: ~98.9% on pixel-level sequential MNIST
+        - GRU: ~98.7%
+        - Vanilla RNN: ~60-70% (gradient problems dominate)
+        - Row-level (28 steps, dim-28 input): all models converge faster, higher accuracy
+
+  benchmark_targets:
+    sequential_mnist_row_level:
+      description: "28 timesteps, each of dim 28. Standard row-by-row formulation."
+      lstm_expected: "~99.2-99.5%"
+      gru_expected: "~99.0-99.3%"
+      vanilla_rnn_expected: "~97-98% (shorter sequence, gradient issues manageable)"
+    sequential_mnist_pixel_level:
+      description: "784 timesteps, each of dim 1. Much harder long-range dependency."
+      lstm_expected: "~98.5-99.0%"
+      gru_expected: "~98.3-98.7%"
+      vanilla_rnn_expected: "~60-70% (gradient vanishing dominates)"
+    notes: >
+      We will use row-level (28x28 → 28 steps of dim 28) as primary benchmark:
+      faster training, cleaner comparison with later spiking/PC variants, and
+      accuracy differences between architectures still informative.
+
+  design_decisions:
+    sequence_format: "row-level: T=28, input_dim=28"
+    architecture: "2-layer stacked LSTM, hidden_size=256, linear classifier head"
+    rationale: >
+      2 layers provides sufficient capacity without over-parameterising for MNIST.
+      hidden_size=256 gives ~535K params comparable to the SNN baseline (535K),
+      enabling fair apple-to-apple comparison. Deeper/wider LSTMs show diminishing
+      returns on MNIST.
+    training:
+      optimizer: Adam
+      lr: 0.001
+      scheduler: ReduceLROnPlateau (patience=3, factor=0.5)
+      batch_size: 128
+      epochs: 30
+      early_stopping_patience: 7
+    regularisation:
+      dropout: 0.3 (between LSTM layers)
+      gradient_clipping: 1.0 (norm clip, standard for RNNs)

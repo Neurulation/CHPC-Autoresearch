@@ -1,0 +1,28 @@
+name: "ANP - Recurrent Neural Networks"
+slug: anp_rnn
+status: active
+created: "2026-04-11"
+description: >
+  Establish RNN baselines (LSTM, GRU, Vanilla RNN) on sequential MNIST as
+  foundational library elements for the Artificial Neural Prostheses roadmap.
+  These rate-coded backprop-trained RNNs serve as comparison baselines before
+  introducing spiking dynamics (ANP Project 4) and backprop-free learning
+  (ANP Project 6). Sequential MNIST treats each row of pixels (28 tokens of
+  length 28) as a time series — a standard RNN benchmark.
+current_iteration: 1
+branch: "project/anp-rnn"
+human_direction: >
+  Iter 1: LSTM on sequential MNIST.
+  Iter 2: GRU baseline.
+  Iter 3: Vanilla RNN (Elman network).
+  Use 5 seeds. Track val accuracy, convergence speed, and parameter count.
+  These will be directly compared against their spiking counterparts later.
+best_result:
+  model: null
+  dataset: null
+  mean_val_accuracy: null
+  std_val_accuracy: null
+  experiment_config: null
+  num_seeds: null
+  iteration: null
+  date: null

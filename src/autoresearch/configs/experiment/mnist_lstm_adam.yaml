@@ -1,0 +1,43 @@
+# @package _global_
+# ANP-RNN Iter 1 — LSTM baseline on sequential MNIST (row-level, T=28).
+# Each 28x28 image is treated as 28 timesteps of dim-28 row vectors.
+# 2-layer stacked LSTM, hidden=256, Adam, gradient clipping.
+
+defaults:
+  - override /dataset: mnist
+  - override /model: lstm
+  - override /optimizer: adam
+  - override /loss_fn: cross_entropy
+
+experiment_group: mnist_lstm_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 30
+num_workers: 4
+validation_split: 0.1
+max_grad_norm: 1.0
+
+early_stopping:
+  enabled: true
+  patience: 7
+  min_delta: 0.001
+  metric: val_loss
+  mode: min
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - lstm
+    - rnn
+    - sequential
+    - adam
+    - cross_entropy
+    - anp
+    - anp-rnn
+  notes: "ANP-RNN Iter 1 — 2-layer LSTM (hidden=256) on row-level sequential MNIST (T=28). Rate-coded backprop baseline."

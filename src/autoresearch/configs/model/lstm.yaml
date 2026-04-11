@@ -1,0 +1,10 @@
+# @package _global_.model
+# Stacked LSTM for sequential MNIST classification.
+# Input treated as T=28 row-vectors of dim 28 (row-level sequential MNIST).
+
+_target_: autoresearch.models.lstm.LSTM
+input_size: 28
+hidden_size: 256
+num_layers: 2
+num_classes: 10
+dropout: 0.3

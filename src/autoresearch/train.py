@@ -203,6 +203,7 @@ def train_one_epoch(
     epoch: int,
     wandb_enabled: bool = False,
     log_frequency: int = 10,
+    max_grad_norm: Optional[float] = None,
 ) -> Dict[str, float]:
     """Train for one epoch.
 
@@ -236,6 +237,8 @@ def train_one_epoch(
 
         # Backward pass
         loss.backward()
+        if max_grad_norm is not None:
+            nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm)
         optimizer.step()
 
         # Track metrics
@@ -496,6 +499,7 @@ def train(
                 epoch,
                 wandb_enabled,
                 cfg.wandb.log_frequency,
+                cfg.get("max_grad_norm"),
             )
 
             val_metrics = validate(model, val_loader, loss_fn, device)
