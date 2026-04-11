@@ -9,6 +9,7 @@ jobs:
     job_name: anp_pcnn_iter4_pc_ffnn_adam_eps
     queue: gpu_1
     status: running
+    elapsed: "00:26"
     submitted: "2026-04-11"
     pbs_script: experiments/anp_pcnn_iter4_pc_ffnn_adam_eps.pbs
     log_out: logs/anp_pcnn_iter4_pc_ffnn_adam_eps.out
