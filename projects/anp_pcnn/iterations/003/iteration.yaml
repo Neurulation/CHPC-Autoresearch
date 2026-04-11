@@ -1,0 +1,31 @@
+project: anp_pcnn
+iteration: 3
+status: experiment
+goal: >
+  PC-FFNN v3: Add gradient clipping (max_grad_norm=0.5) to fix the energy
+  explosions observed in iter 2 (all 5 seeds experienced a 10-90x energy spike
+  mid-training, after which val_acc degraded). All other iter 2 fixes are
+  retained: CE classification head on r_{L-1}, combined loss = PC energy +
+  CE(cls_head(r_{L-1}), y), early stopping on val_accuracy (mode=max, patience=7).
+  Use 5 seeds, 30 epochs.
+created: "2026-04-11"
+phase_history:
+  - phase: planned
+    completed: "2026-04-11"
+    notes: >
+      Iter 2 root cause: competing CE and PC energy gradients. CE head converges
+      fast (epochs 1-4), then unchecked PC energy gradient enters high-curvature
+      region causing Adam to make a catastrophically large update. Fix: clip all
+      gradients to max_norm=0.5 after backward().
+  - phase: implement
+    completed: "2026-04-11"
+    notes: >
+      train_pcnn.py: added max_grad_norm param to train_one_epoch_pc(); clips
+      via nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm) after
+      backward. Config train_pcnn.yaml reads cfg.max_grad_norm (null by default).
+      New experiment config: mnist_pc_ffnn_v3_adam (max_grad_norm=0.5).
+outcomes:
+  summary: null
+  key_metrics: {}
+  artifacts: []
+human_feedback: null

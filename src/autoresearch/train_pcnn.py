@@ -187,6 +187,7 @@ def train_one_epoch_pc(
     epoch: int,
     wandb_enabled: bool = False,
     log_frequency: int = 10,
+    max_grad_norm: Optional[float] = None,
 ) -> Dict[str, float]:
     """One PC training epoch.
 
@@ -207,6 +208,8 @@ def train_one_epoch_pc(
         optimizer.zero_grad()
         combined_loss, energy, logits = model.pc_loss(x, y)
         combined_loss.backward()
+        if max_grad_norm is not None:
+            nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm)
         optimizer.step()
 
         total_combined_loss += combined_loss.item()
@@ -310,6 +313,7 @@ def train(
                 model, train_loader, optimizer, device=next(model.parameters()).device,
                 epoch=epoch, wandb_enabled=wandb_enabled,
                 log_frequency=cfg.wandb.log_frequency,
+                max_grad_norm=cfg.get("max_grad_norm", None),
             )
             val_metrics = validate_pc(
                 model, val_loader, device=next(model.parameters()).device
