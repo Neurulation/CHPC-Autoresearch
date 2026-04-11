@@ -1,0 +1,77 @@
+{
+  "iteration": 3,
+  "experiment_name": "CIFAR-10 ResNet-18 with Data Augmentation",
+  "hypothesis": "Data augmentation (not optimizer choice) is the limiting factor in achieving high accuracy on CIFAR-10",
+  "status": "completed",
+  "date_completed": "2026-04-11",
+
+  "experiments": {
+    "adam_augmented": {
+      "config": "cifar10_resnet18_adam_augmented",
+      "hyperparameters": {
+        "optimizer": "adam",
+        "learning_rate": 1e-3,
+        "epochs": 100,
+        "augmentation": true,
+        "patience": 15
+      },
+      "seeds": {
+        "0": {"final_val_acc": 90.52, "final_val_loss": 0.3531},
+        "1": {"final_val_acc": 90.44, "final_val_loss": 0.3568},
+        "2": {"final_val_acc": 90.74, "final_val_loss": 0.3687},
+        "3": {"final_val_acc": 91.18, "final_val_loss": 0.3588},
+        "4": {"final_val_acc": 89.98, "final_val_loss": 0.3600}
+      },
+      "mean_val_acc": 90.57,
+      "std_val_acc": 0.51
+    },
+
+    "sgd_cosine_augmented": {
+      "config": "cifar10_resnet18_sgd_cosine_augmented",
+      "hyperparameters": {
+        "optimizer": "sgd",
+        "learning_rate_schedule": "cosine",
+        "base_learning_rate": 0.1,
+        "epochs": 200,
+        "augmentation": true,
+        "patience": 40
+      },
+      "seeds": {
+        "0": {"final_val_acc": 94.88, "final_val_loss": 0.1876},
+        "1": {"final_val_acc": 94.76, "final_val_loss": 0.1927},
+        "2": {"final_val_acc": 95.38, "final_val_loss": 0.1705},
+        "3": {"final_val_acc": 95.38, "final_val_loss": 0.1742},
+        "4": {"final_val_acc": 94.42, "final_val_loss": 0.2059}
+      },
+      "mean_val_acc": 94.96,
+      "std_val_acc": 0.38
+    }
+  },
+
+  "comparison_with_iter2": {
+    "adam_without_augmentation": 83.56,
+    "adam_with_augmentation": 90.57,
+    "adam_improvement": "+7.01%",
+
+    "sgd_cosine_without_augmentation": 78.87,
+    "sgd_cosine_with_augmentation": 94.96,
+    "sgd_cosine_improvement": "+16.09%",
+
+    "insight": "SGD+cosine benefits MORE from augmentation (+16.09%) than Adam (+7.01%), suggesting SGD needs regularization more. With augmentation, SGD+cosine (94.96%) outperforms Adam (90.57%) by 4.39%."
+  },
+
+  "key_findings": [
+    "Data augmentation is crucial for CIFAR-10 ResNet-18 performance",
+    "Standard augmentation pipeline (RandomHorizontalFlip + RandomCrop) provides ~6-16% accuracy boost",
+    "SGD+cosine with proper patience (40 epochs) allows full learning rate schedule to run",
+    "With augmentation, both optimizers converge to different plateaus: Adam ~90.6%, SGD+cosine ~95%",
+    "Early stopping with Adam patience=15 stops at epoch ~37-57, SGD+cosine patience=40 runs many more epochs"
+  ],
+
+  "root_cause_analysis": {
+    "iter2_underperformance": "Both optimizer implementations were correct, but neither had data augmentation",
+    "augmentation_missing": "Iterations 1 and 2 only used normalization transforms, not augmentation",
+    "why_sgd_worse_in_iter2": "Without augmentation, SGD became overly constrained and plateaued at 78.87%. With augmentation providing regularization, SGD+cosine's cosine schedule benefit becomes apparent.",
+    "why_adam_better_in_iter2": "Adam's adaptive learning rate provides implicit regularization even without augmentation, but still struggles to pass 84% without data augmentation"
+  }
+}
