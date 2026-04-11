@@ -191,9 +191,11 @@ def train_one_epoch_pc(
     """One PC training epoch.
 
     Calls model.pc_loss(x, y) which runs supervised inference then returns
-    the PC energy (training loss) and logits (for accuracy logging).
+    the combined loss (energy + ce_weight * CE), the PC energy, and logits
+    from the classification head for accuracy logging.
     """
     model.train()
+    total_combined_loss = 0.0
     total_energy = 0.0
     correct = 0
     total = 0
@@ -203,10 +205,11 @@ def train_one_epoch_pc(
         x, y = x.to(device), y.to(device)
 
         optimizer.zero_grad()
-        energy, logits = model.pc_loss(x, y)
-        energy.backward()
+        combined_loss, energy, logits = model.pc_loss(x, y)
+        combined_loss.backward()
         optimizer.step()
 
+        total_combined_loss += combined_loss.item()
         total_energy += energy.item()
         _, predicted = torch.max(logits, 1)
         total += y.size(0)
@@ -219,7 +222,8 @@ def train_one_epoch_pc(
             wandb.log({"train/energy_step": energy.item(), "epoch": epoch})
 
     return {
-        "loss": total_energy / len(train_loader),   # PC energy (training loss)
+        "loss": total_combined_loss / len(train_loader),
+        "energy": total_energy / len(train_loader),
         "accuracy": 100.0 * correct / total,
     }
 
@@ -229,10 +233,11 @@ def validate_pc(
     val_loader: DataLoader,
     device: torch.device,
 ) -> Dict[str, float]:
-    """Validate using free inference.
+    """Validate using cls_head(r_{L-1}) after free inference.
 
-    Reports cross-entropy on inferred logits (r_L) for apples-to-apples
-    comparison with other models in the leaderboard.
+    Reports cross-entropy and accuracy from the classification head — properly
+    calibrated because cls_head was trained with CE loss, not subject to
+    the clamped-output mismatch.
     """
     model.eval()
     ce_fn = nn.CrossEntropyLoss()
@@ -243,7 +248,7 @@ def validate_pc(
     with torch.no_grad():
         for x, y in val_loader:
             x, y = x.to(device), y.to(device)
-            logits = model(x)          # free inference → r_L as logits
+            logits = model(x)          # cls_head(r_{L-1}) after free inference
             loss = ce_fn(logits, y)
             total_loss += loss.item()
             _, predicted = torch.max(logits, 1)
@@ -251,7 +256,7 @@ def validate_pc(
             correct += (predicted == y).sum().item()
 
     return {
-        "loss": total_loss / len(val_loader),   # CE (for comparison)
+        "loss": total_loss / len(val_loader),
         "accuracy": 100.0 * correct / total,
     }
 
@@ -272,7 +277,11 @@ def train(
     wandb_enabled: bool,
     run_dir: Path,
 ) -> None:
-    """PC training loop."""
+    """PC training loop.
+
+    Early stopping and checkpointing use val_accuracy (mode=max) by default.
+    Val loss is still logged for reference but is no longer the stopping metric.
+    """
     checkpoint_dir = run_dir / "checkpoints"
 
     save_status(run_dir, "in_progress", epoch=start_epoch, best_val_loss=best_metric,
@@ -280,12 +289,20 @@ def train(
 
     early_stopping = None
     if cfg.early_stopping.enabled:
+        # For PC-FFNN, monitor val_accuracy (max) not val_loss (min).
+        # Val CE is permanently elevated due to calibration; accuracy is the
+        # meaningful signal.
+        mode = getattr(cfg.early_stopping, "mode", "max")
         early_stopping = EarlyStopping(
             patience=cfg.early_stopping.patience,
             min_delta=cfg.early_stopping.min_delta,
-            mode=cfg.early_stopping.mode,
+            mode=mode,
         )
-        log.info("Early stopping: patience=%d", cfg.early_stopping.patience)
+        log.info("Early stopping: patience=%d, mode=%s", cfg.early_stopping.patience, mode)
+
+    # best_metric tracks best val_accuracy (higher is better) for checkpointing.
+    # Initialise to 0.0 (will be overwritten on first epoch).
+    best_val_acc = 0.0
 
     try:
         for epoch in range(start_epoch, cfg.epochs + 1):
@@ -299,17 +316,18 @@ def train(
             )
 
             log.info(
-                "Epoch %d/%d  Train Energy: %.4f  Train Acc: %.2f%%  "
+                "Epoch %d/%d  Train Loss: %.4f  Train Energy: %.4f  Train Acc: %.2f%%  "
                 "Val CE: %.4f  Val Acc: %.2f%%",
                 epoch, cfg.epochs,
-                train_metrics["loss"], train_metrics["accuracy"],
+                train_metrics["loss"], train_metrics["energy"], train_metrics["accuracy"],
                 val_metrics["loss"], val_metrics["accuracy"],
             )
 
             if wandb_enabled:
                 import wandb
                 wandb.log({
-                    "train/energy": train_metrics["loss"],
+                    "train/loss": train_metrics["loss"],
+                    "train/energy": train_metrics["energy"],
                     "train/accuracy": train_metrics["accuracy"],
                     "val/loss": val_metrics["loss"],
                     "val/accuracy": val_metrics["accuracy"],
@@ -319,20 +337,25 @@ def train(
             if cfg.checkpoint.enabled and epoch % cfg.checkpoint.save_frequency == 0:
                 save_checkpoint(
                     checkpoint_dir, epoch, model, optimizer,
-                    min(best_metric, val_metrics["loss"]), cfg, wandb_run_id,
+                    val_metrics["loss"], cfg, wandb_run_id,
                 )
 
-            if cfg.checkpoint.enabled and val_metrics["loss"] < best_metric:
-                best_metric = val_metrics["loss"]
+            if cfg.checkpoint.enabled and val_metrics["accuracy"] > best_val_acc:
+                best_val_acc = val_metrics["accuracy"]
                 save_best_model(checkpoint_dir, epoch, model, val_metrics["loss"])
+                log.info("New best val_acc: %.2f%% (epoch %d)", best_val_acc, epoch)
 
-            if early_stopping is not None and early_stopping(val_metrics["loss"]):
-                log.info("Early stopping at epoch %d", epoch)
-                save_status(run_dir, "completed", epoch=epoch, best_val_loss=best_metric,
+            # Early stopping on val_accuracy
+            if early_stopping is not None and early_stopping(val_metrics["accuracy"]):
+                log.info("Early stopping at epoch %d (best val_acc: %.2f%%)",
+                         epoch, best_val_acc)
+                save_status(run_dir, "completed", epoch=epoch,
+                            best_val_loss=val_metrics["loss"],
                             message=f"Early stopping triggered at epoch {epoch}")
                 return
 
-        save_status(run_dir, "completed", epoch=cfg.epochs, best_val_loss=best_metric,
+        save_status(run_dir, "completed", epoch=cfg.epochs,
+                    best_val_loss=val_metrics["loss"],
                     message="Training completed successfully")
 
     except Exception as e:
