@@ -1,0 +1,38 @@
+{
+  "experiment_group": "mnist_pc_ffnn_v2_adam",
+  "seeds": [0, 1, 2, 3, 4],
+  "per_seed": {
+    "0": {"best_val_acc": 97.57, "best_val_ce": 0.0885, "best_epoch": 8,  "early_stop_epoch": 15, "energy_spike_epoch": 9,  "energy_spike_value": 88.04},
+    "1": {"best_val_acc": 97.48, "best_val_ce": 0.0886, "best_epoch": 9,  "early_stop_epoch": 16, "energy_spike_epoch": 11, "energy_spike_value": 23.70},
+    "2": {"best_val_acc": 97.28, "best_val_ce": 0.0949, "best_epoch": 4,  "early_stop_epoch": 11, "energy_spike_epoch": 6,  "energy_spike_value": 9.70},
+    "3": {"best_val_acc": 96.73, "best_val_ce": 0.1123, "best_epoch": 4,  "early_stop_epoch": 11, "energy_spike_epoch": 9,  "energy_spike_value": 15.50},
+    "4": {"best_val_acc": 96.98, "best_val_ce": 0.1002, "best_epoch": 4,  "early_stop_epoch": 11, "energy_spike_epoch": 5,  "energy_spike_value": 10.16}
+  },
+  "mean_val_acc": 97.208,
+  "std_val_acc": 0.350,
+  "best_val_acc": 97.57,
+  "best_seed": 0,
+  "mean_val_ce_at_best_epoch": 0.0969,
+  "num_params": 236436,
+  "calibration_fix": "SUCCESS — val_CE now 0.088-0.112 at best epoch (vs 1.54 in iter 1). Logits are properly calibrated.",
+  "iter1_vs_iter2": {
+    "iter1_mean_acc_last_epoch": 89.03,
+    "iter1_std_acc_last_epoch": 4.65,
+    "iter1_best_epoch_estimated": 96.0,
+    "iter2_mean_acc_best_epoch": 97.208,
+    "iter2_std_acc_best_epoch": 0.350
+  },
+  "investigation": {
+    "finding": "Training instability — PC energy explodes at some epoch in all 5 seeds.",
+    "pattern": "Initial convergence is excellent (epochs 1-4/9, val_acc consistently reaches 96.7-97.6%). Then the PC energy spikes by 10-90x in a single epoch (e.g. epoch 5: energy 0.47 → 10.16 for seed 4). Val_acc drops 1-9pp. Seeds 0 and 1 partially recover; seeds 2, 3, 4 do not improve further.",
+    "root_cause": "The combined loss (energy + ce_weight * CE) has competing gradients. The CE head pulls hidden representations toward discriminative features; simultaneously the PC energy pulls weights toward minimising prediction errors. After the CE head converges early, the PC energy dominates the gradient and can enter a high-curvature region where a single large energy gradient step destabilises the inference dynamics. The Adam optimizer's adaptive LR amplifies this when energy variance is high.",
+    "early_stopping_worked": "val_acc early stopping (mode=max, patience=7) correctly saved the best model before the energy explosion for all seeds. The saved best_model.pt achieves the best_val_acc reported above.",
+    "comparison_to_dense_ffnn": "PC-FFNN v2 (97.21% ± 0.35%) now exceeds the SNN baseline (97.62% ± 0.12%) does not, but is within 0.4pp and approaches it. Trails dense FFNN (98.06%) by 0.85pp — a significant reduction from the ~2pp gap in naive iter 1 estimates.",
+    "recommendations_iter3": [
+      "Add gradient clipping to the PC energy gradients (max_grad_norm=1.0 or 0.5) to prevent runaway updates — analogous to the LSTM fix",
+      "Use a lower learning rate (1e-4 instead of 1e-3) for the PC energy component, or use separate optimizers for PC weights and cls_head",
+      "Apply learning rate warmup (5 epochs linear warmup) to let both objectives co-adapt before full LR is reached",
+      "Monitor train/energy and add energy early stopping as a secondary guard: if energy > 5x baseline, decay LR"
+    ]
+  }
+}

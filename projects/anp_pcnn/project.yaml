@@ -24,14 +24,15 @@ human_direction: >
 best_result:
   model: pc_ffnn
   dataset: mnist
-  mean_val_acc_last_epoch: 89.03
-  std_val_acc_last_epoch: 4.65
-  estimated_best_epoch_val_acc: 96.0
-  mean_val_loss: 1.5445
-  experiment_config: mnist_pc_ffnn_adam
+  model: pc_ffnn_v2
+  dataset: mnist
+  mean_val_accuracy: 97.208
+  std_val_accuracy: 0.350
+  best_val_accuracy: 97.57
+  experiment_config: mnist_pc_ffnn_v2_adam
   num_seeds: 5
-  iteration: 1
+  iteration: 2
   date: "2026-04-11"
   note: >
-    Best-epoch val_acc ~96% but degrades due to training-eval mismatch.
-    See iter 1 metrics.json investigation for full analysis.
+    Best-epoch val_acc (early-stop on val_acc, mode=max). CE head fix resolved
+    calibration. Remaining issue: PC energy spikes. Iter 3: gradient clipping.

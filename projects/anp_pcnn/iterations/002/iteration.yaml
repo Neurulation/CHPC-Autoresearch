@@ -1,6 +1,6 @@
 project: anp_pcnn
 iteration: 2
-status: experiment
+status: completed
 goal: >
   PC-FFNN v2: Fix training-evaluation objective mismatch from iter 1.
   Add a CE classification head on r_{L-1} (last hidden representation, 128-dim)
@@ -27,7 +27,37 @@ phase_history:
       checkpointing on val_accuracy (mode=max). New experiment config:
       mnist_pc_ffnn_v2_adam (30 epochs, patience=7 on val_acc).
 outcomes:
-  summary: null
-  key_metrics: {}
-  artifacts: []
+  summary: >
+    CE head fix successful: val_CE drops to 0.09-0.11 at best epoch (vs 1.54
+    permanently in iter 1). Best-epoch val_acc: 97.21% ± 0.35% across 5 seeds
+    (best seed 0: 97.57%), a major improvement over iter 1 (~96% estimated,
+    uncalibrated). However, a new issue emerged: the PC energy explodes by
+    10-90x in a single epoch in all seeds (epoch 5-11 depending on seed),
+    causing val_acc to drop 1-9pp post-peak. Early stopping on val_acc
+    (mode=max) correctly saves the best model before the explosion in all seeds.
+    Root cause: competing CE and PC energy gradients — once the CE head
+    converges, the PC energy gradient dominates and enters a high-curvature
+    region. Fix for iter 3: gradient clipping on PC energy gradients.
+  key_metrics:
+    mean_val_acc: 97.208
+    std_val_acc: 0.350
+    best_val_acc: 97.57
+    best_seed: 0
+    mean_val_ce_at_best_epoch: 0.0969
+    num_params: 236436
+    energy_spikes_all_seeds: true
+  artifacts:
+    - projects/anp_pcnn/iterations/002/metrics.json
+  phase_history:
+    - phase: analyze
+      completed: "2026-04-11"
+      notes: >
+        All 5 seeds completed on CHPC. Per-epoch logs extracted. Energy spikes
+        identified in all seeds. Best val_acc computed from best-checkpoint epoch.
+    - phase: conclude
+      completed: "2026-04-11"
+      notes: >
+        CE head calibration fix confirmed successful (val_CE 1.54→0.097).
+        Best-epoch accuracy 97.21% ± 0.35%. Remaining issue: PC energy
+        explosion after convergence. Iter 3: add gradient clipping.
 human_feedback: null
