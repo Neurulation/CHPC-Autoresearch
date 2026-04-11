@@ -1,0 +1,42 @@
+# @package _global_
+# ANP-PCNN Iter 1 — PC-FFNN on MNIST.
+# Hierarchical predictive coding (Rao & Ballard 1999):
+#   each layer predicts the layer below via top-down weights.
+# Training: supervised inference (clamp r_L = one_hot(y)) + energy minimisation.
+# Evaluation: free inference, CE on inferred logits for leaderboard comparison.
+
+defaults:
+  - override /dataset: mnist
+  - override /model: pc_ffnn
+  - override /optimizer: adam
+
+experiment_group: mnist_pc_ffnn_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 30
+num_workers: 4
+validation_split: 0.1
+
+early_stopping:
+  enabled: true
+  patience: 7
+  min_delta: 0.001
+  metric: val_loss
+  mode: min
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - pc_ffnn
+    - predictive_coding
+    - rao_ballard
+    - adam
+    - anp
+    - anp-pcnn
+  notes: "ANP-PCNN Iter 1 — PC-FFNN (784-256-128-10) on MNIST. Rao & Ballard PC with T_pc=20 inference steps, supervised clamping, Adam weight update."

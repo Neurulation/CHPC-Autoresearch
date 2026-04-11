@@ -1,0 +1,6 @@
+_target_: autoresearch.models.pc_ffnn.PCFFNN
+input_size: 784
+hidden_dims: [256, 128]
+num_classes: 10
+T_pc: 20
+lr_pc: 0.05
