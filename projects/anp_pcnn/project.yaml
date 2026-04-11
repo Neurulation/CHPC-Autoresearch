@@ -10,7 +10,7 @@ description: >
   (trained with Adam on the PC energy) serve as comparison baselines before
   introducing spiking dynamics (ANP Project 5) and backprop-free learning
   (ANP Project 7).
-current_iteration: 4
+current_iteration: 5
 branch: "project/anp-pcnn"
 human_direction: >
   Iter 1: PC-FFNN — Rao & Ballard (1999) hierarchical predictive coding on

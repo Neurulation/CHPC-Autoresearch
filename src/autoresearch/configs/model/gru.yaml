@@ -1,0 +1,11 @@
+# @package _global_.model
+# Stacked GRU for sequential MNIST classification.
+# Input treated as T=28 row-vectors of dim 28 (row-level sequential MNIST).
+# Structurally mirrors the LSTM baseline — same hyperparameters, GRU cells only.
+
+_target_: autoresearch.models.gru.GRU
+input_size: 28
+hidden_size: 256
+num_layers: 2
+num_classes: 10
+dropout: 0.3

@@ -9,7 +9,7 @@ description: >
   introducing spiking dynamics (ANP Project 4) and backprop-free learning
   (ANP Project 6). Sequential MNIST treats each row of pixels (28 tokens of
   length 28) as a time series — a standard RNN benchmark.
-current_iteration: 1
+current_iteration: 2
 branch: "project/anp-rnn"
 human_direction: >
   Iter 1: LSTM on sequential MNIST.

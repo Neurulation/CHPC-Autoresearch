@@ -1,0 +1,56 @@
+# @package _global_
+# ANP-PCNN Iter 5 — PC-RNN on sequential MNIST (row-level, T=28).
+#
+# Extends PC-FFNN with recurrent connections:
+#   mu_l(t) = f(W_ff[l-1] @ r_{l-1}(t) + W_rec[l-1] @ r_l(t-1))
+#
+# Training:
+#   Phase 1 — Greedy per-timestep PC inference (T_pc=10 steps, warm-start from h_prev)
+#   Phase 2 — PC energy (active weights) + CE head (BPTT through full sequence)
+#
+# T_pc=10 (vs 20 for PC-FFNN) — warm-start from previous hidden state compensates.
+# Adam eps=0.01 applied as a precaution (same fix as PC-FFNN v4).
+
+defaults:
+  - override /dataset: mnist
+  - override /model: pc_rnn
+  - override /optimizer: adam_pc
+
+experiment_group: mnist_pc_rnn_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 30
+num_workers: 4
+validation_split: 0.1
+max_grad_norm: 0.5
+
+model:
+  T_pc: 10
+  lr_pc: 0.05
+  ce_weight: 1.0
+
+early_stopping:
+  enabled: true
+  patience: 7
+  min_delta: 0.01
+  metric: val_accuracy
+  mode: max
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - pc_rnn
+    - predictive_coding
+    - rnn
+    - sequential
+    - adam
+    - anp
+    - anp-pcnn
+    - temporal_pc
+  notes: "ANP-PCNN Iter 5 — PC-RNN: temporal predictive coding with recurrent connections on sequential MNIST (T=28 rows)."

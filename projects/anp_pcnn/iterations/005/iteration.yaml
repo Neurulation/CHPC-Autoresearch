@@ -1,0 +1,41 @@
+project: anp_pcnn
+iteration: 5
+status: implement
+goal: >
+  PC-RNN: temporal predictive coding on sequential MNIST (T=28 rows).
+  Extends PC-FFNN with recurrent connections — at each timestep t:
+    mu_l(t) = f(W_ff[l-1] @ r_{l-1}(t) + W_rec[l-1] @ r_l(t-1))
+  Inference: greedy per-timestep gradient descent on representations (T_pc=10,
+  warm-started from previous hidden state). Weight update: PC energy (active
+  weights, reps detached) + CE head via BPTT. Establishes temporal PC baseline
+  as the bridge between PC-FFNN and future spiking PC-RNN (Phase B).
+created: "2026-04-11"
+phase_history:
+  - phase: planned
+    completed: "2026-04-11"
+    notes: >
+      Planned after PC-FFNN energy explosion was diagnosed and fixed (iter 4,
+      Adam eps=0.01). PC-RNN is roadmap Iter 2 for the anp_pcnn project.
+  - phase: survey
+    completed: "2026-04-11"
+    notes: >
+      Key references: Elman (1990) SRN formulation, Friston (2005) predictive
+      coding / free energy, Rao & Ballard (1999) hierarchical PC. Design:
+      single recurrent weight matrix W_rec per hidden layer mapping
+      r_l(t-1) → r_l(t) prediction. Output layer is feedforward-only (same
+      as PC-FFNN). Warm-start from h_prev enables T_pc=10 (vs 20 for PCFFNN)
+      since representations are pre-initialised near the energy minimum.
+      Adam eps=0.01 applied as precaution against stale v_t explosion.
+  - phase: implement
+    completed: "2026-04-11"
+    notes: >
+      Implemented PCRNN model (src/autoresearch/models/pc_rnn.py), model config
+      (configs/model/pc_rnn.yaml), experiment config (mnist_pc_rnn_adam.yaml,
+      30 epochs, 5 seeds, patience=7 on val_accuracy). PCRNN implements
+      pc_loss() and forward() to match train_pcnn.py's expected interface.
+      Adam eps=0.01, max_grad_norm=0.5 (same as PC-FFNN v4).
+experiment:
+  config: mnist_pc_rnn_adam
+  pbs_script: experiments/anp_pcnn_iter5_pc_rnn_adam.pbs
+  seeds: [0, 1, 2, 3, 4]
+  epochs: 30

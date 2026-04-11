@@ -1,0 +1,33 @@
+project: anp_rnn
+iteration: 2
+status: implement
+goal: >
+  GRU baseline on sequential MNIST. Structurally identical to the LSTM
+  baseline (Iter 1) — same architecture depth (2 layers), hidden size (256),
+  optimizer (Adam), and evaluation protocol (5 seeds, 30 epochs). GRU replaces
+  the LSTM cell: 3 gates instead of 4, no separate cell state. Direct
+  side-by-side comparison establishes whether gate complexity meaningfully
+  affects accuracy on this task.
+created: "2026-04-11"
+phase_history:
+  - phase: planned
+    completed: "2026-04-11"
+    notes: "Iteration planned after LSTM baseline (Iter 1) completed at 98.95% ± 0.11%."
+  - phase: survey
+    completed: "2026-04-11"
+    notes: >
+      GRU (Cho et al. 2014): two gates (reset + update) vs LSTM's three-gate
+      structure (input, forget, output). Empirically comparable to LSTM on many
+      tasks (Chung et al. 2014). ~25% fewer parameters. Chosen hyperparameters
+      mirror LSTM: hidden=256, layers=2, dropout=0.3, Adam lr=1e-3, grad clip=1.0.
+  - phase: implement
+    completed: "2026-04-11"
+    notes: >
+      Implemented GRU model (src/autoresearch/models/gru.py), model config
+      (configs/model/gru.yaml), experiment config (mnist_gru_adam.yaml, 30 epochs,
+      5 seeds, patience=7). Mirrors LSTM baseline exactly, only the cell type changes.
+experiment:
+  config: mnist_gru_adam
+  pbs_script: experiments/anp_rnn_iter2_gru_adam.pbs
+  seeds: [0, 1, 2, 3, 4]
+  epochs: 30

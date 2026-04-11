@@ -1,0 +1,12 @@
+# @package _global_.model
+# Temporal Predictive Coding RNN for sequential MNIST classification.
+# Input treated as T=28 row-vectors of dim 28 (row-level sequential MNIST).
+# Recurrent connections added to hidden layers; output layer is feedforward-only.
+
+_target_: autoresearch.models.pc_rnn.PCRNN
+input_size: 28
+hidden_dims: [256, 128]
+num_classes: 10
+T_pc: 10
+lr_pc: 0.05
+ce_weight: 1.0

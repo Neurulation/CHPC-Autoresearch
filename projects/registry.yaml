@@ -9,9 +9,9 @@ projects:
     path: projects/artificial_neural_prostheses
   - slug: anp_rnn
     status: active
-    current_iteration: 1
+    current_iteration: 2
     path: projects/anp_rnn
   - slug: anp_pcnn
     status: active
-    current_iteration: 3
+    current_iteration: 5
     path: projects/anp_pcnn

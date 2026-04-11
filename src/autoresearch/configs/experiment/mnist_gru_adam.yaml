@@ -1,0 +1,44 @@
+# @package _global_
+# ANP-RNN Iter 2 — GRU baseline on sequential MNIST (row-level, T=28).
+# Structurally identical to the LSTM baseline (Iter 1) but uses GRU cells.
+# GRU has 3 gates vs LSTM's 4 — ~25% fewer parameters, often comparable accuracy.
+# Direct comparison with LSTM establishes gate complexity vs performance trade-off.
+
+defaults:
+  - override /dataset: mnist
+  - override /model: gru
+  - override /optimizer: adam
+  - override /loss_fn: cross_entropy
+
+experiment_group: mnist_gru_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 30
+num_workers: 4
+validation_split: 0.1
+max_grad_norm: 1.0
+
+early_stopping:
+  enabled: true
+  patience: 7
+  min_delta: 0.001
+  metric: val_loss
+  mode: min
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - gru
+    - rnn
+    - sequential
+    - adam
+    - cross_entropy
+    - anp
+    - anp-rnn
+  notes: "ANP-RNN Iter 2 — 2-layer GRU (hidden=256) on row-level sequential MNIST (T=28). Rate-coded backprop baseline."
