@@ -1,6 +1,6 @@
 project: anp_pcnn
 iteration: 3
-status: experiment
+status: completed
 goal: >
   PC-FFNN v3: Add gradient clipping (max_grad_norm=0.5) to fix the energy
   explosions observed in iter 2 (all 5 seeds experienced a 10-90x energy spike
@@ -25,7 +25,41 @@ phase_history:
       backward. Config train_pcnn.yaml reads cfg.max_grad_norm (null by default).
       New experiment config: mnist_pc_ffnn_v3_adam (max_grad_norm=0.5).
 outcomes:
-  summary: null
-  key_metrics: {}
-  artifacts: []
+  summary: >
+    Gradient clipping (max_grad_norm=0.5) is a partial improvement but does not
+    eliminate the energy explosions. Mean best val_acc: 97.30% µ 0.22% (vs iter 2:
+    97.21% ± 0.35%). The clipping reduced variance and delayed explosions (seeds 1
+    and 3 survived to epochs 14 and 17 before exploding, enabling best val_accs of
+    97.60% and 97.42%), but all 5 seeds still hit massive energy spikes (peak
+    energies 18-1905). Root cause: gradient clipping bounds parameter update
+    magnitude but not the PC energy value, which is determined by how well the
+    inference dynamics fit the weights. The CE head (ce_weight=1.0) and PC energy
+    are competing co-equal objectives for the same weights; CE pulls representations
+    toward discriminative features while PC energy resists those same changes.
+    Iter 4: reduce ce_weight from 1.0 to 0.1 so CE is a gentle regulariser rather
+    than an equal co-objective.
+  key_metrics:
+    mean_val_acc: 97.296
+    std_val_acc: 0.219
+    best_val_acc: 97.60
+    best_seed: 1
+    num_params: 236436
+    energy_spikes_all_seeds: true
+    delta_vs_iter2_mean_pp: +0.088
+    delta_vs_iter2_std_pp: -0.131
+  artifacts:
+    - projects/anp_pcnn/iterations/003/metrics.json
+  phase_history:
+    - phase: analyze
+      completed: "2026-04-11"
+      notes: >
+        All 5 seeds completed on CHPC. Per-epoch logs extracted. Energy spikes
+        identified in all seeds despite gradient clipping. Best val_acc taken from
+        max epoch val_acc across each seed.
+    - phase: conclude
+      completed: "2026-04-11"
+      notes: >
+        Grad clipping: partial improvement (std 0.35->0.22, delayed explosions).
+        Explosions are algorithmic, not gradient-magnitude issues. Iter 4:
+        reduce ce_weight=0.1 to decouple CE and PC energy objectives.
 human_feedback: null

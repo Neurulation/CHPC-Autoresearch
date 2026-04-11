@@ -79,14 +79,15 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 | Artificial Neural Prostheses | 1 | SNN (784-512-256-10 LIF, T=25) | Adam | ✗ | 5 | 97.62% ± 0.12% | rate-coded | ✅ |
 | ANP — PC-NN | 1 | PC-FFNN (784-256-128-10) | Adam | ✗ | 5 | ~96%¹ / 89.0% ± 4.7%² | predictive coding | ⚠️ |
 | ANP — PC-NN | 2 | PC-FFNN v2 + CE head (784-256-128-10) | Adam | ✗ | 5 | **97.21% ± 0.35%**³ | predictive coding | ✅ |
-| ANP — PC-NN | 3 | PC-FFNN v3 + CE head + grad clip (784-256-128-10) | Adam | ✗ | 5 | pending⁴ | predictive coding | 🔄 |
+| ANP — PC-NN | 3 | PC-FFNN v3 + CE head + grad clip (784-256-128-10) | Adam | ✗ | 5 | **97.30% ± 0.22%**⁴ | predictive coding | ✅ |
 
 ¹ Estimated best-epoch val_acc (~epoch 3) based on smoke test; true best-epoch val_acc not directly recorded.  
 ² Mean last-epoch val_acc at early-stop (epochs 9-11). High variance and degradation compared to best epoch
   is caused by a training-evaluation objective mismatch (see key findings below).  
 ³ Best-epoch val_acc across 5 seeds (early stopping on val_acc, mode=max). CE head resolves iter 1 calibration failure.
   A new issue emerged: PC energy explosions mid-training (all seeds); early stopping preserves the best model correctly.  
-⁴ Running on CHPC (job in queue). Adds gradient clipping (max_grad_norm=0.5) to fix energy explosions seen in iter 2.
+⁴ Grad clipping (max_grad_norm=0.5) delays explosions and reduces variance (std 0.35→0.22) but does not eliminate them.
+  Explosions are algorithmic — the CE head and PC energy compete for the same weights. Iter 4: reduce ce_weight=0.1.
 
 ### CIFAR-10
 
@@ -101,7 +102,7 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 
 **Key findings:**
 - *MNIST: CNN outperforms FFNN at 99.17% vs 98.06%. SNN baseline 97.62% ± 0.12% — trails dense nets as expected given rate coding overhead. LSTM on sequential MNIST (T=28) achieves 98.95% ± 0.11% — competitive with CNN despite processing pixels row-by-row; all 5 seeds converged the full 30 epochs.*
-- *PC-FFNN v2 (iter 2): CE classification head on r_{L-1} resolves the iter 1 training-evaluation mismatch — val_CE drops from 1.54 (permanently stuck) to 0.097 (converging). Best-epoch val_acc: **97.21% ± 0.35%**, within 0.4pp of SNN. New finding: PC energy explodes by 10-90x in all seeds mid-training (epochs 5-11); early stopping preserves the best model. Iter 3 running: adds gradient clipping (max_grad_norm=0.5) to stabilise training beyond the early peak.*
+- *PC-FFNN v3 (iter 3): Gradient clipping (max_grad_norm=0.5) is a **partial improvement** — variance reduced (0.35→0.22pp), explosions delayed (seeds 1 and 3 survived to epochs 14 and 17, reaching 97.60% and 97.42%), mean accuracy +0.09pp to **97.30% ± 0.22%**. However, all 5 seeds still hit massive energy spikes (peak 18–1905×). Root cause: clipping bounds gradient magnitude but not the energy value itself, which is driven by the competing CE head and PC energy pulling the same weights in opposite directions. Iter 4: reduce ce_weight from 1.0 to 0.1 so CE acts as a gentle regulariser rather than an equal co-objective.*
 - *PC-FFNN v1 (iter 1): train accuracy 100% from epoch 2 via supervised clamping, but val CE stuck at ~1.54 (uncalibrated — ~21% avg confidence on true class). Root cause: training-evaluation objective mismatch between clamped and free inference.*
 - *CIFAR-10: Data augmentation was THE limiting factor. SGD+cosine with aug: 94.96% (+16.09%). Adam with aug: 90.57% (+7.01%). SGD+cosine beats Adam when both use augmentation.*
 

@@ -2,7 +2,7 @@ experiments:
   - job_name: anp_pcnn_iter3_pc_ffnn_v3_adam
     job_id: "7169103"
     submitted: "2026-04-11"
-    status: submitted
+    status: completed
     config: mnist_pc_ffnn_v3_adam
     seeds: [0, 1, 2, 3, 4]
     epochs: 30

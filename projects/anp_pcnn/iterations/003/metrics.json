@@ -1,0 +1,31 @@
+{
+  "experiment_group": "mnist_pc_ffnn_v3_adam",
+  "seeds": [0, 1, 2, 3, 4],
+  "per_seed": {
+    "0": {"best_val_acc": 97.23, "best_epoch": 3,  "early_stop_epoch": 10, "energy_spike_epoch": 5,    "peak_energy": 1632},
+    "1": {"best_val_acc": 97.60, "best_epoch": 7,  "early_stop_epoch": 14, "energy_spike_epoch": 14,   "peak_energy": 1905},
+    "2": {"best_val_acc": 97.20, "best_epoch": 3,  "early_stop_epoch": 10, "energy_spike_epoch": "7-9","peak_energy": 963},
+    "3": {"best_val_acc": 97.42, "best_epoch": 10, "early_stop_epoch": 17, "energy_spike_epoch": 14,   "peak_energy": 18},
+    "4": {"best_val_acc": 97.03, "best_epoch": 4,  "early_stop_epoch": 11, "energy_spike_epoch": 7,    "peak_energy": 1768}
+  },
+  "mean_val_acc": 97.296,
+  "std_val_acc": 0.219,
+  "best_val_acc": 97.60,
+  "best_seed": 1,
+  "num_params": 236436,
+  "iter2_vs_iter3": {
+    "mean_delta_pp": 0.088,
+    "std_delta_pp": -0.131,
+    "comment": "Gradient clipping improved stability (std 0.350 -> 0.219) and delayed explosions (seeds 1 and 3 reached epochs 14 and 17 before exploding vs epochs 11 and 9 in iter 2), but did NOT eliminate them."
+  },
+  "investigation": {
+    "finding": "Energy explosions persist in all 5 seeds despite max_grad_norm=0.5. Peak energies: 18-1905. The explosions are delayed (occurring later), which allowed seeds 1 and 3 to reach higher best val_acc before the explosion.",
+    "why_clipping_failed": "Gradient clipping bounds the parameter *update* magnitude (gradient norm <= 0.5), but the PC *energy value* (the loss) is determined by how well the PC inference dynamics fit the current weight configuration. As the CE head trains r_{L-1} toward class-discriminative representations, those same representations become increasingly inconsistent with the PC prediction equations — raising the energy independently of gradient magnitude. The energy explosion is an algorithmic consequence of the competing objectives, not a gradient instability.",
+    "root_cause_refined": "CE loss (ce_weight=1.0) and PC energy are near-equal in magnitude (~0.4 vs ~0.09) at the peak accuracy epoch. As CE optimisation pulls weights toward discriminative features, the PC inference for hidden layers produces representations that violate the PC prediction chain, spiking energy. The two objectives are fundamentally competing for the same weight matrices.",
+    "recommendations_iter4": [
+      "Reduce ce_weight from 1.0 to 0.1: make CE a gentle nudge (regulariser) rather than an equal co-objective. PC energy can dominate and stay stable; cls_head still trains.",
+      "Alternative: use separate optimizers — standard Adam (lr=1e-3) for cls_head only; SGD or Adam with lr=1e-4 for PC layers. This gives the PC graph time to adapt without being overridden by CE gradients.",
+      "Alternative: freeze PC weights after energy < threshold (e.g. 0.5) and only train cls_head from that point — two-phase curriculum."
+    ]
+  }
+}

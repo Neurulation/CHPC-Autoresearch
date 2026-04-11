@@ -26,13 +26,13 @@ best_result:
   dataset: mnist
   model: pc_ffnn_v2
   dataset: mnist
-  mean_val_accuracy: 97.208
-  std_val_accuracy: 0.350
-  best_val_accuracy: 97.57
-  experiment_config: mnist_pc_ffnn_v2_adam
+  mean_val_accuracy: 97.296
+  std_val_accuracy: 0.219
+  best_val_accuracy: 97.60
+  experiment_config: mnist_pc_ffnn_v3_adam
   num_seeds: 5
-  iteration: 2
+  iteration: 3
   date: "2026-04-11"
   note: >
-    Best-epoch val_acc (early-stop on val_acc, mode=max). CE head fix resolved
-    calibration. Remaining issue: PC energy spikes. Iter 3: gradient clipping.
+    Best-epoch val_acc. Grad clipping delayed explosions and reduced variance
+    vs iter 2, but structural instability remains. Iter 4: ce_weight=0.1.
