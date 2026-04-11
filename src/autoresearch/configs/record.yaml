@@ -1,0 +1,15 @@
+defaults:
+  - _self_
+  - dataset: mnist
+  - model: snn_baseline
+  - experiment: null
+
+experiment_group: mnist_snn_baseline_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 256
+num_workers: 4
+
+hydra:
+  run:
+    dir: outputs/record/${experiment_group}/${seed}

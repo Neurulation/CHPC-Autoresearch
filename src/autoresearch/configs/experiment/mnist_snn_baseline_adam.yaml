@@ -1,0 +1,41 @@
+# @package _global_
+# Phase 1 — SNN Baseline on MNIST with Adam optimizer.
+# Trains via BPTT with snntorch fast-sigmoid surrogate gradients.
+
+defaults:
+  - override /dataset: mnist
+  - override /model: snn_baseline
+  - override /optimizer: adam
+  - override /loss_fn: cross_entropy
+
+experiment_group: mnist_snn_baseline_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 20
+num_workers: 4
+validation_split: 0.1
+
+early_stopping:
+  enabled: true
+  patience: 5
+  min_delta: 0.001
+  metric: val_loss
+  mode: min
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - snn
+    - lif
+    - rate-coding
+    - adam
+    - cross_entropy
+    - anp
+    - phase1
+  notes: "Phase 1 — SNN Baseline (784-512-256-10 LIF, T=25) on MNIST. Source network for ANP project."
