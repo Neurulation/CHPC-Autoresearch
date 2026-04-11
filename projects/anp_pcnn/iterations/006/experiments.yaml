@@ -5,7 +5,7 @@ seeds: [0, 1, 2, 3, 4]
 epochs: 30
 
 jobs:
-  - job_id: "7169448"
+  - job_id: "7169576"
     job_name: anp_pcnn_iter6_pc_enc_dec_adam
     queue: gpu_1
     status: queued
