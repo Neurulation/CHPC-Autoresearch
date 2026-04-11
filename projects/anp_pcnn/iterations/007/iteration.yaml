@@ -1,6 +1,6 @@
 project: anp_pcnn
 iteration: 7
-status: implement
+status: experiment
 goal: >
   PC-EncDec v2 — fix the two root causes preventing PC-EncDec from reaching
   its potential as a generative classifier on MNIST.
@@ -41,3 +41,10 @@ phase_history:
       warmup_epochs 15→10. CE dominates throughout: at steady state
       Y=0.1 → 90% CE gradient, 10% energy gradient.
       PBS script: experiments/anp_pcnn_iter7_pc_enc_dec_v2_adam.pbs (12h, 64gb).
+  - phase: experiment
+    completed: null
+    notes: >
+      Submitted job 7169793 on 2026-04-12 (gpu_1, 12h walltime).
+      5 seeds (0-4), experiment=mnist_pc_enc_dec_v2_adam, epochs=30.
+      Expected: both fixes should push val accuracy significantly above 93.13%.
+      Primary fix (train/val mismatch) expected to be the larger contributor.
