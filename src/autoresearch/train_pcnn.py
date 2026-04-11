@@ -188,12 +188,16 @@ def train_one_epoch_pc(
     wandb_enabled: bool = False,
     log_frequency: int = 10,
     max_grad_norm: Optional[float] = None,
+    energy_weight: Optional[float] = None,
 ) -> Dict[str, float]:
     """One PC training epoch.
 
     Calls model.pc_loss(x, y) which runs supervised inference then returns
     the combined loss (energy + ce_weight * CE), the PC energy, and logits
     from the classification head for accuracy logging.
+
+    If energy_weight is provided, passes it to model.pc_loss(x, y,
+    energy_weight=energy_weight) for scheduled convex blending.
     """
     model.train()
     total_combined_loss = 0.0
@@ -206,7 +210,10 @@ def train_one_epoch_pc(
         x, y = x.to(device), y.to(device)
 
         optimizer.zero_grad()
-        combined_loss, energy, logits = model.pc_loss(x, y)
+        if energy_weight is not None:
+            combined_loss, energy, logits = model.pc_loss(x, y, energy_weight=energy_weight)
+        else:
+            combined_loss, energy, logits = model.pc_loss(x, y)
         combined_loss.backward()
         if max_grad_norm is not None:
             nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm)
@@ -309,11 +316,20 @@ def train(
 
     try:
         for epoch in range(start_epoch, cfg.epochs + 1):
+            # Linear energy weight schedule: ramp from 0 to max over warmup_epochs,
+            # then hold. Only active when cfg.energy_schedule is present.
+            energy_weight = None
+            if "energy_schedule" in cfg:
+                ew = cfg.energy_schedule
+                progress = min((epoch - 1) / max(ew.warmup_epochs, 1), 1.0)
+                energy_weight = progress * ew.max
+
             train_metrics = train_one_epoch_pc(
                 model, train_loader, optimizer, device=next(model.parameters()).device,
                 epoch=epoch, wandb_enabled=wandb_enabled,
                 log_frequency=cfg.wandb.log_frequency,
                 max_grad_norm=cfg.get("max_grad_norm", None),
+                energy_weight=energy_weight,
             )
             val_metrics = validate_pc(
                 model, val_loader, device=next(model.parameters()).device
@@ -329,14 +345,17 @@ def train(
 
             if wandb_enabled:
                 import wandb
-                wandb.log({
+                log_dict = {
                     "train/loss": train_metrics["loss"],
                     "train/energy": train_metrics["energy"],
                     "train/accuracy": train_metrics["accuracy"],
                     "val/loss": val_metrics["loss"],
                     "val/accuracy": val_metrics["accuracy"],
                     "epoch": epoch,
-                })
+                }
+                if energy_weight is not None:
+                    log_dict["train/energy_weight"] = energy_weight
+                wandb.log(log_dict)
 
             if cfg.checkpoint.enabled and epoch % cfg.checkpoint.save_frequency == 0:
                 save_checkpoint(

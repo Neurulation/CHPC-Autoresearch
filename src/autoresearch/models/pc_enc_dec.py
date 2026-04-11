@@ -29,12 +29,24 @@ Skip connections as shared representation:
     target, and vice versa — the bidirectional constraint drives r_l to be
     simultaneously recognisable from below and generative toward below.
 
-Training (matches train_pcnn.py interface):
+Training loss (scheduled convex combination):
+    energy_norm = F / B            (per-sample scale; F is batch-summed)
+    combined = Y * energy_norm + (1 - Y) * CE(cls_head(r_{L-1}), y)
+
+    Y is an external energy_weight parameter (0.0 → 1.0) scheduled by the
+    training loop:
+      Y = 0.0  →  pure CE (classifier learns first, decoder ignored in loss)
+      Y = 0.5  →  balanced (energy and CE contribute equally per sample)
+      Y = 1.0  →  pure PC energy (no CE gradient; not recommended)
+
+    Rationale: raw energy is O(B × dims) while CE is O(1) per sample. Without
+    normalisation and scheduling, CE contributes <1% of the gradient and the
+    network learns only reconstruction, not classification.
+
     Phase 1 — Inference: T_pc gradient steps on r_1..r_{L-1} (r_0=x clamped,
               r_L=one_hot(y) clamped during training) minimising combined
               enc+dec free energy (weights fixed).
-    Phase 2 — Weight update: PC energy (enc_layers + dec_layers active, reps
-              detached) + CE loss via forward pass through enc_layers+cls_head.
+    Phase 2 — Weight update: combined = Y*(F/B) + (1-Y)*CE
 
 References:
     - Rao & Ballard (1999). Predictive coding in the visual cortex.
@@ -59,7 +71,6 @@ class PCEncDec(nn.Module):
         num_classes: Number of output classes
         T_pc: Inference steps per forward pass
         lr_pc: Step size for representation updates during inference
-        ce_weight: Cross-entropy loss weight relative to PC energy
         dec_weight: Decoder energy weight relative to encoder energy
     """
 
@@ -70,7 +81,6 @@ class PCEncDec(nn.Module):
         num_classes: int = 10,
         T_pc: int = 20,
         lr_pc: float = 0.05,
-        ce_weight: float = 1.0,
         dec_weight: float = 0.5,
     ):
         super().__init__()
@@ -80,7 +90,6 @@ class PCEncDec(nn.Module):
         self.num_classes = num_classes
         self.T_pc = T_pc
         self.lr_pc = lr_pc
-        self.ce_weight = ce_weight
         self.dec_weight = dec_weight
 
         self._n_hidden = len(hidden_dims)
@@ -243,17 +252,21 @@ class PCEncDec(nn.Module):
     # ------------------------------------------------------------------
 
     def pc_loss(
-        self, x: torch.Tensor, y: torch.Tensor
+        self, x: torch.Tensor, y: torch.Tensor, energy_weight: float = 0.0
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Compute PC-EncDec training loss.
 
         Phase 1 — Inference: settle r_1..r_{L-1} (r_L clamped, weights fixed).
-        Phase 2 — Weight update: enc+dec energy (active weights, reps detached)
-                                 + CE via bottom-up forward through enc_layers + cls_head.
+        Phase 2 — Weight update: combined = Y*(energy/B) + (1-Y)*CE
+                                 where Y = energy_weight (scheduled externally).
+
+        Normalising energy by B puts both terms on a per-sample scale, so Y
+        is a true convex interpolation coefficient rather than a raw magnitude
+        fudge factor.
 
         Returns:
-            combined_loss: energy + ce_weight * ce_loss
-            energy: PC free energy scalar (logging)
+            combined_loss: Y*(energy/B) + (1-Y)*ce_loss
+            energy: raw batch-summed PC free energy scalar (logging)
             logits: (B, num_classes) from cls_head(r_{L-1})
         """
         B = x.shape[0]
@@ -264,6 +277,7 @@ class PCEncDec(nn.Module):
         reps_final = self._run_inference(reps_init, clamp_last=target)
 
         energy = self._energy_active_weights(reps_final)
+        energy_norm = energy / B
 
         # CE head: differentiable forward through enc_layers[:-1] → cls_head
         h = x_flat
@@ -272,7 +286,7 @@ class PCEncDec(nn.Module):
         logits = self.cls_head(h)
         ce_loss = F.cross_entropy(logits, y)
 
-        combined_loss = energy + self.ce_weight * ce_loss
+        combined_loss = energy_weight * energy_norm + (1.0 - energy_weight) * ce_loss
         return combined_loss, energy.detach(), logits.detach()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
