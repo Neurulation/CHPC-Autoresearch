@@ -1,6 +1,6 @@
 project: anp_rnn
 iteration: 2
-status: implement
+status: experiment
 goal: >
   GRU baseline on sequential MNIST. Structurally identical to the LSTM
   baseline (Iter 1) — same architecture depth (2 layers), hidden size (256),

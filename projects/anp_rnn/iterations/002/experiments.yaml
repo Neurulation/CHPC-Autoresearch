@@ -1,0 +1,20 @@
+project: anp_rnn
+iteration: 2
+experiment_config: mnist_gru_adam
+seeds: [0, 1, 2, 3, 4]
+epochs: 30
+
+jobs:
+  - job_id: "7169358"
+    job_name: anp_rnn_iter2_gru_adam
+    queue: gpu_1
+    status: queued
+    submitted: "2026-04-11"
+    pbs_script: experiments/anp_rnn_iter2_gru_adam.pbs
+    log_out: logs/anp_rnn_iter2_gru_adam.out
+    log_err: logs/anp_rnn_iter2_gru_adam.err
+    walltime: "04:00:00"
+    nodes: 1
+    cpus: 4
+    gpus: 1
+    memory: 32gb

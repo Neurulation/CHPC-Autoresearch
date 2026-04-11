@@ -1,6 +1,6 @@
 project: anp_pcnn
 iteration: 5
-status: implement
+status: experiment
 goal: >
   PC-RNN: temporal predictive coding on sequential MNIST (T=28 rows).
   Extends PC-FFNN with recurrent connections — at each timestep t:
