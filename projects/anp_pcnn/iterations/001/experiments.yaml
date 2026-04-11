@@ -1,1 +1,12 @@
-experiments: []
+experiments:
+  - job_name: anp_pcnn_iter1_pc_ffnn_adam
+    job_id: "7168974"
+    submitted: "2026-04-11"
+    status: submitted
+    config: mnist_pc_ffnn_adam
+    seeds: [0, 1, 2, 3, 4]
+    epochs: 30
+    queue: gpu_1
+    walltime: "04:00:00"
+    nodes: "1:ncpus=4:mem=32gb:ngpus=1"
+    pbs_script: experiments/anp_pcnn_iter1_pc_ffnn_adam.pbs
