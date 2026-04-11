@@ -1,0 +1,80 @@
+literature:
+  - key: rao_ballard_1999
+    title: "Predictive coding in the visual cortex: a functional interpretation of some extra-classical receptive-field effects"
+    authors: "Rao, R. P. N. & Ballard, D. H."
+    year: 1999
+    venue: "Nature Neuroscience"
+    relevance: >
+      The foundational PC paper. Proposes hierarchical prediction: each layer
+      predicts activity of the layer below. Error units carry the residual
+      (observed - predicted). Representations are updated to minimise
+      prediction error (free energy). Directly defines our architecture.
+    key_points:
+      - "Bidirectional architecture: bottom-up errors + top-down predictions"
+      - "Error units: e_l = r_l - f(W_l @ r_{l-1})"
+      - "Inference: gradient descent on F = 0.5 * Σ ||e_l||² w.r.t. r"
+      - "Weight update: ΔW_l ∝ e_l @ r_{l-1}^T (Hebbian)"
+      - "Applied to visual cortex — explains extra-classical RF effects"
+
+  - key: whittington_bogacz_2017
+    title: "An Approximation of the Error Backpropagation Algorithm in a Predictive Coding Network with Local Hebbian Synaptic Plasticity"
+    authors: "Whittington, J. C. R. & Bogacz, R."
+    year: 2017
+    venue: "Neural Computation"
+    relevance: >
+      Proves that PC weight updates (Hebbian on errors) converge to backprop
+      gradients as T_pc→∞. Supervised inference via label clamping. Justifies
+      PC as a biologically plausible approximation of standard deep learning.
+    key_points:
+      - "PC Hebbian update = backprop gradient at T→∞"
+      - "Supervised inference: clamp output layer to one-hot target"
+      - "Finite T_pc gives approximate backprop — usually T=20 is sufficient"
+      - "Local learning rule: ΔW_l depends only on e_l and r_{l-1}"
+
+  - key: millidge_et_al_2020
+    title: "Predictive Coding Approximates Backprop Along Arbitrary Computation Graphs"
+    authors: "Millidge, B., Tschantz, A., & Buckley, C. L."
+    year: 2020
+    venue: "arXiv:2006.04182"
+    relevance: >
+      Extends the W&B 2017 result to arbitrary computation graphs. Also
+      proposes differentiable PC (gradient through inference steps), showing
+      that end-to-end training of PC networks is practical. Informs our
+      PyTorch implementation using detached representations for inference.
+    key_points:
+      - "PC ≈ backprop for arbitrary DAGs, not just feedforward nets"
+      - "Differentiable inference: can backprop through T_pc steps"
+      - "Detached-rep approach: separate inference and weight update phases"
+      - "Benchmark: PC-FFNN reaches near-backprop accuracy on MNIST"
+
+  - key: salvatori_et_al_2021
+    title: "Predictive Coding Can Do Exact Backpropagation on Convolutional and Recurrent Neural Networks"
+    authors: "Salvatori, T. et al."
+    year: 2021
+    venue: "arXiv:2103.03489"
+    relevance: >
+      Extends PC to CNNs and RNNs, relevant for Iter 2 (PC-RNN) and
+      eventual spiking PC enc-dec. Shows PC inference on recurrent
+      architectures is feasible.
+    key_points:
+      - "PC is exact backprop on feedforward nets at T→∞"
+      - "PC-RNN formulation: predict next hidden state"
+      - "Practical T_pc ~ 10-50 for convergence"
+
+design_decisions:
+  architecture:
+    layers: [784, 256, 128, 10]
+    hidden_activation: relu
+    output_activation: identity  # r_L used as logits directly
+    T_pc: 20
+    lr_pc: 0.05
+  training:
+    loss: pc_energy  # F = 0.5 * Σ ||r_l - f(W_l @ r_{l-1})||²
+    weight_optimizer: adam
+    lr: 0.001
+    epochs: 30
+    seeds: 5
+    supervised_inference: true  # clamp r_output = one_hot(y) during training
+  evaluation:
+    loss: cross_entropy  # logged for comparison; CE on inferred r_L
+    metric: val_accuracy

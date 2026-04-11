@@ -1,0 +1,32 @@
+name: "ANP - Predictive Coding Neural Networks"
+slug: anp_pcnn
+status: active
+created: "2026-04-11"
+description: >
+  Establish predictive coding (PC) baselines on MNIST as the energy-based
+  hierarchical inference layer of the ANP roadmap. PC networks maintain error
+  units and representation units at each layer; inference minimises free energy
+  via gradient descent rather than backpropagation. These rate-coded PC models
+  (trained with Adam on the PC energy) serve as comparison baselines before
+  introducing spiking dynamics (ANP Project 5) and backprop-free learning
+  (ANP Project 7).
+current_iteration: 1
+branch: "project/anp-pcnn"
+human_direction: >
+  Iter 1: PC-FFNN — Rao & Ballard (1999) hierarchical predictive coding on
+  MNIST. Error units + representation units, inference via gradient descent on
+  free energy (T_pc inference steps), supervised training with label clamping.
+  Use 5 seeds. Track val accuracy, convergence speed, inference steps, and
+  parameter count.
+  Iter 2: PC-RNN — temporal predictive coding, recurrent PC cells.
+  Iter 3: PC enc-dec — hierarchical encoder-decoder with top-down predictions
+  and skip connections (proto-SPCNN, rate-coded).
+best_result:
+  model: null
+  dataset: null
+  mean_val_accuracy: null
+  std_val_accuracy: null
+  experiment_config: null
+  num_seeds: null
+  iteration: null
+  date: null

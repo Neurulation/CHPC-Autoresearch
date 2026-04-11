@@ -1,0 +1,49 @@
+defaults:
+  - _self_
+  - dataset: mnist
+  - model: pc_ffnn
+  - optimizer: adam
+  - scheduler: null
+  - experiment: null
+
+experiment_group: default_train_pcnn
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 42
+batch_size: 32
+epochs: 10
+num_workers: 1
+validation_split: 0.2
+
+early_stopping:
+  enabled: true
+  patience: 5
+  min_delta: 0.001
+  metric: val_loss
+  mode: min
+
+checkpoint:
+  enabled: true
+  save_dir: null
+  save_frequency: 1
+  resume_from: null
+  save_best_only: false
+  save_initial_model: true
+
+wandb:
+  enabled: true
+  project: ${oc.env:WANDB_PROJECT,autoresearch}
+  entity: ${oc.env:WANDB_ENTITY,autoresearch}
+  group: ${experiment_group}
+  name: null
+  tags:
+    - mnist
+    - pc_ffnn
+    - predictive_coding
+    - adam
+    - anp
+  notes: null
+  log_frequency: 10
+
+hydra:
+  run:
+    dir: outputs/train/${experiment_group}/${seed}

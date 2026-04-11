@@ -1,0 +1,40 @@
+project: anp_pcnn
+iteration: 1
+status: experiment
+goal: >
+  PC-FFNN: Rao & Ballard (1999) hierarchical predictive coding on MNIST.
+  Architecture: input (784) → PC Layer 1 (256, ReLU) → PC Layer 2 (128, ReLU)
+  → output (10, linear). Each layer has representation units (r) and error
+  units (e = r - predicted). Inference minimises free energy F = Σ||e||² via
+  T_pc gradient descent steps. Supervised training clamps r_output = one_hot(y).
+  Weight update uses Adam on energy. Use 5 seeds and 30 epochs.
+created: "2026-04-11"
+phase_history:
+  - phase: planned
+    completed: "2026-04-11"
+    notes: "Project initialised."
+  - phase: survey
+    completed: "2026-04-11"
+    notes: >
+      Surveyed Rao & Ballard 1999 (hierarchical PC, error + representation
+      units, free energy minimisation), Whittington & Bogacz 2017 (PC ≈ backprop
+      at T→∞, Hebbian weight update equivalence), Millidge et al. 2020
+      (end-to-end differentiable PC, gradient-through-inference).
+      Design decisions: T_pc=20 inference steps, lr_pc=0.05, hidden=[256,128],
+      ReLU on hidden layers, identity at output (logits = r_L).
+      Expected accuracy: ~97–98% (slightly below FFNN baseline of 98.06%
+      due to approximate inference at finite T).
+  - phase: implement
+    completed: "2026-04-11"
+    notes: >
+      Implemented PCFFNN model (784-256-128-10, T_pc=20, lr_pc=0.05),
+      model config, experiment config (mnist_pc_ffnn_adam, 30 epochs, 5 seeds,
+      patience=7), and custom train_pcnn.py (two-phase PC training loop).
+      Local 2-epoch smoke test: val_acc=96.27%, val_CE=1.5407 — PC energy
+      collapses from ~50 to 0.43 within 2 epochs; model learns very strongly.
+      Training acc reaches 100% by epoch 2 (energy minimisation works).
+outcomes:
+  summary: null
+  key_metrics: {}
+  artifacts: []
+human_feedback: null
