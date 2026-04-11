@@ -1,0 +1,52 @@
+project: anp_pcnn
+iteration: 6
+status: implement
+goal: >
+  PC-EncDec (proto-SPCNN) — bidirectional predictive coding with explicit
+  top-down decoder weights alongside the bottom-up encoder. Creates a full
+  generative model on MNIST:
+    Encoder: x → r_1 → r_2 → classification (CE head)
+    Decoder: r_2 → r_1_pred, r_1 → x_hat (input reconstruction)
+  PC Energy = enc_errors + 0.5 * dec_errors + 1.0 * CE
+  Skip connections via shared representations: each r_l minimises both
+  encoder (bottom-up) and decoder (top-down) prediction errors simultaneously.
+  This is the PC analogue of U-Net skip connections. Establishes the
+  proto-SPCNN rate-coded baseline before spiking extension (Phase B).
+created: "2026-04-11"
+phase_history:
+  - phase: planned
+    completed: "2026-04-11"
+    notes: >
+      Planned as the convergence point of anp_rnn and anp_pcnn roadmaps.
+      After PC-RNN (iter 5) establishes temporal PC, PC-EncDec adds the
+      bidirectional/generative structure needed for the proto-SPCNN milestone.
+      Follows from human_direction Iter 3: PC enc-dec (project.yaml).
+  - phase: survey
+    completed: "2026-04-11"
+    notes: >
+      Bidirectional PC: Rao & Ballard (1999) top-down predictions + Friston
+      (2005) free energy principle. U-Net skip connections (Ronneberger 2015)
+      as analogue. Design: explicit W_dec[j] mapping r_{j+1}→r_j (top-down).
+      dec_weight=0.5 (decoder has half weight of encoder — prevents decoder
+      from dominating inference). Adam eps=0.01 retained from iter 4.
+      max_grad_norm=0.5 retained. T_pc=20, lr_pc=0.05 (same as PC-FFNN v4).
+  - phase: implement
+    completed: "2026-04-11"
+    notes: >
+      Implemented PCEncDec model (src/autoresearch/models/pc_enc_dec.py):
+        enc_layers: [784→256→128→10] (same as PC-FFNN)
+        dec_layers: [256→784, 128→256] (explicit top-down decoders)
+        cls_head: 128→10 (CE classification head)
+      Energy = enc_errors + 0.5*dec_errors. Inference: T_pc gradient steps
+      on r_1..r_{L-1} (r_0=x clamped, r_L clamped to one_hot(y) during training).
+      Weight update: both enc_layers and dec_layers trained via PC energy.
+      Model config: configs/model/pc_enc_dec.yaml (dec_weight=0.5)
+      Experiment config: mnist_pc_enc_dec_adam.yaml (30 epochs, 5 seeds)
+      PBS script: experiments/anp_pcnn_iter6_pc_enc_dec_adam.pbs (12h, 64gb)
+      Smoke test passed: val_loss 2.308→2.277 (2 epochs), 470,948 params.
+      Energy ~2.5k/batch (dec reconstruction over 784 dims dominates; expected).
+experiment:
+  config: mnist_pc_enc_dec_adam
+  pbs_script: experiments/anp_pcnn_iter6_pc_enc_dec_adam.pbs
+  seeds: [0, 1, 2, 3, 4]
+  epochs: 30

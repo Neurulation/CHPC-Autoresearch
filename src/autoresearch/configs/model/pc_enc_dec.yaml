@@ -1,0 +1,15 @@
+# @package _global_.model
+# PC Encoder-Decoder for MNIST classification.
+# Bidirectional PC: explicit top-down decoder weights + input reconstruction.
+# enc_layers: [784→256→128→10] (same as PC-FFNN)
+# dec_layers: [256→784, 128→256] (top-down: predicts r_j from r_{j+1})
+# Skip connections: shared representations minimised against both enc and dec errors.
+
+_target_: autoresearch.models.pc_enc_dec.PCEncDec
+input_size: 784
+hidden_dims: [256, 128]
+num_classes: 10
+T_pc: 20
+lr_pc: 0.05
+ce_weight: 1.0
+dec_weight: 0.5
