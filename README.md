@@ -62,23 +62,36 @@ python -m autoresearch.train --multirun experiment=mnist_ffnn_adam
 |-----------|---------|-------|-----------|--------|
 | `mnist_ffnn_adam` | MNIST | FFNN (784-256-128-10) | Adam | 50 epochs, 5 seeds |
 | `mnist_cnn_adam` | MNIST | CNN (2 conv + 1 FC) | Adam | 50 epochs, 5 seeds |
+| `mnist_snn_baseline_adam` | MNIST | SNN (784-512-256-10 LIF, T=25) | Adam | 20 epochs, 5 seeds |
 | `cifar10_resnet18_adam` | CIFAR-10 | ResNet-18 (CIFAR-modified) | Adam | 100 epochs, 5 seeds |
 
 ## Leaderboard
 
-| Project | Iteration | Model | Dataset | Optimizer | Augmentation | Accuracy (mean ± std) | Best | Status |
-|---------|-----------|-------|---------|-----------|--------------|----------------------|------|--------|
-| Image Processing NN | 1 | CNN (2 conv + 1 FC) | MNIST | Adam | ✗ | **99.17% ± 0.10%** | 99.27% | ✅ Done |
-| Image Processing NN | 1 | FFNN (784-256-128-10) | MNIST | Adam | ✗ | 98.06% ± 0.15% | 98.26% | ✅ Done |
-| Image Processing NN | 1 | ResNet-18 | CIFAR-10 | Adam | ✗ | 83.56% ± 0.36% | 84.18% | ✅ Done |
-| Image Processing NN | 2 | ResNet-18 | CIFAR-10 | SGD+Cosine | ✗ | 78.87% ± 0.94% | 80.12% | ✅ Done |
-| Image Processing NN | 3 | ResNet-18 | CIFAR-10 | SGD+Cosine | ✓ | **94.96% ± 0.38%** | 95.38% | ✅ Done |
-| Image Processing NN | 3 | ResNet-18 | CIFAR-10 | Adam | ✓ | 90.57% ± 0.51% | 91.18% | ✅ Done |
+Results grouped by dataset. Val Acc = mean ± std across seeds where available. ⚠️ = preliminary (single seed / partial run).
+
+### MNIST
+
+| Project | Iter | Model | Optimizer | Aug | Seeds | Val Acc | Status |
+|---------|------|-------|-----------|-----|-------|---------|--------|
+| Image Processing NN | 1 | CNN (2 conv + 1 FC) | Adam | ✗ | 5 | **99.17% ± 0.10%** | ✅ |
+| Image Processing NN | 1 | FFNN (784-256-128-10) | Adam | ✗ | 5 | 98.06% ± 0.15% | ✅ |
+| Artificial Neural Prostheses | 1 | SNN (784-512-256-10 LIF, T=25) | Adam | ✗ | 1 | 96.45% ⚠️ | 🔄 Prelim |
+
+### CIFAR-10
+
+| Project | Iter | Model | Optimizer | Aug | Seeds | Val Acc | Status |
+|---------|------|-------|-----------|-----|-------|---------|--------|
+| Image Processing NN | 3 | ResNet-18 | SGD+Cosine | ✓ | 5 | **94.96% ± 0.38%** | ✅ |
+| Image Processing NN | 3 | ResNet-18 | Adam | ✓ | 5 | 90.57% ± 0.51% | ✅ |
+| Image Processing NN | 1 | ResNet-18 | Adam | ✗ | 5 | 83.56% ± 0.36% | ✅ |
+| Image Processing NN | 2 | ResNet-18 | SGD+Cosine | ✗ | 5 | 78.87% ± 0.94% | ✅ |
 
 *Updated 2026-04-11.*
-- *Iter 1: [W&B summary](https://wandb.ai/arneschreuder/chpc_autoresearch/runs/jy2d7rv2)*
-- *Iter 2: SGD+cosine underperforms Adam on CIFAR-10 (ResNet-18: 78.87% vs 83.56%) without augmentation*
-- *Iter 3: **Data augmentation was THE limiting factor!** With augmentation: SGD+cosine 94.96% (+16.09%), Adam 90.57% (+7.01%) — SGD+cosine now outperforms Adam*
+
+**Key findings:**
+- *MNIST: CNN outperforms FFNN at 99.17% vs 98.06%. SNN baseline at 96.45% (2ep prelim) — rate coding overhead expected vs dense nets*
+- *CIFAR-10: Data augmentation was THE limiting factor. SGD+cosine with aug: 94.96% (+16.09%). Adam with aug: 90.57% (+7.01%). SGD+cosine beats Adam when both use augmentation*
+- *[Iter 1 W&B](https://wandb.ai/arneschreuder/chpc_autoresearch/runs/jy2d7rv2)*
 
 ## CHPC Usage
 

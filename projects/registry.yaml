@@ -1,5 +1,9 @@
 projects:
   - slug: image_processing_nn
     status: active
-    current_iteration: 2
+    current_iteration: 3
     path: projects/image_processing_nn
+  - slug: artificial_neural_prostheses
+    status: active
+    current_iteration: 1
+    path: projects/artificial_neural_prostheses
