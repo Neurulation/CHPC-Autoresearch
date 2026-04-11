@@ -1,0 +1,33 @@
+project: anp_pcnn
+iteration: 2
+status: implement
+goal: >
+  PC-FFNN v2: Fix training-evaluation objective mismatch from iter 1.
+  Add a CE classification head on r_{L-1} (last hidden representation, 128-dim)
+  trained jointly with the PC energy. Evaluation uses cls_head(r_{L-1}) after
+  free inference, producing calibrated logits. Early stopping monitors val_acc
+  (mode=max) instead of val_CE. Architecture: 784 → PC(256) → PC(128) → PC(10)
+  + cls_head(128→10). Use 5 seeds, 30 epochs, patience=7.
+created: "2026-04-11"
+phase_history:
+  - phase: planned
+    completed: "2026-04-11"
+    notes: >
+      Iter 1 root cause: supervised clamping trains weights for label-conditional
+      energy min; free-inference logits near-uniform (CE ~1.54, val_acc 83-95%).
+      Fix: add cls_head on r_{L-1}, train with CE loss jointly with PC energy.
+  - phase: implement
+    completed: "2026-04-11"
+    notes: >
+      pc_ffnn.py: added cls_head (Linear 128→10), ce_weight param. pc_loss()
+      now returns (combined_loss, energy, logits); combined_loss = energy +
+      ce_weight * CE(cls_head(r_{L-1}), y). forward() returns cls_head(r_{L-1})
+      after free inference (not r_L). train_pcnn.py: updated training loop
+      (logs train/energy + train/loss separately), early stopping and
+      checkpointing on val_accuracy (mode=max). New experiment config:
+      mnist_pc_ffnn_v2_adam (30 epochs, patience=7 on val_acc).
+outcomes:
+  summary: null
+  key_metrics: {}
+  artifacts: []
+human_feedback: null

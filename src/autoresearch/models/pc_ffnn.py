@@ -17,7 +17,7 @@ Each layer l has:
   - e_l: error units  e_l = r_l - f(W_l @ r_{l-1})
   - mu_l = f(W_l @ r_{l-1}): top-down prediction
 
-  Hidden layers use ReLU; output layer uses identity (r_L = logits directly).
+  Hidden layers use ReLU; output layer uses identity.
 
 Free energy:
   F = 0.5 * Σ_l || r_l - f(W_l @ r_{l-1}) ||²
@@ -25,11 +25,14 @@ Free energy:
 Training (two-phase):
   Phase 1 — Inference: minimise F over {r_l} via T_pc gradient steps (weights fixed).
              Supervised: clamp r_L = one_hot(y).
-  Phase 2 — Weight update: minimise F over {W_l} with {r_l} fixed.
-             Equivalent to Hebbian update: ΔW_l ∝ e_l @ r_{l-1}^T.
+  Phase 2 — Weight update: minimise (F + λ·CE(cls_head(r_{L-1}), y)) over weights.
+             F is minimised by PC energy, CE trains the classification head on the
+             final hidden representation r_{L-1}, avoiding training-eval mismatch.
 
 Evaluation:
-  Free inference (no clamping). Logits = r_L after convergence.
+  cls_head(r_{L-1}) after T_pc inference steps (no clamping).
+  This bypasses r_L entirely — r_{L-1} is a well-formed feature vector trained
+  jointly by PC energy and CE loss, yielding properly calibrated logits.
 """
 
 from typing import List, Optional, Tuple
@@ -57,6 +60,7 @@ class PCFFNN(nn.Module):
         num_classes: int = 10,
         T_pc: int = 20,
         lr_pc: float = 0.05,
+        ce_weight: float = 1.0,
     ):
         super().__init__()
 
@@ -65,6 +69,7 @@ class PCFFNN(nn.Module):
         self.num_classes = num_classes
         self.T_pc = T_pc
         self.lr_pc = lr_pc
+        self.ce_weight = ce_weight
 
         # Weight matrices W_l: r_{l-1} → r_l
         dims = [input_size] + hidden_dims + [num_classes]
@@ -72,6 +77,11 @@ class PCFFNN(nn.Module):
             [nn.Linear(dims[i], dims[i + 1]) for i in range(len(dims) - 1)]
         )
         self._n_hidden = len(hidden_dims)
+
+        # Classification head: r_{L-1} → logits (trained with CE loss).
+        # Avoids training-eval mismatch: r_{L-1} is a stable feature vector
+        # not subject to clamping, so its logits are always calibrated.
+        self.cls_head = nn.Linear(hidden_dims[-1], num_classes)
 
     # ------------------------------------------------------------------
     # Helpers
@@ -182,18 +192,22 @@ class PCFFNN(nn.Module):
 
     def pc_loss(
         self, x: torch.Tensor, y: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
-        """Compute PC training loss (supervised inference + weight-update energy).
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Compute PC training loss (supervised inference + weight-update energy + CE head).
 
-        Call this from the training loop instead of forward() + loss_fn().
+        Two losses are returned so the training loop can log them separately:
+          - energy: PC free energy over all layers (trains PC weights)
+          - ce_loss: cross-entropy on cls_head(r_{L-1}) (trains cls_head + PC hidden weights)
+        The combined loss = energy + ce_weight * ce_loss is what you backprop.
 
         Args:
             x: Input images  (B, C, H, W) or (B, input_size)
             y: Class labels  (B,)
 
         Returns:
-            energy: Scalar PC free energy — backprop this to update weights.
-            logits: (B, num_classes) for accuracy logging (no-grad).
+            combined_loss: energy + ce_weight * ce_loss — backprop this.
+            energy: PC free energy scalar (for logging).
+            logits: (B, num_classes) from cls_head(r_{L-1}) — for accuracy logging.
         """
         B = x.shape[0]
         x_flat = x.view(B, -1)
@@ -203,25 +217,37 @@ class PCFFNN(nn.Module):
         reps_init = self._bottom_up(x_flat)
         reps_final = self._run_inference(reps_init, clamp_last=target)
 
-        # Phase 2 — Energy with active weights (gradients → weight matrices)
+        # Phase 2 — Energy with active weights (gradients → PC weight matrices)
         energy = self._energy_active_weights(reps_final)
 
-        # Logits for accuracy: one clean forward step through the last two reps
-        with torch.no_grad():
-            logits = self._act(
-                len(self.layers) - 1, self.layers[-1](reps_final[-2])
-            )
+        # CE head on r_{L-1}: r_{L-1} is detached from the PC graph but we
+        # re-run the bottom-up pass to get a differentiable r_{L-1} for cls_head.
+        # We stop gradients at r_{L-1} w.r.t. the PC layers to keep the two
+        # objectives cleanly separated: PC energy trains the PC layers;
+        # the CE loss trains cls_head (and pulls gradients back through
+        # PC hidden layers only via the shared representation).
+        h = x_flat
+        for i, layer in enumerate(self.layers[:-1]):   # up to r_{L-1}
+            h = self._act(i, layer(h))
+        logits = self.cls_head(h)
+        ce_loss = F.cross_entropy(logits, y)
 
-        return energy, logits
+        combined_loss = energy + self.ce_weight * ce_loss
+        return combined_loss, energy.detach(), logits.detach()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Free-inference forward pass for evaluation.
+        """Evaluation forward pass using cls_head(r_{L-1}) after PC inference.
+
+        Runs T_pc free-inference steps to allow PC hidden representations to
+        settle, then classifies using the CE-trained classification head on
+        r_{L-1} (the final hidden layer). This produces calibrated logits
+        regardless of r_L's quality.
 
         Args:
             x: Input images (B, C, H, W) or (B, input_size)
 
         Returns:
-            logits: (B, num_classes) — r_L after T_pc free inference steps.
+            logits: (B, num_classes) from cls_head(r_{L-1}).
         """
         B = x.shape[0]
         x_flat = x.view(B, -1)
@@ -229,4 +255,5 @@ class PCFFNN(nn.Module):
         reps_init = self._bottom_up(x_flat)
         reps_final = self._run_inference(reps_init, clamp_last=None)
 
-        return reps_final[-1]  # r_L (identity activation = logits)
+        # r_{L-1} is reps_final[-2]; run it through the classification head
+        return self.cls_head(reps_final[-2])

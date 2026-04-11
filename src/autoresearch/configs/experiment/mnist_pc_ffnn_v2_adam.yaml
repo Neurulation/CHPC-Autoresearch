@@ -1,0 +1,54 @@
+# @package _global_
+# ANP-PCNN Iter 2 — PC-FFNN v2 on MNIST.
+#
+# Fix for iter 1 training-evaluation objective mismatch:
+#   1. CE classification head on r_{L-1} for calibrated logits at eval time.
+#   2. Early stopping on val_accuracy (mode=max) instead of val_loss.
+#   3. Combined loss: PC energy + ce_weight * CE(cls_head(r_{L-1}), y).
+#
+# Architecture: 784 → PC(256) → PC(128) → PC(10) + cls_head(128→10)
+# Training: supervised PC inference (clamp r_L=one_hot(y)) + CE on r_{L-1}
+# Evaluation: cls_head(r_{L-1}) after T_pc=20 free inference steps
+
+defaults:
+  - override /dataset: mnist
+  - override /model: pc_ffnn
+  - override /optimizer: adam
+
+experiment_group: mnist_pc_ffnn_v2_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 30
+num_workers: 4
+validation_split: 0.1
+
+model:
+  T_pc: 20
+  lr_pc: 0.05
+  ce_weight: 1.0
+
+early_stopping:
+  enabled: true
+  patience: 7
+  min_delta: 0.01
+  metric: val_accuracy
+  mode: max
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - pc_ffnn
+    - predictive_coding
+    - rao_ballard
+    - adam
+    - anp
+    - anp-pcnn
+    - ce_head
+    - v2
+  notes: "ANP-PCNN Iter 2 — PC-FFNN v2 with CE classification head on r_{L-1}. Fixes iter 1 training-eval objective mismatch. Early stopping on val_acc (max)."

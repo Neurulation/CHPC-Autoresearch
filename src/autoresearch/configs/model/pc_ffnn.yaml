@@ -4,3 +4,4 @@ hidden_dims: [256, 128]
 num_classes: 10
 T_pc: 20
 lr_pc: 0.05
+ce_weight: 1.0
