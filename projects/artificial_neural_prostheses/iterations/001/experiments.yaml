@@ -1,0 +1,11 @@
+jobs:
+  - job_id: "7168283.sched01"
+    name: anp_phase1_snn_baseline
+    experiment_config: mnist_snn_baseline_adam
+    seeds: [0, 1, 2, 3, 4]
+    submitted: "2026-04-11"
+    queue: gpu_1
+    walltime: "06:00:00"
+    pbs_script: experiments/anp_phase1_snn_baseline.pbs
+    status: submitted
+    notes: "Full 20-epoch 5-seed sweep. snntorch 0.9.4 installed in .venv before submission."
