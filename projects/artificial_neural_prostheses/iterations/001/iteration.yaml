@@ -1,0 +1,18 @@
+project: artificial_neural_prostheses
+iteration: 1
+status: implement
+goal: >
+  Phase 1 — Source Network Baseline: train a feedforward SNN on MNIST using
+  snntorch LIF neurons, save the trained checkpoint, and record per-sample
+  spike trains and membrane potentials for every layer across the full test
+  set. These recordings are the raw material for Phase 2.
+created: "2026-04-11"
+phase_history:
+  - phase: planned
+    completed: "2026-04-11"
+    notes: "Project initialised."
+outcomes:
+  summary: null
+  key_metrics: {}
+  artifacts: []
+human_feedback: null

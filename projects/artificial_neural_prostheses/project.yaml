@@ -1,0 +1,21 @@
+name: "Artificial Neural Prostheses"
+slug: artificial_neural_prostheses
+status: active
+created: "2026-04-11"
+description: >
+  Demonstrate neural function restoration using a small, biologically plausible
+  auxiliary network (the ANP) that interfaces with a larger, pre-trained source
+  network through a bandwidth-limited connection — analogous to how a neural
+  prosthetic device interfaces with biological neural tissue.
+current_iteration: 1
+branch: "project/artificial_neural_prostheses"
+human_direction: >
+  Phase 1: Train a feedforward SNN on MNIST using snntorch LIF neurons (rate
+  coding, BPTT with surrogate gradients). Save weights and per-sample spike
+  train / membrane potential recordings for every layer. These recordings feed
+  directly into Phase 2 (Artificial EEG dataset construction).
+best_result:
+  model: null
+  dataset: null
+  accuracy: null
+  experiment_config: null
