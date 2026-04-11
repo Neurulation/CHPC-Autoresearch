@@ -1,21 +1,20 @@
 # @package _global_
-# ANP-PCNN Iter 6 — PC-EncDec (proto-SPCNN) on MNIST.
+# ANP-PCNN Iter 6b — PC-EncDec (proto-SPCNN) on MNIST — energy schedule fix.
 #
-# Bidirectional predictive coding: explicit top-down decoder weights
-# alongside the bottom-up encoder. Creates a full generative model:
-#   Encoder: x → r_1 → r_2 → classification
-#   Decoder: r_2 → r_1_pred, r_1 → x_hat (input reconstruction)
+# Problem (iter 6 run): raw PC energy is O(B × dims) while CE is O(1) per
+# sample. With ce_weight=1.0, CE was <1% of the total gradient → network
+# learned only reconstruction, reaching only ~33% val accuracy after 30 epochs.
 #
-# PC Energy = enc_errors + dec_weight(0.5) * dec_errors + ce_weight * CE
+# Fix: scheduled convex combination  Y*(F/B) + (1-Y)*CE
+#   - Y=0.0: pure CE — classifier learns first, no energy gradient
+#   - Y→max: energy participates once representations are sensible
+#   - Normalising by B makes Y a true blend coefficient, not a magnitude hack
 #
-# Skip connections via shared representations: each r_l is updated during
-# inference to minimise BOTH encoder (r_l predicted from r_{l-1}) and
-# decoder (r_{l-1} predicted from r_l) errors — the bidirectional constraint
-# is the PC analogue of U-Net skip connections.
+# Schedule: linear ramp from Y=0 at epoch 1 to Y=max at epoch warmup_epochs,
+# then hold. warmup_epochs=15 (half of 30) with max=0.5 (balanced blend).
 #
-# Adam eps=0.01 retained from iter 4 (prevents energy explosion).
-# max_grad_norm=0.5 retained from iter 4.
-# proto-SPCNN: rate-coded PC with enc-dec structure ready for spiking extension.
+# Adam eps=0.01 retained (prevents energy explosion).
+# max_grad_norm=0.5 retained.
 
 defaults:
   - override /dataset: mnist
@@ -34,8 +33,11 @@ max_grad_norm: 0.5
 model:
   T_pc: 20
   lr_pc: 0.05
-  ce_weight: 1.0
   dec_weight: 0.5
+
+energy_schedule:
+  max: 0.5
+  warmup_epochs: 15
 
 early_stopping:
   enabled: true
@@ -62,4 +64,5 @@ wandb:
     - anp
     - anp-pcnn
     - proto_spcnn
-  notes: "ANP-PCNN Iter 6 — PC-EncDec: bidirectional PC with explicit decoder weights and input reconstruction. Proto-SPCNN rate-coded baseline."
+    - energy_schedule
+  notes: "ANP-PCNN Iter 6b — PC-EncDec energy schedule fix: Y*(F/B)+(1-Y)*CE, linear ramp Y=0→0.5 over 15 epochs."
