@@ -1,0 +1,15 @@
+{
+  "experiment_group": "mnist_vanilla_rnn_adam",
+  "seeds": [0, 1, 2, 3, 4],
+  "best_val_loss_per_seed": [0.0728, 0.0757, 0.0784, 0.0969, 0.0822],
+  "best_val_acc_per_seed": [98.02, 98.17, 98.12, 97.32, 97.82],
+  "best_epoch_per_seed": [14, 18, 19, 13, 26],
+  "early_stopped": [true, true, true, true, false],
+  "mean_accuracy": 97.89,
+  "std_accuracy": 0.35,
+  "mean_loss": 0.0812,
+  "best_seed": 1,
+  "best_accuracy": 98.17,
+  "num_params": 207370,
+  "notes": "Better than expected. Gap from GRU only 1.17pp (97.89% vs 99.06%). Adam compensates for vanishing gradients at T=28. 3x fewer params than GRU (207k vs 617k). Seed 3 underperforms (97.32%), driving higher variance vs GRU (0.35 vs 0.14)."
+}
