@@ -1,0 +1,31 @@
+#!/bin/sh
+#PBS -N anp_pcnn_iter4_pc_ffnn_adam_eps
+#PBS -q gpu_1
+#PBS -P CSCI1166
+#PBS -l select=1:ncpus=4:mem=64gb:ngpus=1
+#PBS -l walltime=12:00:00
+#PBS -o /mnt/lustre/users/aschreuder/CHPC-Autoresearch/logs/anp_pcnn_iter4_pc_ffnn_adam_eps.out
+#PBS -e /mnt/lustre/users/aschreuder/CHPC-Autoresearch/logs/anp_pcnn_iter4_pc_ffnn_adam_eps.err
+#PBS -m abe -M arneschreuder@icloud.com
+
+set -euo pipefail
+
+module purge
+module load chpc/python/anaconda/3-2024.10.1
+
+cd /mnt/lustre/users/aschreuder/CHPC-Autoresearch
+source .venv/bin/activate
+
+echo "=========================================="
+echo "Job: anp_pcnn_iter4_pc_ffnn_adam_eps"
+echo "=========================================="
+echo "Start time: $(date)"
+echo ""
+
+python -m autoresearch.train_pcnn --multirun experiment=mnist_pc_ffnn_v4_adam_eps
+
+echo ""
+echo "=========================================="
+echo "JOB COMPLETED"
+echo "=========================================="
+echo "End time: $(date)"

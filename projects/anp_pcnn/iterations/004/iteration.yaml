@@ -1,0 +1,43 @@
+project: anp_pcnn
+iteration: 4
+status: experiment
+goal: >
+  Fix the energy explosion in PC-FFNN by increasing Adam's epsilon from 1e-8 
+  to 0.01. Root cause analysis (iter 3 post-mortem) identified Adam's adaptive 
+  denominator v_t becoming dangerously small (~1e-6) after energy converges, 
+  causing gradient fluctuations to be amplified ~1e6x. Setting eps=0.01 caps 
+  amplification at 100x, eliminating the explosion. Single-seed diagnostic 
+  achieved 98.12% val accuracy (vs 97.30% best in iter 3 with grad clipping).
+  Run 5-seed validation on CHPC.
+created: "2026-04-11"
+phase_history:
+  - phase: planned
+    completed: "2026-04-11"
+    notes: "Energy explosion fix iteration planned after root cause analysis."
+  - phase: survey
+    completed: "2026-04-11"
+    notes: >
+      Conducted controlled diagnostic experiments (scripts/diagnose_pc_energy.py):
+      Variant A (Adam): explodes epoch 12. Variant B (CE detached, Adam): still
+      explodes epoch 14 — disproves CE↔PC gradient conflict hypothesis.
+      Variant C (SGD): never explodes — confirms Adam's adaptive denominator is
+      the root cause. See energy_explosion_analysis.md for full analysis.
+  - phase: implement
+    completed: "2026-04-11"
+    notes: >
+      Tested 4 fix variants (scripts/diagnose_pc_fixes.py):
+      D (AdamW wd=0.01): FAILED — still explodes epoch 13.
+      E (Adam eps=0.01): SUCCESS — no explosion, 98.12% val_acc, energy
+      monotonically decreasing to 0.0185 over 30 epochs.
+      F (Adam + CosineAnnealingLR): FAILED — delayed explosion to epoch 15,
+      stabilized at E~19, ValAcc 94.6%.
+      Created optimizer/adam_pc.yaml (eps=0.01) and experiment config
+      mnist_pc_ffnn_v4_adam_eps.yaml.
+  - phase: experiment
+    started: "2026-04-11"
+    notes: "5-seed CHPC run pending submission."
+experiment:
+  config: mnist_pc_ffnn_v4_adam_eps
+  pbs_script: experiments/anp_pcnn_iter4_pc_ffnn_adam_eps.pbs
+  seeds: [0, 1, 2, 3, 4]
+  epochs: 30

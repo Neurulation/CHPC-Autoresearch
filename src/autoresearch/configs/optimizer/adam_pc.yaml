@@ -1,0 +1,6 @@
+# Adam optimizer tuned for Predictive Coding networks
+# eps=0.01 prevents energy explosion from stale v_t denominator
+
+_target_: torch.optim.Adam
+lr: 1e-3
+eps: 0.01

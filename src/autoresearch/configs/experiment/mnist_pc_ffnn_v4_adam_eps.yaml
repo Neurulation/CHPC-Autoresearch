@@ -1,0 +1,55 @@
+# @package _global_
+# ANP-PCNN Iter 4 — PC-FFNN v4 on MNIST.
+#
+# Fix for energy explosion: Adam eps=0.01 prevents stale v_t denominator
+# from amplifying gradient fluctuations after energy convergence.
+# Root cause: Adam's adaptive denominator v_t → ~1e-6 after convergence,
+# causing g_t / (sqrt(v_t) + eps) to amplify random fluctuations by ~1e6x.
+# eps=0.01 caps amplification at 100x, eliminating the explosion entirely.
+#
+# Single-seed diagnostic: 98.12% val_acc (vs 97.30% with grad clipping in v3).
+
+defaults:
+  - override /dataset: mnist
+  - override /model: pc_ffnn
+  - override /optimizer: adam_pc
+
+experiment_group: mnist_pc_ffnn_v4_adam_eps
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 30
+num_workers: 4
+validation_split: 0.1
+max_grad_norm: 0.5
+
+model:
+  T_pc: 20
+  lr_pc: 0.05
+  ce_weight: 1.0
+
+early_stopping:
+  enabled: true
+  patience: 7
+  min_delta: 0.01
+  metric: val_accuracy
+  mode: max
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - pc_ffnn
+    - predictive_coding
+    - rao_ballard
+    - adam
+    - anp
+    - anp-pcnn
+    - ce_head
+    - eps_fix
+    - v4
+  notes: "ANP-PCNN Iter 4 — PC-FFNN v4: Adam eps=0.01 fix for energy explosion. Eliminates stale v_t amplification."
