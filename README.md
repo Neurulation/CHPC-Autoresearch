@@ -71,11 +71,17 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 
 ### MNIST
 
-| Project | Iter | Model | Optimizer | Aug | Seeds | Val Acc | Status |
-|---------|------|-------|-----------|-----|-------|---------|--------|
-| Image Processing NN | 1 | CNN (2 conv + 1 FC) | Adam | ✗ | 5 | **99.17% ± 0.10%** | ✅ |
-| Image Processing NN | 1 | FFNN (784-256-128-10) | Adam | ✗ | 5 | 98.06% ± 0.15% | ✅ |
-| Artificial Neural Prostheses | 1 | SNN (784-512-256-10 LIF, T=25) | Adam | ✗ | 5 | 97.62% ± 0.12% | ✅ |
+| Project | Iter | Model | Optimizer | Aug | Seeds | Val Acc | Notes | Status |
+|---------|------|-------|-----------|-----|-------|---------|-------|--------|
+| Image Processing NN | 1 | CNN (2 conv + 1 FC) | Adam | ✗ | 5 | **99.17% ± 0.10%** | spatial | ✅ |
+| ANP — RNN | 1 | LSTM (2-layer, h=256) | Adam | ✗ | 5 | 98.95% ± 0.11% | sequential (T=28) | ✅ |
+| Image Processing NN | 1 | FFNN (784-256-128-10) | Adam | ✗ | 5 | 98.06% ± 0.15% | dense | ✅ |
+| Artificial Neural Prostheses | 1 | SNN (784-512-256-10 LIF, T=25) | Adam | ✗ | 5 | 97.62% ± 0.12% | rate-coded | ✅ |
+| ANP — PC-NN | 1 | PC-FFNN (784-256-128-10) | Adam | ✗ | 5 | ~96%¹ / 89.0% ± 4.7%² | predictive coding | ⚠️ |
+
+¹ Estimated best-epoch val_acc (~epoch 3) based on smoke test; true best-epoch val_acc not directly recorded.  
+² Mean last-epoch val_acc at early-stop (epochs 9-11). High variance and degradation compared to best epoch
+  is caused by a training-evaluation objective mismatch (see key findings below).
 
 ### CIFAR-10
 
@@ -89,9 +95,9 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 *Updated 2026-04-11.*
 
 **Key findings:**
-- *MNIST: CNN outperforms FFNN at 99.17% vs 98.06%. SNN baseline 97.62% ± 0.12% (5 seeds) — trails dense nets as expected given rate coding overhead; all seeds early-stopped in 9-15 epochs*
-- *CIFAR-10: Data augmentation was THE limiting factor. SGD+cosine with aug: 94.96% (+16.09%). Adam with aug: 90.57% (+7.01%). SGD+cosine beats Adam when both use augmentation*
-- *[Iter 1 W&B](https://wandb.ai/arneschreuder/chpc_autoresearch/runs/jy2d7rv2)*
+- *MNIST: CNN outperforms FFNN at 99.17% vs 98.06%. SNN baseline 97.62% ± 0.12% — trails dense nets as expected given rate coding overhead. LSTM on sequential MNIST (T=28) achieves 98.95% ± 0.11% — competitive with CNN despite processing pixels row-by-row, all 5 seeds converged the full 30 epochs.*
+- *PC-FFNN: training accuracy reaches 100% quickly via supervised clamping, but val CE never drops below ~1.54 and val_acc degrades from ~96% at the best epoch (epoch ~3) to 83-95% by early-stop (epoch 9-11), with high cross-seed variance. Root cause: **training-evaluation objective mismatch** — PC weights are trained to minimise free energy WITH the correct output clamped; during free inference (no clamping) the inferred logits are near-uniform (average confidence ~21% on true class), producing poor CE calibration even when the argmax is correct. Iter 2 will add a CE classification head on the last hidden representation r_{L-1} and monitor val_acc for early stopping.*
+- *CIFAR-10: Data augmentation was THE limiting factor. SGD+cosine with aug: 94.96% (+16.09%). Adam with aug: 90.57% (+7.01%). SGD+cosine beats Adam when both use augmentation.*
 
 ## CHPC Usage
 

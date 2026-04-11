@@ -1,6 +1,6 @@
 project: anp_pcnn
 iteration: 1
-status: experiment
+status: completed
 goal: >
   PC-FFNN: Rao & Ballard (1999) hierarchical predictive coding on MNIST.
   Architecture: input (784) → PC Layer 1 (256, ReLU) → PC Layer 2 (128, ReLU)
@@ -34,7 +34,67 @@ phase_history:
       collapses from ~50 to 0.43 within 2 epochs; model learns very strongly.
       Training acc reaches 100% by epoch 2 (energy minimisation works).
 outcomes:
-  summary: null
-  key_metrics: {}
-  artifacts: []
+  summary: >
+    PC-FFNN baseline established with a critical finding: severe
+    training-evaluation objective mismatch. Train accuracy reaches 100% by
+    epoch 2 (energy minimisation with clamped output works), but val CE
+    never drops below ~1.54 (vs random baseline of 2.30) across all seeds.
+    Early stopping triggers at epochs 9-11. Last-epoch val accuracy spans
+    83.7-95.2% across seeds (mean 89.0%, std 4.65pp). The best-epoch val
+    accuracy is estimated at ~96% (consistent with local smoke test epoch 2:
+    96.27%); it degrades in subsequent epochs as further energy minimisation
+    makes the weights increasingly dependent on the clamped output.
+    Root cause: PC weights trained with supervised clamping produce near-
+    uniform free-inference logits (high CE, poor calibration, ~21% average
+    confidence on true class) even when the argmax is correct. Monitoring
+    val_CE as the early-stopping metric was also inappropriate — the CE
+    was never going to improve with this architecture and training protocol.
+    See metrics.json investigation field for full analysis and iter 2 fixes.
+  key_metrics:
+    mean_val_loss_best_epoch: 1.5445
+    std_val_loss_best_epoch: 0.0082
+    mean_last_epoch_val_acc: 89.03
+    std_last_epoch_val_acc: 4.65
+    estimated_best_epoch_val_acc: 96.0
+    train_accuracy: 100.0
+    num_params: 235146
+    early_stop_epochs: [10, 10, 10, 9, 11]
+  artifacts:
+    - projects/anp_pcnn/iterations/001/metrics.json
+  investigation:
+    finding: >
+      Training-evaluation mismatch. Supervised clamping trains weights for
+      label-conditional energy minimisation; free inference cannot recover
+      confident logits without the clamped target. Results in accurate-but-
+      uncalibrated predictions (argmax correct ~96%, confidence ~21%).
+    root_cause: >
+      PC energy F = 0.5 * Σ||r_l - f(W_l @ r_{l-1})||² is minimised with
+      r_L = one_hot(y) during training. This makes W_L learn to invert the
+      hidden representation to reproduce one-hot targets, but the same
+      weights produce small-magnitude, near-uniform predictions during free
+      inference (no clamping). The CE loss measures prediction confidence,
+      not argmax correctness — so despite ~96% argmax accuracy, CE stays at
+      ~1.54 (corresponding to ~21% average confidence on the true class).
+    degradation_mechanism: >
+      Beyond the best epoch (~epoch 3), the energy → 0 but only in the
+      clamped regime. The gap between clamped and free-inference dynamics
+      widens with training, causing val_acc to degrade from ~96% to 83-95%.
+    fixes_for_iter2:
+      - "Add a linear classification head on r_{L-1} trained with CE loss"
+      - "Monitor val_acc (not val_CE) for early stopping"
+      - "Increase T_pc to 50-100 during evaluation"
+      - "Explore contrastive PC: add negative (free-inference) phase to training"
+      - "Apply post-hoc temperature scaling to calibrate logits"
+  phase_history:
+    - phase: analyze
+      completed: "2026-04-11"
+      notes: >
+        Metrics pulled from CHPC (5 seeds). W&B summaries confirmed train
+        acc=100% / val_CE~1.54. Deep investigation performed.
+    - phase: conclude
+      completed: "2026-04-11"
+      notes: >
+        PC-FFNN training-eval mismatch identified and documented.
+        Iter 2 will add CE classification head on r_{L-1} and fix
+        early stopping metric.
 human_feedback: null

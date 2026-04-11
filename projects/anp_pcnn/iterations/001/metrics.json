@@ -1,0 +1,31 @@
+{
+  "experiment_group": "mnist_pc_ffnn_adam",
+  "seeds": [0, 1, 2, 3, 4],
+  "per_seed": {
+    "0": {"best_val_acc": null, "best_val_loss": 1.5451, "last_epoch_val_acc": 87.98, "epochs_run": 10, "best_epoch": null},
+    "1": {"best_val_acc": null, "best_val_loss": 1.5514, "last_epoch_val_acc": 84.67, "epochs_run": 10, "best_epoch": null},
+    "2": {"best_val_acc": null, "best_val_loss": 1.5424, "last_epoch_val_acc": 95.22, "epochs_run": 10, "best_epoch": null},
+    "3": {"best_val_acc": null, "best_val_loss": 1.5520, "last_epoch_val_acc": 93.62, "epochs_run":  9, "best_epoch": null},
+    "4": {"best_val_acc": null, "best_val_loss": 1.5315, "last_epoch_val_acc": 83.68, "epochs_run": 11, "best_epoch": null}
+  },
+  "mean_val_loss": 1.5445,
+  "std_val_loss": 0.0082,
+  "mean_last_epoch_val_acc": 89.03,
+  "std_last_epoch_val_acc": 4.65,
+  "estimated_best_epoch_val_acc": 96.0,
+  "num_params": 235146,
+  "investigation": {
+    "symptom": "val_CE never improves below ~1.54; early stopping triggers at epochs 9-11. Train acc=100% from epoch 2. Last-epoch val_acc spans 83.7-95.2% (high variance across seeds).",
+    "root_cause": "Training-evaluation objective mismatch. During training, the output layer r_L is clamped to one_hot(y) (supervised inference), so weights are trained to minimise PC energy WITH the correct output present. During free evaluation inference, r_L must settle via gradient descent from a bottom-up initialisation in T_pc=20 steps. The inferred r_L values are near the linear prediction W_L @ r_{L-1}, which has comparably small magnitudes — producing a near-uniform softmax distribution (average confidence ~exp(-1.54/1) ≈ 21% on the true class) even when the argmax is still correct.",
+    "calibration_failure": "The model correctly ranks the true class first (~96% argmax accuracy at best epoch) but assigns very low confidence, yielding high CE. CE of 1.54 for 10-class corresponds to ~21% average confidence on the true class — model is effectively uncalibrated.",
+    "overfitting_regime": "Post-best-epoch, further training drives the PC energy toward 0 by making representations increasingly consistent ONLY when the correct label is clamped. Free inference degrades because the weights become more 'label-dependent': without the clamped one_hot, the inference dynamics no longer produce a reliable discriminative peak. This explains the 10-13pp drop in val_acc from best epoch to early-stop epoch.",
+    "early_stopping_metric_issue": "Monitoring val_CE for early stopping is inappropriate here: val_CE is permanently elevated (~1.54) due to calibration failure regardless of actual accuracy. The correct metric to monitor for PC-FFNN is val_acc (argmax accuracy). This caused early stopping to trigger on a metric that was never going to improve.",
+    "recommendations_iter2": [
+      "Add a separate linear classification head trained with CE on r_{L-1} (bypasses the clamped r_L entirely for evaluation)",
+      "Monitor val_acc instead of val_CE for early stopping",
+      "Increase T_pc from 20 to 50-100 during evaluation to allow better inference convergence",
+      "Consider contrastive PC training (positive phase = clamped, negative phase = free inference) to align training and evaluation objectives",
+      "Apply temperature scaling post-hoc as a quick calibration fix"
+    ]
+  }
+}

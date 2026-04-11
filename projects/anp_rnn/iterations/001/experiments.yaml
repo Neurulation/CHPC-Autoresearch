@@ -2,7 +2,7 @@ experiments:
   - job_name: anp_rnn_iter1_lstm_adam
     job_id: "7168667"
     submitted: "2026-04-11"
-    status: submitted
+    status: completed
     config: mnist_lstm_adam
     seeds: [0, 1, 2, 3, 4]
     epochs: 30

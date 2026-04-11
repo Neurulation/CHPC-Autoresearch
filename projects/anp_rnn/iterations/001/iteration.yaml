@@ -1,6 +1,6 @@
 project: anp_rnn
 iteration: 1
-status: experiment
+status: completed
 goal: >
   LSTM on sequential MNIST. Treat each image as a sequence of 28 row-vectors
   (each of length 28), feed through a stacked LSTM, classify with a linear
@@ -27,7 +27,35 @@ phase_history:
       set to 1.0 for LSTM). Local 2-epoch smoke test: val_acc=97.03%,
       val_loss=0.1010 — confirming LSTM learns strongly from epoch 1.
 outcomes:
-  summary: null
-  key_metrics: {}
-  artifacts: []
-human_feedback: null
+  summary: >
+    LSTM baseline established. 2-layer stacked LSTM (hidden=256) on row-level
+    sequential MNIST (T=28, input_dim=28) achieves 98.95% ± 0.11% mean val
+    accuracy across 5 seeds, with best seed reaching 99.10% (seed 3). All 5
+    seeds trained the full 30 epochs without early stopping, showing stable
+    convergence. Mean best val CE loss: 0.037. With 821K parameters this is
+    competitive with the dense CNN baseline (99.17%) while processing input
+    as a length-28 sequence — confirming LSTM can handle the sequential MNIST
+    task nearly as well as spatial convolutions. Outperforms SNN baseline
+    (97.62%) by ~1.3pp. Provides the RNN rate-coding baseline for future
+    spiking RNN comparisons.
+  key_metrics:
+    mean_val_acc: 98.95
+    std_val_acc: 0.11
+    best_val_acc: 99.10
+    best_seed: 3
+    mean_val_loss: 0.03685
+    num_params: 821770
+    epochs_all_seeds: 30
+  artifacts:
+    - projects/anp_rnn/iterations/001/metrics.json
+  phase_history:
+    - phase: analyze
+      completed: "2026-04-11"
+      notes: >
+        Metrics pulled from CHPC (5 seeds completed), W&B summaries fetched.
+        All seeds ran full 30 epochs.
+    - phase: conclude
+      completed: "2026-04-11"
+      notes: >
+        LSTM baseline: 98.95% ± 0.11%. Strong result — comparable to CNN
+        (99.17%) with sequential processing. Next: GRU and Vanilla RNN.
