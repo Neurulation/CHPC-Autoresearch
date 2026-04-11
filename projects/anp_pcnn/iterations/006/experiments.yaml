@@ -5,12 +5,12 @@ seeds: [0, 1, 2, 3, 4]
 epochs: 30
 
 jobs:
-  - job_id: null
+  - job_id: "7169448"
     job_name: anp_pcnn_iter6_pc_enc_dec_adam
     queue: gpu_1
-    status: pending
-    elapsed: null
-    submitted: null
+    status: queued
+    elapsed: "00:00"
+    submitted: "2026-04-11"
     pbs_script: experiments/anp_pcnn_iter6_pc_enc_dec_adam.pbs
     log_out: logs/anp_pcnn_iter6_pc_enc_dec_adam.out
     log_err: logs/anp_pcnn_iter6_pc_enc_dec_adam.err
