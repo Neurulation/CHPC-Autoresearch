@@ -1,0 +1,12 @@
+# @package _global_.model
+# Stacked Vanilla RNN (Elman) for sequential MNIST classification.
+# Input treated as T=28 row-vectors of dim 28 (row-level sequential MNIST).
+# Structurally mirrors LSTM and GRU baselines — same hyperparameters, RNN cell only.
+# No gating: h_t = tanh(W_ih * x_t + W_hh * h_{t-1}). Susceptible to vanishing gradients.
+
+_target_: autoresearch.models.vanilla_rnn.VanillaRNN
+input_size: 28
+hidden_size: 256
+num_layers: 2
+num_classes: 10
+dropout: 0.3

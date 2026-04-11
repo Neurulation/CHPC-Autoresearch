@@ -8,7 +8,8 @@ jobs:
   - job_id: "7169358"
     job_name: anp_rnn_iter2_gru_adam
     queue: gpu_1
-    status: queued
+    status: running
+    elapsed: "00:00"
     submitted: "2026-04-11"
     pbs_script: experiments/anp_rnn_iter2_gru_adam.pbs
     log_out: logs/anp_rnn_iter2_gru_adam.out

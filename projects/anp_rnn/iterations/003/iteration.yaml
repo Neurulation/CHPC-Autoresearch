@@ -1,0 +1,41 @@
+project: anp_rnn
+iteration: 3
+status: implement
+goal: >
+  Vanilla RNN (Elman network) baseline on sequential MNIST. Structurally
+  identical to LSTM (Iter 1) and GRU (Iter 2) — same architecture depth
+  (2 layers), hidden size (256), optimizer (Adam), and evaluation protocol
+  (5 seeds, 30 epochs). Uses the simplest recurrent formulation:
+  h_t = tanh(W_ih*x_t + W_hh*h_{t-1}) — no gating, no cell state.
+  Expected to show accuracy degradation vs LSTM/GRU due to vanishing
+  gradients over T=28 timesteps. Completes the 3-way RNN family comparison.
+created: "2026-04-11"
+phase_history:
+  - phase: planned
+    completed: "2026-04-11"
+    notes: >
+      Planned after GRU baseline (Iter 2) started on CHPC. Final member of the
+      RNN family trilogy: LSTM → GRU → Vanilla RNN (decreasing gate complexity).
+  - phase: survey
+    completed: "2026-04-11"
+    notes: >
+      Elman (1990) Simple Recurrent Network: h_t = tanh(W_ih*x_t + W_hh*h_{t-1}).
+      No gating — gradient flows multiplicatively through tanh over T=28 steps.
+      Bengio et al. (1994), Hochreiter (1991): vanishing/exploding gradient
+      problem for T>>10. Sequential MNIST T=28 is at the boundary. Reported
+      benchmarks show Vanilla RNN ~10-20pp below LSTM on sMNIST (depending on
+      depth/size). Chosen hyperparameters mirror LSTM/GRU: hidden=256, layers=2,
+      dropout=0.3, Adam lr=1e-3, grad clip=1.0. tanh nonlinearity (default).
+  - phase: implement
+    completed: "2026-04-11"
+    notes: >
+      Implemented VanillaRNN model (src/autoresearch/models/vanilla_rnn.py),
+      model config (configs/model/vanilla_rnn.yaml), experiment config
+      (mnist_vanilla_rnn_adam.yaml, 30 epochs, 5 seeds, patience=7).
+      Mirrors LSTM and GRU baselines exactly — only the cell type changes.
+      PBS script: experiments/anp_rnn_iter3_vanilla_rnn_adam.pbs (4h, 32gb).
+experiment:
+  config: mnist_vanilla_rnn_adam
+  pbs_script: experiments/anp_rnn_iter3_vanilla_rnn_adam.pbs
+  seeds: [0, 1, 2, 3, 4]
+  epochs: 30
