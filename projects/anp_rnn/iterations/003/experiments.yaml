@@ -1,0 +1,21 @@
+project: anp_rnn
+iteration: 3
+experiment_config: mnist_vanilla_rnn_adam
+seeds: [0, 1, 2, 3, 4]
+epochs: 30
+
+jobs:
+  - job_id: null
+    job_name: anp_rnn_iter3_vanilla_rnn_adam
+    queue: gpu_1
+    status: pending
+    elapsed: null
+    submitted: null
+    pbs_script: experiments/anp_rnn_iter3_vanilla_rnn_adam.pbs
+    log_out: logs/anp_rnn_iter3_vanilla_rnn_adam.out
+    log_err: logs/anp_rnn_iter3_vanilla_rnn_adam.err
+    walltime: "04:00:00"
+    nodes: 1
+    cpus: 4
+    gpus: 1
+    memory: 32gb

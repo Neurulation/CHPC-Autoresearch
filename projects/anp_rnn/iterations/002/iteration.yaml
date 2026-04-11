@@ -1,6 +1,6 @@
 project: anp_rnn
 iteration: 2
-status: experiment
+status: completed
 goal: >
   GRU baseline on sequential MNIST. Structurally identical to the LSTM
   baseline (Iter 1) — same architecture depth (2 layers), hidden size (256),
@@ -26,6 +26,21 @@ phase_history:
       Implemented GRU model (src/autoresearch/models/gru.py), model config
       (configs/model/gru.yaml), experiment config (mnist_gru_adam.yaml, 30 epochs,
       5 seeds, patience=7). Mirrors LSTM baseline exactly, only the cell type changes.
+  - phase: analyze
+    completed: "2026-04-11"
+    notes: >
+      5-seed results: [99.08, 99.27, 98.95, 98.93, 99.08]%.
+      Mean: 99.06% ± 0.14%. Best seed 1 at epoch 18 (99.27%).
+      All seeds converged via early stopping (patience=7, val_loss).
+      Best val_loss per seed: [0.0303, 0.0318, 0.0433, 0.0410, 0.0320].
+  - phase: conclude
+    completed: "2026-04-11"
+    notes: >
+      GRU (99.06% ± 0.14%) marginally outperforms LSTM (98.95% ± 0.11%) with
+      25% fewer parameters (616,970 vs ~821k). Confirms GRU empirical parity
+      with LSTM on seq-MNIST (Chung et al. 2014). Updated project best_result.
+      Advancing to iter 3: Vanilla RNN (Elman) — expect significant regression
+      without gating mechanisms (vanishing gradients over 28 timesteps).
 experiment:
   config: mnist_gru_adam
   pbs_script: experiments/anp_rnn_iter2_gru_adam.pbs

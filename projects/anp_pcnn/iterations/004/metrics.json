@@ -1,0 +1,13 @@
+{
+  "experiment_group": "mnist_pc_ffnn_v4_adam_eps",
+  "seeds": [0, 1, 2, 3, 4],
+  "best_val_acc_per_seed": [93.73, 94.05, 94.38, 93.80, 93.80],
+  "final_epoch_per_seed": [30, 30, 30, 30, 30],
+  "mean_accuracy": 93.95,
+  "std_accuracy": 0.27,
+  "mean_loss": null,
+  "best_seed": 2,
+  "best_accuracy": 94.38,
+  "num_params": 236436,
+  "notes": "Not converged at 30 epochs. Adam eps=0.01 eliminates energy explosions (monotonic decrease to ~0.21 at ep30) but slows late-stage convergence vs eps=1e-8. Single-seed diagnostic at ep60+ would likely reach ~98%. Needs 50-75 epochs to match iter3 diagnostic of 98.12%."
+}

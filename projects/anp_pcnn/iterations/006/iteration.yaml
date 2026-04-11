@@ -1,6 +1,6 @@
 project: anp_pcnn
 iteration: 6
-status: implement
+status: experiment
 goal: >
   PC-EncDec (proto-SPCNN) — bidirectional predictive coding with explicit
   top-down decoder weights alongside the bottom-up encoder. Creates a full
@@ -45,6 +45,9 @@ phase_history:
       PBS script: experiments/anp_pcnn_iter6_pc_enc_dec_adam.pbs (12h, 64gb)
       Smoke test passed: val_loss 2.308→2.277 (2 epochs), 470,948 params.
       Energy ~2.5k/batch (dec reconstruction over 784 dims dominates; expected).
+  - phase: experiment
+    started: "2026-04-11"
+    notes: "5-seed CHPC run — submitting in parallel with PC-RNN (iter5)."
 experiment:
   config: mnist_pc_enc_dec_adam
   pbs_script: experiments/anp_pcnn_iter6_pc_enc_dec_adam.pbs

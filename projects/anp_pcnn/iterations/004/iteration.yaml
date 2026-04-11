@@ -1,6 +1,6 @@
 project: anp_pcnn
 iteration: 4
-status: experiment
+status: completed
 goal: >
   Fix the energy explosion in PC-FFNN by increasing Adam's epsilon from 1e-8 
   to 0.01. Root cause analysis (iter 3 post-mortem) identified Adam's adaptive 
@@ -36,6 +36,27 @@ phase_history:
   - phase: experiment
     started: "2026-04-11"
     notes: "5-seed CHPC run pending submission."
+  - phase: analyze
+    completed: "2026-04-11"
+    notes: >
+      5-seed results: [93.73, 94.05, 94.38, 93.80, 93.80]%.
+      Mean: 93.95% ± 0.27%. Best seed 2 (94.38% at epoch 30).
+      ALL seeds hit epoch 30 without early stopping triggering — model not
+      converged. Energy monotonically decreased (no explosion), confirming
+      eps=0.01 fix works. Slow convergence is expected: eps=0.01 reduces
+      effective step size when v_t is small, trading stability for speed.
+      Single-seed diagnostic (scripts/) reached 98.12% — needs ~50-75 epochs.
+  - phase: conclude
+    completed: "2026-04-11"
+    notes: >
+      eps=0.01 fix CONFIRMED: zero energy explosions across all 5 seeds.
+      But 30 epochs insufficient for convergence under eps=0.01 (vs eps=1e-8
+      which would converge faster but explodes). 93.95% does not reflect model
+      capability — iter 3 diagnostic at 60+ epochs would likely hit ~98%.
+      Decision: accept these results as a stability baseline (explosion-free PC
+      training confirmed), advance to iter 5 (PC-RNN) and iter 6 (PC-EncDec).
+      A future re-run with epochs=75 could establish the true PC-FFNN ceiling.
+      best_result for anp_pcnn stays at iter 3 (97.30%) pending convergence re-run.
 experiment:
   config: mnist_pc_ffnn_v4_adam_eps
   pbs_script: experiments/anp_pcnn_iter4_pc_ffnn_adam_eps.pbs

@@ -1,0 +1,21 @@
+project: anp_pcnn
+iteration: 6
+experiment_config: mnist_pc_enc_dec_adam
+seeds: [0, 1, 2, 3, 4]
+epochs: 30
+
+jobs:
+  - job_id: null
+    job_name: anp_pcnn_iter6_pc_enc_dec_adam
+    queue: gpu_1
+    status: pending
+    elapsed: null
+    submitted: null
+    pbs_script: experiments/anp_pcnn_iter6_pc_enc_dec_adam.pbs
+    log_out: logs/anp_pcnn_iter6_pc_enc_dec_adam.out
+    log_err: logs/anp_pcnn_iter6_pc_enc_dec_adam.err
+    walltime: "12:00:00"
+    nodes: 1
+    cpus: 4
+    gpus: 1
+    memory: 64gb

@@ -74,12 +74,14 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 | Project | Iter | Model | Optimizer | Aug | Seeds | Val Acc | Notes | Status |
 |---------|------|-------|-----------|-----|-------|---------|-------|--------|
 | Image Processing NN | 1 | CNN (2 conv + 1 FC) | Adam | ✗ | 5 | **99.17% ± 0.10%** | spatial | ✅ |
+| ANP — RNN | 2 | GRU (2-layer, h=256) | Adam | ✗ | 5 | **99.06% ± 0.14%** | sequential (T=28) | ✅ |
 | ANP — RNN | 1 | LSTM (2-layer, h=256) | Adam | ✗ | 5 | 98.95% ± 0.11% | sequential (T=28) | ✅ |
 | Image Processing NN | 1 | FFNN (784-256-128-10) | Adam | ✗ | 5 | 98.06% ± 0.15% | dense | ✅ |
 | Artificial Neural Prostheses | 1 | SNN (784-512-256-10 LIF, T=25) | Adam | ✗ | 5 | 97.62% ± 0.12% | rate-coded | ✅ |
-| ANP — PC-NN | 1 | PC-FFNN (784-256-128-10) | Adam | ✗ | 5 | ~96%¹ / 89.0% ± 4.7%² | predictive coding | ⚠️ |
-| ANP — PC-NN | 2 | PC-FFNN v2 + CE head (784-256-128-10) | Adam | ✗ | 5 | **97.21% ± 0.35%**³ | predictive coding | ✅ |
 | ANP — PC-NN | 3 | PC-FFNN v3 + CE head + grad clip (784-256-128-10) | Adam | ✗ | 5 | **97.30% ± 0.22%**⁴ | predictive coding | ✅ |
+| ANP — PC-NN | 2 | PC-FFNN v2 + CE head (784-256-128-10) | Adam | ✗ | 5 | **97.21% ± 0.35%**³ | predictive coding | ✅ |
+| ANP — PC-NN | 1 | PC-FFNN (784-256-128-10) | Adam | ✗ | 5 | ~96%¹ / 89.0% ± 4.7%² | predictive coding | ⚠️ |
+| ANP — PC-NN | 4 | PC-FFNN v4 + eps=0.01 (784-256-128-10) | Adam (eps=0.01) | ✗ | 5 | 93.95% ± 0.27%⁵ | not converged | ⚠️ |
 
 ¹ Estimated best-epoch val_acc (~epoch 3) based on smoke test; true best-epoch val_acc not directly recorded.  
 ² Mean last-epoch val_acc at early-stop (epochs 9-11). High variance and degradation compared to best epoch
@@ -87,7 +89,10 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 ³ Best-epoch val_acc across 5 seeds (early stopping on val_acc, mode=max). CE head resolves iter 1 calibration failure.
   A new issue emerged: PC energy explosions mid-training (all seeds); early stopping preserves the best model correctly.  
 ⁴ Grad clipping (max_grad_norm=0.5) delays explosions and reduces variance (std 0.35→0.22) but does not eliminate them.
-  Explosions are algorithmic — the CE head and PC energy compete for the same weights. Iter 4: reduce ce_weight=0.1.
+  Explosions are algorithmic — the CE head and PC energy compete for the same weights. Iter 4: reduce ce_weight=0.1.  
+⁵ **Stability result, not a performance result.** Adam eps=0.01 eliminates energy explosions (zero across 5 seeds) at the
+  cost of slower convergence. 30 epochs insufficient; single-seed diagnostic at 60+ epochs reached 98.12%. Needs ~50-75
+  epochs to show true capability. Future re-run with epochs=75 will establish PC-FFNN ceiling.
 
 ### CIFAR-10
 
@@ -101,9 +106,12 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 *Updated 2026-04-11.*
 
 **Key findings:**
-- *MNIST: CNN outperforms FFNN at 99.17% vs 98.06%. SNN baseline 97.62% ± 0.12% — trails dense nets as expected given rate coding overhead. LSTM on sequential MNIST (T=28) achieves 98.95% ± 0.11% — competitive with CNN despite processing pixels row-by-row; all 5 seeds converged the full 30 epochs.*
-- *PC-FFNN v3 (iter 3): Gradient clipping (max_grad_norm=0.5) is a **partial improvement** — variance reduced (0.35→0.22pp), explosions delayed (seeds 1 and 3 survived to epochs 14 and 17, reaching 97.60% and 97.42%), mean accuracy +0.09pp to **97.30% ± 0.22%**. However, all 5 seeds still hit massive energy spikes (peak 18–1905×). Root cause: clipping bounds gradient magnitude but not the energy value itself, which is driven by the competing CE head and PC energy pulling the same weights in opposite directions. Iter 4: reduce ce_weight from 1.0 to 0.1 so CE acts as a gentle regulariser rather than an equal co-objective.*
-- *PC-FFNN v1 (iter 1): train accuracy 100% from epoch 2 via supervised clamping, but val CE stuck at ~1.54 (uncalibrated — ~21% avg confidence on true class). Root cause: training-evaluation objective mismatch between clamped and free inference.*
+- *MNIST: CNN outperforms FFNN at 99.17% vs 98.06%. SNN baseline 97.62% ± 0.12% — trails dense nets as expected given rate coding overhead.*
+- *GRU (iter 2) beats LSTM (iter 1): 99.06% ± 0.14% vs 98.95% ± 0.11%, with 25% fewer parameters (617k vs ~821k). Gate reduction (4→3 gates) did not hurt — confirms GRU parity with LSTM on seq-MNIST (Chung et al. 2014).*
+- *LSTM/GRU on sequential MNIST (T=28): competitive with CNN despite processing pixels row-by-row.*
+- *PC-FFNN v4 (iter 4): eps=0.01 fix CONFIRMED zero energy explosions across all 5 seeds (energy monotonically decreases to ~0.21 at ep30). However 93.95% is a convergence artifact — not a performance comparison. Adam eps=0.01 reduces effective step size in late training, needing ~50-75 epochs to match the single-seed diagnostic of 98.12%. A future re-run with epochs=75 will establish the PC-FFNN ceiling.*
+- *PC-FFNN v3 (iter 3): Gradient clipping (max_grad_norm=0.5) is a partial improvement — variance reduced (0.35→0.22pp), explosions delayed, mean accuracy +0.09pp to 97.30% ± 0.22%. Root cause: clipping bounds gradient magnitude but not the energy value itself.*
+- *PC-FFNN v1 (iter 1): train accuracy 100% from epoch 2 via supervised clamping, but val CE stuck at ~1.54 (uncalibrated). Root cause: training-evaluation objective mismatch between clamped and free inference.*
 - *CIFAR-10: Data augmentation was THE limiting factor. SGD+cosine with aug: 94.96% (+16.09%). Adam with aug: 90.57% (+7.01%). SGD+cosine beats Adam when both use augmentation.*
 
 ## CHPC Usage

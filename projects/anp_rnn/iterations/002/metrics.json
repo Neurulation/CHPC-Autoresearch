@@ -1,0 +1,14 @@
+{
+  "experiment_group": "mnist_gru_adam",
+  "seeds": [0, 1, 2, 3, 4],
+  "best_val_loss_per_seed": [0.0303, 0.0318, 0.0433, 0.0410, 0.0320],
+  "best_val_acc_per_seed": [99.08, 99.27, 98.95, 98.93, 99.08],
+  "best_epoch_per_seed": [12, 18, 14, 13, 16],
+  "mean_accuracy": 99.06,
+  "std_accuracy": 0.14,
+  "mean_loss": 0.0357,
+  "best_seed": 1,
+  "best_accuracy": 99.27,
+  "num_params": 616970,
+  "notes": "GRU 2-layer hidden=256 on seq-MNIST. All seeds converged via early stopping (patience=7 on val_loss). Best seed 1 at epoch 18."
+}

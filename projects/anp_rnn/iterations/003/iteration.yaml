@@ -1,6 +1,6 @@
 project: anp_rnn
 iteration: 3
-status: implement
+status: experiment
 goal: >
   Vanilla RNN (Elman network) baseline on sequential MNIST. Structurally
   identical to LSTM (Iter 1) and GRU (Iter 2) — same architecture depth
@@ -34,6 +34,9 @@ phase_history:
       (mnist_vanilla_rnn_adam.yaml, 30 epochs, 5 seeds, patience=7).
       Mirrors LSTM and GRU baselines exactly — only the cell type changes.
       PBS script: experiments/anp_rnn_iter3_vanilla_rnn_adam.pbs (4h, 32gb).
+  - phase: experiment
+    started: "2026-04-11"
+    notes: "5-seed CHPC run — submitting after GRU iter2 concluded."
 experiment:
   config: mnist_vanilla_rnn_adam
   pbs_script: experiments/anp_rnn_iter3_vanilla_rnn_adam.pbs
