@@ -25,22 +25,26 @@ phase_history:
       recommended as next step (expected ~98-99% based on convergence rate).
 outcomes:
   summary: >
-    Phase 1 SNN baseline implemented and validated. The 784-512-256-10 feedforward
-    SNN with LIF neurons, rate coding (T=25), and Adam + BPTT surrogate gradients
-    achieves 96.45% val accuracy on MNIST in just 2 epochs — converging rapidly.
-    Model integrates cleanly with the existing autoresearch training framework.
-    Spike trains and membrane potentials are accessible via forward_with_recordings()
-    for use in Phase 2 (Artificial EEG dataset construction).
+    Phase 1 SNN baseline complete. 784-512-256-10 LIF SNN with rate coding (T=25)
+    and Adam + BPTT surrogate gradients achieves 97.62% ± 0.12% val accuracy on
+    MNIST across 5 seeds (best seed: 97.75%). All seeds early-stopped (patience=5),
+    converging in 9-15 epochs — confirming the surrogate gradient approach works
+    well. Model (535K params) trails dense CNN (99.17%) as expected given rate
+    coding overhead, but provides a strong biologically-plausible baseline for ANP.
   key_metrics:
-    val_acc_2ep: 96.45
-    val_loss_2ep: 0.1169
-    train_acc_2ep: 96.67
-    epochs_run: 2
-    note: "Preliminary local test. Full 20-epoch CHPC run recommended for final baseline."
+    mean_val_acc: 97.62
+    std_val_acc: 0.12
+    best_val_acc: 97.75
+    best_seed: 4
+    mean_val_loss: 0.09358
+    num_params: 535818
+    num_seeds: 5
+    mean_epochs_run: 11.4
   artifacts:
     - src/autoresearch/models/snn_baseline.py
     - src/autoresearch/configs/model/snn_baseline.yaml
     - src/autoresearch/configs/experiment/mnist_snn_baseline_adam.yaml
     - src/autoresearch/record.py
     - src/autoresearch/configs/record.yaml
+    - projects/artificial_neural_prostheses/iterations/001/metrics.json
 human_feedback: null

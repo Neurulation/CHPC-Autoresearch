@@ -17,9 +17,10 @@ human_direction: >
 best_result:
   model: snn_baseline
   dataset: mnist
-  val_accuracy: 96.45
+  mean_val_accuracy: 97.62
+  std_val_accuracy: 0.12
+  best_val_accuracy: 97.75
   experiment_config: mnist_snn_baseline_adam
-  epochs: 2
-  note: "Preliminary local test (2 epochs). Full 20-epoch CHPC run pending."
+  num_seeds: 5
   iteration: 1
   date: "2026-04-11"

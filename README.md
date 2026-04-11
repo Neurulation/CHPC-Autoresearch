@@ -75,7 +75,7 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 |---------|------|-------|-----------|-----|-------|---------|--------|
 | Image Processing NN | 1 | CNN (2 conv + 1 FC) | Adam | ✗ | 5 | **99.17% ± 0.10%** | ✅ |
 | Image Processing NN | 1 | FFNN (784-256-128-10) | Adam | ✗ | 5 | 98.06% ± 0.15% | ✅ |
-| Artificial Neural Prostheses | 1 | SNN (784-512-256-10 LIF, T=25) | Adam | ✗ | 1 | 96.45% ⚠️ | 🔄 Prelim |
+| Artificial Neural Prostheses | 1 | SNN (784-512-256-10 LIF, T=25) | Adam | ✗ | 5 | 97.62% ± 0.12% | ✅ |
 
 ### CIFAR-10
 
@@ -89,7 +89,7 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 *Updated 2026-04-11.*
 
 **Key findings:**
-- *MNIST: CNN outperforms FFNN at 99.17% vs 98.06%. SNN baseline at 96.45% (2ep prelim) — rate coding overhead expected vs dense nets*
+- *MNIST: CNN outperforms FFNN at 99.17% vs 98.06%. SNN baseline 97.62% ± 0.12% (5 seeds) — trails dense nets as expected given rate coding overhead; all seeds early-stopped in 9-15 epochs*
 - *CIFAR-10: Data augmentation was THE limiting factor. SGD+cosine with aug: 94.96% (+16.09%). Adam with aug: 90.57% (+7.01%). SGD+cosine beats Adam when both use augmentation*
 - *[Iter 1 W&B](https://wandb.ai/arneschreuder/chpc_autoresearch/runs/jy2d7rv2)*
 
