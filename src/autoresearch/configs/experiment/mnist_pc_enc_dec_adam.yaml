@@ -1,0 +1,65 @@
+# @package _global_
+# ANP-PCNN Iter 6 — PC-EncDec (proto-SPCNN) on MNIST.
+#
+# Bidirectional predictive coding: explicit top-down decoder weights
+# alongside the bottom-up encoder. Creates a full generative model:
+#   Encoder: x → r_1 → r_2 → classification
+#   Decoder: r_2 → r_1_pred, r_1 → x_hat (input reconstruction)
+#
+# PC Energy = enc_errors + dec_weight(0.5) * dec_errors + ce_weight * CE
+#
+# Skip connections via shared representations: each r_l is updated during
+# inference to minimise BOTH encoder (r_l predicted from r_{l-1}) and
+# decoder (r_{l-1} predicted from r_l) errors — the bidirectional constraint
+# is the PC analogue of U-Net skip connections.
+#
+# Adam eps=0.01 retained from iter 4 (prevents energy explosion).
+# max_grad_norm=0.5 retained from iter 4.
+# proto-SPCNN: rate-coded PC with enc-dec structure ready for spiking extension.
+
+defaults:
+  - override /dataset: mnist
+  - override /model: pc_enc_dec
+  - override /optimizer: adam_pc
+
+experiment_group: mnist_pc_enc_dec_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 30
+num_workers: 4
+validation_split: 0.1
+max_grad_norm: 0.5
+
+model:
+  T_pc: 20
+  lr_pc: 0.05
+  ce_weight: 1.0
+  dec_weight: 0.5
+
+early_stopping:
+  enabled: true
+  patience: 7
+  min_delta: 0.01
+  metric: val_accuracy
+  mode: max
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - pc_enc_dec
+    - predictive_coding
+    - encoder_decoder
+    - bidirectional_pc
+    - reconstruction
+    - skip_connections
+    - adam
+    - anp
+    - anp-pcnn
+    - proto_spcnn
+  notes: "ANP-PCNN Iter 6 — PC-EncDec: bidirectional PC with explicit decoder weights and input reconstruction. Proto-SPCNN rate-coded baseline."
