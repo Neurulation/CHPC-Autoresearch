@@ -6,5 +6,6 @@ jobs:
     seeds: [0, 1, 2, 3, 4]
     epochs: 20
     submitted_at: "2026-04-12"
-    status: queued
+    status: completed
+    elapsed: "00:13"
     notes: "SPC-FFNN: LIF SNN (T=25 rate-coded, firing rates [0,1]) + PC inference (T_pc=20, lr_pc=0.05)"

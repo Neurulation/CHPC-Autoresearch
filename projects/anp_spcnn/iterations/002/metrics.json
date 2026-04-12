@@ -1,0 +1,19 @@
+{
+  "experiment_group": "mnist_spc_ffnn_adam",
+  "seeds": [0, 1, 2, 3, 4],
+  "per_seed": {
+    "0": {"best_val_acc": 10.88, "best_epoch": 0, "epochs_run": 6, "best_val_loss": 2.3021},
+    "1": {"best_val_acc": 11.30, "best_epoch": 0, "epochs_run": 6, "best_val_loss": 2.3009},
+    "2": {"best_val_acc": 10.48, "best_epoch": 0, "epochs_run": 6, "best_val_loss": 2.3017},
+    "3": {"best_val_acc": 11.37, "best_epoch": 0, "epochs_run": 6, "best_val_loss": 2.3005},
+    "4": {"best_val_acc": 11.02, "best_epoch": 0, "epochs_run": 6, "best_val_loss": 2.3011}
+  },
+  "mean_val_acc": 11.01,
+  "std_val_acc": 0.33,
+  "best_val_acc": 11.37,
+  "best_seed": 3,
+  "mean_val_loss": 2.3013,
+  "failure": true,
+  "failure_reason": "Training CE loss bypasses SNN: pc_loss() computes CE on raw linear activations (h=x_flat→layers[:-1]) but forward() evaluates on SNN spike-count representations. SNN weights never jointly optimized with cls_head. Energy explosion at epoch 6 (train_energy ~22-31) across all seeds triggers early-stop.",
+  "notes": "COMPLETE FAILURE: ~11% val_acc (random) across all 5 seeds. Train/val distribution mismatch: CE gradient path in training uses raw x_flat→layers[:-1] (no SNN), validation uses SNN spike-counts→PC inference→cls_head. Root cause identical to PC-EncDec v1 (anp_pcnn iter 6). Fix: compute CE on reps_init[-2] from _bottom_up(); make forward() pure-feedforward SNN (no PC inference)."
+}

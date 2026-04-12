@@ -1,0 +1,45 @@
+# @package _global_
+# ANP-SPCNN Iter 3 — SPC-FFNN v2 (rate coding) on MNIST.
+# Fix: CE loss uses SNN spike-count representations (reps_init[-2] from _bottom_up()),
+# and eval uses the same pure-feedforward SNN path — eliminates train/val mismatch.
+# Iter 2 failed at ~11% (random) due to CE trained on raw activations, eval on SNN reps.
+
+defaults:
+  - override /dataset: mnist
+  - override /model: spc_ffnn
+
+experiment_group: mnist_spc_ffnn_v2_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 30
+num_workers: 4
+validation_split: 0.1
+max_grad_norm: 1.0
+
+early_stopping:
+  enabled: true
+  patience: 7
+  min_delta: 0.001
+  metric: val_loss
+  mode: min
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - snn
+    - pc
+    - spc-ffnn
+    - lif
+    - rate-coding
+    - predictive-coding
+    - adam
+    - anp
+    - anp-spcnn
+    - train-val-mismatch-fix
+  notes: "ANP-SPCNN Iter 3 — SPC-FFNN v2: CE on SNN reps (not raw activations). Eliminates train/val mismatch."

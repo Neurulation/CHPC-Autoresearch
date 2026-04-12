@@ -1,0 +1,32 @@
+iteration: 3
+project: anp_spcnn
+status: implement
+goal: >
+  SPC-FFNN v2 — fix train/val mismatch bug from iter 2.
+  Bug: CE was computed on raw linear activations (no SNN), eval on SNN spike-count reps.
+  Fix 1: pc_loss() CE now uses reps_init[-2] from _bottom_up() (SNN representations).
+  Fix 2: forward() uses pure-feedforward SNN (no PC inference) to match training.
+  Same fix class as PC-EncDec v2 (anp_pcnn iter 7, +3.46pp).
+
+phases:
+  plan:
+    completed_at: "2026-04-12"
+    notes: >
+      Root cause of iter 2 failure: CE gradient path uses raw x_flat→layers[:-1]
+      (bypassing SNN entirely), while eval uses SNN spike-counts→PC inference→cls_head.
+      Fix: make CE and eval both use the same SNN-feedforward representation.
+      Secondary concern: energy explosions at epoch 6. With CE no longer flowing to
+      self.layers (detached reps), only PC energy gradient updates layers → no competing
+      gradients → explosions should be eliminated or significantly reduced.
+      Safety: add max_grad_norm=1.0 to experiment config.
+
+  implement:
+    completed_at: "2026-04-12"
+    notes: >
+      Modified src/autoresearch/models/spc_ffnn.py:
+        pc_loss(): replaced raw-activation CE with cls_head(reps_init[-2]).
+        forward(): replaced SNN+PC-inference with pure-feedforward SNN only.
+      Created src/autoresearch/configs/experiment/mnist_spc_ffnn_v2_adam.yaml (30ep).
+      Created experiments/anp_spcnn_iter3_spc_ffnn_v2_adam.pbs (gpu_1, 2h).
+      Smoke test: val_acc 39.43% @ep1, 46.72% @ep2 (vs iter2: 10% stuck throughout).
+      No energy explosion observed. Fix confirmed working.
