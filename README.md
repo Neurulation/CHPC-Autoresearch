@@ -79,15 +79,32 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 | ANP — SNN | 1 | SNN-CNN (2 Conv+LIF+Pool + 2 FC+LIF, T=25) | Adam | ✗ | 5 | **98.87% ± 0.13%** | rate-coded, spatial | ✅ |
 | Image Processing NN | 1 | FFNN (784-256-128-10) | Adam | ✗ | 5 | 98.06% ± 0.15% | dense | ✅ |
 | ANP — RNN | 3 | Vanilla RNN (2-layer, h=256) | Adam | ✗ | 5 | 97.89% ± 0.35% | sequential (T=28) | ✅ |
-| Artificial Neural Prostheses | 1 | SNN (784-512-256-10 LIF, T=25) | Adam | ✗ | 5 | 97.62% ± 0.12% | rate-coded | ✅ |
+| ANP — SNN | 2 | SNN-FFNN (784-512-256-10 LIF, T=25) | Adam | ✗ | 5 | 97.62% ± 0.12%ᴬ | rate-coded (Phase B baseline) | ✅ |
 | ANP — PC-NN | 3 | PC-FFNN v3 + CE head + grad clip (784-256-128-10) | Adam | ✗ | 5 | **97.30% ± 0.22%**⁴ | predictive coding | ✅ |
 | ANP — PC-NN | 2 | PC-FFNN v2 + CE head (784-256-128-10) | Adam | ✗ | 5 | **97.21% ± 0.35%**³ | predictive coding | ✅ |
+| ANP — PC-NN | 9 | PC-EncDec v2 + cosine LR (784-256-128 enc+dec, β=0.1) | Adam+Cosine | ✗ | 5 | pending⁹ | target ≥97.30% | ⏳ |
 | ANP — PC-NN | 8 | PC-EncDec v2 @ 60ep (784-256-128 enc+dec, β=0.1) | Adam | ✗ | 5 | **97.14% ± 0.21%**⁸ | generative PC, 60ep ceiling | ✅ |
 | ANP — PC-NN | 7 | PC-EncDec v2 (784-256-128 enc+dec, β=0.1) | Adam | ✗ | 5 | **96.59% ± 0.28%**⁷ | generative PC, ff-forward eval | ✅ |
 | ANP — PC-NN | 1 | PC-FFNN (784-256-128-10) | Adam | ✗ | 5 | ~96%¹ / 89.0% ± 4.7%² | predictive coding | ⚠️ |
 | ANP — PC-NN | 4 | PC-FFNN v4 + eps=0.01 (784-256-128-10) | Adam (eps=0.01) | ✗ | 5 | 93.95% ± 0.27%⁵ | not converged | ⚠️ |
 | ANP — PC-NN | 6 | PC-EncDec v1 (784-256-128 enc+dec) | Adam | ✗ | 5 | 93.13% ± 0.35%⁶ | train/val mismatch + β=1 | ⚠️ |
+| ANP — SNN | 3 | SNN-LSTM (LIF encoder + 2-layer LSTM h=256, T=25) | Adam | ✗ | 5 | pendingᴮ | rate-coded, sequential | ⏳ |
+| ANP — SNN | 4 | SNN-GRU (LIF encoder + 2-layer GRU h=256, T=25) | Adam | ✗ | 5 | pendingᴮ | rate-coded, sequential | ⏳ |
+| ANP — SNN | 5 | SNN-VanillaRNN (LIF encoder + 2-layer RNN h=256, T=25) | Adam | ✗ | 5 | pendingᴮ | rate-coded, sequential | ⏳ |
+| ANP — SNN | 6 | SNN-FFNN TTFS (784-512-256-10 LIF, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | temporal coding (Phase C) | ⏳ |
+| ANP — SNN | 7 | SNN-CNN TTFS (2 Conv+LIF+Pool + 2 FC+LIF, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | temporal coding (Phase C) | ⏳ |
+| ANP — SNN | 8 | SNN-LSTM TTFS (LIF encoder + LSTM, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | temporal coding (Phase C) | ⏳ |
+| ANP — SNN | 9 | SNN-GRU TTFS (LIF encoder + GRU, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | temporal coding (Phase C) | ⏳ |
+| ANP — SNN | 10 | SNN-VanillaRNN TTFS (LIF encoder + RNN, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | temporal coding (Phase C) | ⏳ |
+| ANP — SPCNN | 2 | SPC-FFNN v1 (SNN-FFNN + PC inference loop) | Adam | ✗ | 5 | ~11%ˢ | COMPLETE FAILURE | ❌ |
+| ANP — SPCNN | 3 | SPC-FFNN v2 (train/val mismatch fixed) | Adam | ✗ | 5 | pendingˢ | post-fix validation | ⏳ |
 
+ᴬ **ANP — SNN iter 2 (SNN-FFNN rate coding):** 97.62% ± 0.12% (535k params). Rate coding (T=25 Bernoulli) preserves
+  accuracy well — only −0.44pp gap vs non-spiking FFNN despite larger hidden dims (512-256 vs 256-128).  
+ᴮ **ANP — SNN iters 3-5 (Phase B: SNN-LSTM/GRU/VanillaRNN):** Jobs 7171472-7171474, submitted 2026-04-12.
+  Seed 0 elapsed at time of last check: LSTM 44m, GRU 20m per seed. Results pending.  
+ᶜ **ANP — SNN iters 6-10 (Phase C TTFS):** Jobs 7171613-7171617, queued behind Phase B.
+  Tests whether TTFS temporal coding improves over rate coding for static/sequential MNIST.  
 ¹ Estimated best-epoch val_acc (~epoch 3) based on smoke test; true best-epoch val_acc not directly recorded.  
 ² Mean last-epoch val_acc at early-stop (epochs 9-11). High variance and degradation compared to best epoch
   is caused by a training-evaluation objective mismatch (see key findings below).  
@@ -109,6 +126,16 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 ⁸ **Training budget closes the efficiency gap.** +0.55pp over 30ep (96.59%→97.14%). Seeds 1 and 2 early-stopped
   (patience=10), seeds 0/3/4 needed all 60 epochs (slow convergence). Gap to PC-FFNN v3 reduced from -0.71pp to -0.16pp.
   Architecture is competitive; bottleneck is slow convergence. Cosine LR decay recommended for iter 9.
+⁹ **anp_pcnn iter 9 (PC-EncDec v2 + cosine LR):** Job 7171630, queued 2026-04-12.
+  CosineAnnealingLR: lr 1e-3 → 1e-6 over 60 epochs. All other hyperparameters identical to iter 8.
+  Hypothesis: cosine decay avoids stale large late-training steps, accelerating convergence to close -0.16pp gap.
+ˢ **SPC-FFNN iter 2 — COMPLETE FAILURE (train/val distribution mismatch):** ~11% val_acc (random) across all 5 seeds.
+  Root cause: `pc_loss()` computed CE on raw linear activations `x_flat→layers[:-1]` (bypassing SNN entirely),
+  while `forward()` evaluated on SNN spike-count representations. SNN weights were never jointly trained with `cls_head`.
+  Energy explosion at epoch 6 (secondary effect: competing CE + PC gradients on same weights).
+  Same bug class as PC-EncDec v1 (anp_pcnn iter 6). Fix (iter 3): CE now uses `reps_init[-2]` from `_bottom_up()`;
+  `forward()` changed to pure-feedforward SNN (no PC inference). Smoke test: 39.43%→46.72% @ ep1-2.
+  Job 7171612, queued 2026-04-12.
 
 ### CIFAR-10
 
@@ -122,16 +149,17 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 *Updated 2026-04-12.*
 
 **Key findings:**
-- *MNIST: CNN outperforms FFNN at 99.17% vs 98.06%. SNN-CNN (iter1, anp_snn) 98.87% ± 0.13% — only -0.30pp behind non-spiking CNN, confirming LIF neurons + rate coding are effective for spatial feature extraction. SNN-FFNN baseline 97.62% ± 0.12%, +1.25pp architecture gain with convolutional spiking layers.*
+- *MNIST: CNN outperforms FFNN at 99.17% vs 98.06%. SNN-CNN (iter1, anp_snn) 98.87% ± 0.13% — only -0.30pp behind non-spiking CNN, confirming LIF neurons + rate coding are effective for spatial feature extraction. SNN-FFNN baseline (iter2, anp_snn) 97.62% ± 0.12% — -0.44pp vs non-spiking FFNN despite larger hidden dims (512-256 vs 256-128). Architecture gain: +1.25pp from adding convolutional spiking layers.*
 - *GRU (iter 2) beats LSTM (iter 1): 99.06% ± 0.14% vs 98.95% ± 0.11%, with 25% fewer parameters (617k vs ~821k). Gate reduction (4→3 gates) did not hurt — confirms GRU parity with LSTM on seq-MNIST (Chung et al. 2014).*
 - *Vanilla RNN (iter 3): 97.89% ± 0.35% — far better than predicted. Literature expects 10-20pp regression from LSTM for T>>10 (Bengio et al. 1994); actual gap from GRU is only 1.17pp. Adam's adaptive LR compensates for vanishing gradients at T=28, acting as a significant equaliser. Completes the RNN trilogy: GRU (99.06%) → LSTM (98.95%) → Vanilla (97.89%). Parameter efficiency: 207k vs 617k (GRU) for 1.17pp.*
 - *LSTM/GRU on sequential MNIST (T=28): competitive with CNN despite processing pixels row-by-row.*
 - *PC-FFNN v4 (iter 4): eps=0.01 fix CONFIRMED zero energy explosions across all 5 seeds (energy monotonically decreases to ~0.21 at ep30). However 93.95% is a convergence artifact — not a performance comparison. Adam eps=0.01 reduces effective step size in late training, needing ~50-75 epochs to match the single-seed diagnostic of 98.12%. A future re-run with epochs=75 will establish the PC-FFNN ceiling.*
 - *PC-FFNN v3 (iter 3): Gradient clipping (max_grad_norm=0.5) is a partial improvement — variance reduced (0.35→0.22pp), explosions delayed, mean accuracy +0.09pp to 97.30% ± 0.22%. Root cause: clipping bounds gradient magnitude but not the energy value itself.*
 - *PC-FFNN v1 (iter 1): train accuracy 100% from epoch 2 via supervised clamping, but val CE stuck at ~1.54 (uncalibrated). Root cause: training-evaluation objective mismatch between clamped and free inference.*
-- *PC-EncDec v2 @ 60ep (iter 8): 97.14% ± 0.21% — +0.55pp over 30ep (96.59%). Training budget alone closed 78% of the gap to PC-FFNN v3 (-0.71pp→-0.16pp). Seeds 1/2 early-stopped; seeds 0/3/4 needed all 60 epochs — slow convergence is the main bottleneck. Cosine LR decay recommended for iter 9 to accelerate convergence within 30-40 epochs.*
+- *PC-EncDec v2 @ 60ep (iter 8): 97.14% ± 0.21% — +0.55pp over 30ep (96.59%). Training budget alone closed 78% of the gap to PC-FFNN v3 (-0.71pp→-0.16pp). Seeds 1/2 early-stopped; seeds 0/3/4 needed all 60 epochs — slow convergence is the main bottleneck. Cosine LR decay submitted for iter 9 to accelerate convergence.*
 - *PC-EncDec v2 (iter 7): 96.59% ± 0.28% — +3.46pp vs iter 6 (93.13%). Both fixes confirmed: (1) closing the train/val distribution mismatch (pure-feedforward eval) was the dominant contributor; (2) reducing β from 1.0 to 0.1 (Y_max 0.5→0.1) shifted gradient budget to 90% CE / 10% energy. Generative decoder is now a mild regulariser, not a hindrance. All seeds best at epochs 26-30 — model not yet converged at epoch 30; iter 8 recommended at 60 epochs to establish ceiling.*
 - *PC-EncDec (iter 6): 93.13% ± 0.35% ceiling caused by two compounding bugs: (1) train/val mismatch — cls_head trained on feedforward r_{L-1} but validated on inference-modified r_{L-1} (20 PC steps shift the representation distribution); (2) Y_max=0.5 = β=1 VAE — reconstruction and classification compete with equal gradient budget, known suboptimal for discrimination (Higgins et al. 2017). Iter 7 fixes both: pure-feedforward forward() + Y_max=0.1 (β=0.1, 90% CE gradient).*
+- ***SPC-FFNN v1 (anp_spcnn iter 2) — COMPLETE FAILURE:** ~11% val_acc (random chance) across all 5 seeds. Root cause: the "train/val distribution mismatch" bug class. `pc_loss()` computed CE on raw linear activations (bypassing SNN entirely), while `forward()` evaluated on SNN spike-count representations. SNN weights were NEVER updated via CE. Secondary: competing CE + PC gradients on shared `self.layers` caused energy explosion at epoch 6. Fix (iter 3): CE uses `reps_init[-2]` from `_bottom_up()` (detached SNN reps); `forward()` changed to pure-feedforward SNN (no PC inference during eval). Smoke test: 39.43%→46.72% @ ep1-2 — fix confirmed working. **Recurring bug pattern:** This train/val mismatch has appeared in PC-EncDec v1 (iter 6, -4.17pp penalty) and now SPC-FFNN v1 (complete failure). Fix template: always ensure training CE path and eval path use identical representation source.*
 - *CIFAR-10: Data augmentation was THE limiting factor. SGD+cosine with aug: 94.96% (+16.09%). Adam with aug: 90.57% (+7.01%). SGD+cosine beats Adam when both use augmentation.*
 
 ## CHPC Usage
