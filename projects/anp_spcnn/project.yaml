@@ -10,7 +10,7 @@ description: >
   comparison. Progresses from static classification (MNIST) to temporal
   next-frame prediction (MNIST-Video, NMNIST) as datasets become available
   from anp_datasets.
-current_iteration: 1
+current_iteration: 2
 branch: "project/anp-spcnn"
 human_direction: >
   Phase E1 (static MNIST): SPC-FFNN and SPC-EncDec under rate then TTFS coding.

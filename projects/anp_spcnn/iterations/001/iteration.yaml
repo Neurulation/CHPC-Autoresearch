@@ -1,0 +1,103 @@
+iteration: 1
+project: anp_spcnn
+status: completed
+goal: >
+  Design the SPC-FFNN (Spiking Predictive Coding FFNN) for Phase E1 (static MNIST).
+  Survey relevant literature. Specify architecture, PC inference loop, and training procedure.
+  Defer implementation until anp_snn iter 1 results confirm SNN FFNN dynamics are sound.
+
+phases:
+  plan:
+    completed_at: "2026-04-12"
+    notes: >
+      Iter 1 = design + survey only. Key question: how do LIF spiking dynamics and
+      PC inference interact? Two timescales must not interfere:
+      (1) SNN temporal loop (T=25 timesteps of fast spike dynamics)
+      (2) PC inference loop (N_inf gradient steps on representations)
+      The PC-RNN failure (anp_pcnn iter 5) showed that interleaving these loops
+      corrupts BPTT gradients. Solution: decouple completely.
+
+  survey:
+    completed_at: "2026-04-12"
+    notes: >
+      Key literature:
+      - Rao & Ballard 1999 (Nat Neurosci): original hierarchical PC; prediction
+        errors propagate upward, predictions downward. Representations minimise FE.
+      - Friston 2005 (Phil Trans B): free energy principle; FE = complexity - accuracy.
+      - Bogacz 2017 (Psych Rev): tutorial — village analogy, exact update equations.
+      - Millidge et al. 2021 (arXiv 2006.04182): PC on arbitrary computation graphs,
+        explicit treatment of non-linear activations: e_l = r_l - f(W_l r_{l+1}).
+      - Salvatori et al. 2022 (NeurIPS 2022): associative memories with PC networks.
+      - O'Reilly & Bhatt 2020: spiking PC in cortical columns; membrane ≈ prediction
+        error; LIF reset ≈ error signalling.
+      - Guo et al. 2023 (Frontiers Neurosci): direct review of spiking PC networks;
+        confirms 2-timescale separation is the right strategy.
+      Consensus: use spike-count rates as PC representations (phase E1 rate coding).
+      True temporal coding (TTFS representations) comes in phase C / E1-TTFS.
+
+design:
+  architecture: |
+    SPC-FFNN (rate coding, static MNIST)
+    =====================================
+    Input:    (N, 1, 28, 28) images → flatten → (N, 784)
+    Rate enc: (T, N, 784) Bernoulli spikes  [T=25]
+
+    SNN FFNN layers (bottom-up pass):
+      Layer 1: Linear(784→256), LIF  → accumulate spike counts → r1: (N, 256)
+      Layer 2: Linear(256→128), LIF  → accumulate spike counts → r2: (N, 128)
+      Layer 3: Linear(128→10),  LIF  → accumulate spike counts → r_out: (N, 10)
+
+    PC inference loop  [runs AFTER the SNN forward pass]:
+      Representations to infer: r1, r2  (r_out fixed by label in supervised mode)
+      For k = 1..N_inf:
+        pred_r1  = f(W_{2→1} @ r2)       # top-down prediction of r1
+        pred_r2  = f(W_{3→2} @ r_out)    # top-down prediction of r2
+        e1 = r1 - pred_r1               # prediction error at layer 1
+        e2 = r2 - pred_r2               # prediction error at layer 2
+        r1 += lr_inf * (W_{2→1}.T @ e2 - e1)   # FE gradient wrt r1
+        r2 += lr_inf * (W_{3→2}.T @ e_out - e2) # FE gradient wrt r2
+
+    Weight update (after inference convergence):
+      ΔW_{2→1} ∝ e1 @ r2.T
+      ΔW_{3→2} ∝ e2 @ r_out.T
+
+    Loss: cross_entropy(r_out, label)   # spike-count logits, identical to SNN-FFNN
+
+  key_decisions:
+    - "Representations are spike counts (rates), NOT membrane potentials. This keeps
+       PC inference in the continuous real-valued domain — no spiking during inference."
+    - "PC inference loop is completely outside the SNN temporal loop. The SNN runs
+       first (T timesteps), outputs spike counts, then PC inference runs. No interleaving."
+    - "This avoids the meta-gradient interference that killed PC-RNN (iter 5). The SNN
+       temporal loop is purely for rate encoding; PC inference is on the collapsed output."
+    - "Weight matrices W_{l→l-1} are the same as the feedforward weights (tied weights
+       option) OR separate prediction weights (untied option). Start with untied for
+       flexibility, test tied as ablation in a later iter."
+    - "lr_inf (representation learning rate) and N_inf (inference steps) are hyperparams.
+       Start: lr_inf=0.01, N_inf=20 (matches PC-FFNN iter 1 settings)."
+
+  open_questions:
+    - "Will spike-count representations converge under PC inference? Spike counts are
+       discrete integers — should we normalise to [0,1] firing rates before inference?"
+    - "Tied vs untied weights: tied is more biologically plausible but may restrict
+       representational capacity. Ablate in iter 2."
+    - "How does beta (LIF decay) affect the quality of spike-count representations
+       passed to the PC inference loop? Sweep beta in [0.7, 0.9, 0.95]."
+    - "Can we eventually close the loop: use the PC-inferred representations as the
+       target membrane state for the next SNN forward pass? This moves towards true
+       predictive spiking but risks meta-gradient interference — defer to phase E2."
+
+  implementation_plan:
+    - "Create src/autoresearch/models/spc_ffnn.py — SPCFFNNModel class."
+    - "Reuse LIF neurons from snntorch. Add a separate PCInferenceModule."
+    - "Create src/autoresearch/configs/model/spc_ffnn.yaml."
+    - "Create src/autoresearch/configs/experiment/mnist_spc_ffnn_adam.yaml."
+    - "Reuse train.py (standard training loop). PC inference replaces the standard
+       forward pass — override model.forward() to include inference loop."
+    - "Local smoke test: 2 epochs, wandb.enabled=false."
+    - "CHPC: gpu_1, 1h, 5 seeds."
+    - "Target: match PC-FFNN v3 (97.27% ± 0.18%) or better."
+
+next_iteration:
+  number: 2
+  goal: "Implement SPC-FFNN (rate coding) on MNIST. Run full 5-seed sweep at 20ep."
