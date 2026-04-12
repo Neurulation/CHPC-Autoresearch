@@ -13,6 +13,7 @@ from autoresearch.models.snn_cnn import SNNCNN
 from autoresearch.models.snn_gru import SNNGRUModel
 from autoresearch.models.snn_lstm import SNNLSTMModel
 from autoresearch.models.snn_vanilla_rnn import SNNVanillaRNNModel
+from autoresearch.models.spc_ffnn import SPCFFNNModel
 from autoresearch.models.vanilla_rnn import VanillaRNN
 
 __all__ = [
@@ -29,5 +30,6 @@ __all__ = [
     "SNNGRUModel",
     "SNNLSTMModel",
     "SNNVanillaRNNModel",
+    "SPCFFNNModel",
     "VanillaRNN",
 ]

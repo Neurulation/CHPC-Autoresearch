@@ -1,0 +1,45 @@
+# @package _global_
+# ANP-SPCNN Iter 2 — SPC-FFNN (rate coding) on MNIST.
+# Spiking + PC: LIF SNN initialises representations, PC inference refines them.
+# 2-timescale separation: SNN loop (T=25) → spike counts → PC loop (T_pc=20).
+# Target: match or exceed PC-FFNN v3 (97.27% ± 0.18%).
+
+defaults:
+  - override /dataset: mnist
+  - override /model: spc_ffnn
+  - override /optimizer: adam
+
+experiment_group: mnist_spc_ffnn_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 20
+num_workers: 4
+validation_split: 0.1
+
+early_stopping:
+  enabled: true
+  patience: 5
+  min_delta: 0.001
+  metric: val_loss
+  mode: min
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - snn
+    - pc
+    - spc-ffnn
+    - lif
+    - rate-coding
+    - predictive-coding
+    - adam
+    - anp
+    - anp-spcnn
+    - phase-e
+  notes: "ANP-SPCNN Iter 2 — SPC-FFNN (rate coding): SNN bottom-up + PC inference on MNIST."

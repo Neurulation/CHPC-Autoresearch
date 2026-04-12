@@ -1,0 +1,15 @@
+# @package _global_.model
+# SPC-FFNN — Spiking Predictive Coding FFNN for MNIST.
+# SNN bottom-up pass (LIF, T=25 rate coding) + PC inference loop (T_pc=20 steps).
+# Strictly 2-timescale: SNN temporal loop then PC inference (no interleaving).
+
+_target_: autoresearch.models.spc_ffnn.SPCFFNNModel
+input_size: 784
+hidden_dims: [256, 128]
+num_classes: 10
+T_pc: 20
+lr_pc: 0.05
+ce_weight: 1.0
+beta: 0.9
+threshold: 1.0
+timesteps: 25
