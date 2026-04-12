@@ -1,0 +1,12 @@
+# @package _global_.model
+# SNN-CNN — spiking analogue of the rate-coded CNN baseline.
+# Two Conv+LIF+Pool blocks followed by two FC+LIF layers.
+# Rate coding: T=25 timesteps of Bernoulli spikes from pixel intensities.
+# Matches CNN spatial topology exactly (same filter counts, kernel sizes, FC dims).
+
+_target_: autoresearch.models.snn_cnn.SNNCNN
+input_channels: 1
+num_classes: 10
+beta: 0.9
+threshold: 1.0
+timesteps: 25

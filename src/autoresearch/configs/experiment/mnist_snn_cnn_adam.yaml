@@ -1,0 +1,44 @@
+# @package _global_
+# ANP-SNN Iter 1 — SNN-CNN (rate coding) on MNIST.
+# Spiking analogue of the rate-coded CNN (99.17% ± 0.10%).
+# Establishes Phase B spiking CNN baseline before temporal coding (TTFS) in iter 5/6.
+
+defaults:
+  - override /dataset: mnist
+  - override /model: snn_cnn
+  - override /optimizer: adam
+  - override /loss_fn: cross_entropy
+
+experiment_group: mnist_snn_cnn_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 20
+num_workers: 4
+validation_split: 0.1
+
+early_stopping:
+  enabled: true
+  patience: 5
+  min_delta: 0.001
+  metric: val_loss
+  mode: min
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - snn
+    - snn_cnn
+    - lif
+    - rate-coding
+    - convolutional
+    - adam
+    - anp
+    - anp-snn
+    - phase-b
+  notes: "ANP-SNN Iter 1 — SNN-CNN (rate coding): spiking analogue of CNN baseline."

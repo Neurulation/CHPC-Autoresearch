@@ -1,0 +1,39 @@
+iteration: 1
+project: anp_snn
+status: experiment
+goal: >
+  SNN-CNN (rate coding) — spiking analogue of the rate-coded CNN baseline (99.17% ± 0.10%).
+  Two Conv+LIF+Pool blocks followed by two FC+LIF layers.
+  Rate coding: T=25 timesteps of Bernoulli spikes from pixel intensities.
+  Establishes Phase B spiking CNN baseline before temporal coding (TTFS) in iter 5.
+
+phases:
+  plan:
+    completed_at: "2026-04-12"
+    notes: >
+      Decided to build a spiking CNN as the direct analogue of the CNN baseline.
+      Same spatial topology (Conv+Pool × 2 → FC × 2), swap ReLU → LIF.
+      Rate coding first (Phase B); TTFS variant follows in iter 5 (Phase C).
+
+  survey:
+    completed_at: "2026-04-12"
+    notes: >
+      snntorch (Eshraghian et al. 2023) provides LIF neurons with surrogate gradients
+      (fast-sigmoid, slope=25). BPTT through T timesteps. Rate coding: pixel intensity
+      → Poisson spike probability (Bernoulli sampling). Standard approach for static images.
+
+  implement:
+    completed_at: "2026-04-12"
+    notes: >
+      Created src/autoresearch/models/snn_cnn.py — SNNCNN class matching CNN topology.
+      Created src/autoresearch/configs/model/snn_cnn.yaml (beta=0.9, threshold=1.0, T=25).
+      Created src/autoresearch/configs/experiment/mnist_snn_cnn_adam.yaml (20ep, 5 seeds).
+      Created experiments/anp_snn_iter1_snn_cnn_adam.pbs (gpu_1, 1h, 32gb).
+      Created src/autoresearch/datasets/mnist_video.py — MNISTVideo for future temporal use.
+
+  experiment:
+    started_at: "2026-04-12"
+    notes: >
+      Submitted anp_snn_iter1_snn_cnn_adam.pbs to CHPC gpu_1 queue.
+      5 seeds (0–4), 20 epochs each, early stopping patience=5 on val_loss.
+      Target: match or exceed CNN baseline (99.17% ± 0.10%).
