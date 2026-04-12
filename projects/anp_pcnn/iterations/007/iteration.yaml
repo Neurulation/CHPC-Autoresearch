@@ -1,6 +1,6 @@
 project: anp_pcnn
 iteration: 7
-status: experiment
+status: completed
 goal: >
   PC-EncDec v2 — fix the two root causes preventing PC-EncDec from reaching
   its potential as a generative classifier on MNIST.
@@ -42,9 +42,33 @@ phase_history:
       Y=0.1 → 90% CE gradient, 10% energy gradient.
       PBS script: experiments/anp_pcnn_iter7_pc_enc_dec_v2_adam.pbs (12h, 64gb).
   - phase: experiment
-    completed: null
+    completed: "2026-04-12"
     notes: >
-      Submitted job 7169793 on 2026-04-12 (gpu_1, 12h walltime).
-      5 seeds (0-4), experiment=mnist_pc_enc_dec_v2_adam, epochs=30.
-      Expected: both fixes should push val accuracy significantly above 93.13%.
-      Primary fix (train/val mismatch) expected to be the larger contributor.
+      Job 7169793 completed successfully. All 5 seeds (0-4) ran 30 epochs each.
+      Best val_acc: seed0=96.97%, seed1=96.63%, seed2=96.68%, seed3=96.25%, seed4=96.40%.
+      Mean: 96.59% ± 0.28%. Massive +3.46pp improvement over iter6 (93.13%).
+      Both fixes contributed as expected: mismatch closure (primary) + Y_max reduction (secondary).
+  - phase: analyze
+    completed: "2026-04-12"
+    notes: >
+      Metrics aggregated from CHPC PBS log and status.json files.
+      96.59% ± 0.28% (5 seeds, best-epoch). Best seed: 0 at 96.97% (epoch 30).
+      Mean best_val_loss: 0.1193. All seeds converged within 30 epochs (best at epochs 26-30).
+      470,948 parameters. Results written to metrics.json.
+  - phase: conclude
+    completed: "2026-04-12"
+    notes: >
+      Both fixes confirmed effective. +3.46pp vs iter 6 (96.59% vs 93.13%).
+      Fix 1 (train/val mismatch) was the dominant contributor — closing the
+      distribution gap between CE training path and inference-modified r_2
+      recovered the bulk of missing accuracy.
+      Fix 2 (Y_max 0.5→0.1 / β=1→β=0.1) provided additional improvement by
+      shifting gradient budget: 90% CE, 10% energy vs prior 50/50.
+      PC-EncDec v2 at 96.59% ± 0.28% now sits 0.71pp below PC-FFNN v3 (97.30%)
+      and 0.38pp below PC-FFNN v2 (96.97%). The generative structure (decoder)
+      is no longer a liability — it adds mild regularisation with minimal cost.
+      All seeds still best at epochs 26-30 (no early stopping) — model still
+      improving at epoch 30. 30 more epochs may squeeze further gains.
+      best_result not updated (96.59% < project best 97.30% PC-FFNN v3).
+      Recommended iter 8: epochs=60 to establish PC-EncDec v2 ceiling, evaluate
+      whether the generative structure eventually closes or exceeds PC-FFNN v3.

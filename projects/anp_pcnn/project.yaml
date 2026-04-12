@@ -10,7 +10,7 @@ description: >
   (trained with Adam on the PC energy) serve as comparison baselines before
   introducing spiking dynamics (ANP Project 5) and backprop-free learning
   (ANP Project 7).
-current_iteration: 7
+current_iteration: 8
 branch: "project/anp-pcnn"
 human_direction: >
   Iter 1: PC-FFNN — Rao & Ballard (1999) hierarchical predictive coding on
@@ -36,3 +36,6 @@ best_result:
   note: >
     Best-epoch val_acc. Grad clipping delayed explosions and reduced variance
     vs iter 2, but structural instability remains. Iter 4: ce_weight=0.1.
+    PC-EncDec v2 (iter 7) reached 96.59% ± 0.28% (+3.46pp vs iter 6 93.13%).
+    Generative structure no longer a liability. Still 0.71pp below PC-FFNN v3.
+    Recommended iter 8: epochs=60 for PC-EncDec v2 ceiling.

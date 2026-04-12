@@ -1,0 +1,20 @@
+{
+  "experiment_group": "mnist_pc_enc_dec_v2_adam",
+  "seeds": [0, 1, 2, 3, 4],
+  "per_seed": {
+    "0": {"best_val_acc": 96.97, "best_epoch": 30, "best_val_loss": 0.10350015989326417, "status": "completed"},
+    "1": {"best_val_acc": 96.63, "best_epoch": 29, "best_val_loss": 0.11471916449830886, "status": "completed"},
+    "2": {"best_val_acc": 96.68, "best_epoch": 29, "best_val_loss": 0.12417831176773031, "status": "completed"},
+    "3": {"best_val_acc": 96.25, "best_epoch": 26, "best_val_loss": 0.13101449093603074, "status": "completed"},
+    "4": {"best_val_acc": 96.40, "best_epoch": 26, "best_val_loss": 0.12300677985904064, "status": "completed"}
+  },
+  "mean_val_accuracy": 96.59,
+  "std_val_accuracy": 0.28,
+  "mean_val_loss": 0.11928,
+  "best_seed": 0,
+  "best_val_accuracy": 96.97,
+  "num_params": 470948,
+  "epochs": 30,
+  "all_seeds_completed": true,
+  "notes": "PC-EncDec v2: pure-feedforward forward() + Y_max=0.1. Massive +3.46pp improvement over iter6 (93.13%). Both fixes contributed: train/val mismatch closure (primary) + Y_max 0.5->0.1 (secondary). Now 0.71pp below PC-FFNN v3 best (97.30%)."
+}

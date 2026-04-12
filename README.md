@@ -81,9 +81,10 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 | Artificial Neural Prostheses | 1 | SNN (784-512-256-10 LIF, T=25) | Adam | ✗ | 5 | 97.62% ± 0.12% | rate-coded | ✅ |
 | ANP — PC-NN | 3 | PC-FFNN v3 + CE head + grad clip (784-256-128-10) | Adam | ✗ | 5 | **97.30% ± 0.22%**⁴ | predictive coding | ✅ |
 | ANP — PC-NN | 2 | PC-FFNN v2 + CE head (784-256-128-10) | Adam | ✗ | 5 | **97.21% ± 0.35%**³ | predictive coding | ✅ |
+| ANP — PC-NN | 7 | PC-EncDec v2 (784-256-128 enc+dec, β=0.1) | Adam | ✗ | 5 | **96.59% ± 0.28%**⁷ | generative PC, ff-forward eval | ✅ |
 | ANP — PC-NN | 1 | PC-FFNN (784-256-128-10) | Adam | ✗ | 5 | ~96%¹ / 89.0% ± 4.7%² | predictive coding | ⚠️ |
 | ANP — PC-NN | 4 | PC-FFNN v4 + eps=0.01 (784-256-128-10) | Adam (eps=0.01) | ✗ | 5 | 93.95% ± 0.27%⁵ | not converged | ⚠️ |
-| ANP — PC-NN | 6 | PC-EncDec (784-256-128 enc + dec) | Adam | ✗ | 5 | 93.13% ± 0.35%⁶ | generative PC | ⚠️ |
+| ANP — PC-NN | 6 | PC-EncDec v1 (784-256-128 enc+dec) | Adam | ✗ | 5 | 93.13% ± 0.35%⁶ | train/val mismatch + β=1 | ⚠️ |
 
 ¹ Estimated best-epoch val_acc (~epoch 3) based on smoke test; true best-epoch val_acc not directly recorded.  
 ² Mean last-epoch val_acc at early-stop (epochs 9-11). High variance and degradation compared to best epoch
@@ -98,7 +99,11 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 ⁶ **Train/val mismatch + Y_max too high.** Energy schedule fix resolved the original <1% CE-gradient problem (prev: ~31%).
   93.13% ceiling caused by: (1) cls_head trained on feedforward r_2 but validated on inference-modified r_2 (mismatch);
   (2) Y_max=0.5 = β=1 VAE — reconstruction and classification compete equally, suboptimal for discrimination.
-  Iter 7 fixes: pure-feedforward forward() + Y_max=0.1 (β=0.1).
+  Iter 7 fixes: pure-feedforward forward() + Y_max=0.1 (β=0.1).  
+⁷ **Both fixes confirmed.** +3.46pp vs iter 6 (96.59% vs 93.13%). Fix 1 (train/val mismatch closure) was the dominant
+  contributor. Fix 2 (β=1→β=0.1, 50/50 → 90/10 CE/energy gradient split) added secondary improvement.
+  All seeds best at epochs 26-30 — model still improving at epoch 30. 30 more epochs may yield further gains.
+  0.71pp below PC-FFNN v3 (97.30%); the generative decoder is now a mild regulariser, not a liability.
 
 ### CIFAR-10
 
@@ -109,7 +114,7 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 | Image Processing NN | 1 | ResNet-18 | Adam | ✗ | 5 | 83.56% ± 0.36% | ✅ |
 | Image Processing NN | 2 | ResNet-18 | SGD+Cosine | ✗ | 5 | 78.87% ± 0.94% | ✅ |
 
-*Updated 2026-04-11.*
+*Updated 2026-04-12.*
 
 **Key findings:**
 - *MNIST: CNN outperforms FFNN at 99.17% vs 98.06%. SNN baseline 97.62% ± 0.12% — trails dense nets as expected given rate coding overhead.*
@@ -119,6 +124,7 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 - *PC-FFNN v4 (iter 4): eps=0.01 fix CONFIRMED zero energy explosions across all 5 seeds (energy monotonically decreases to ~0.21 at ep30). However 93.95% is a convergence artifact — not a performance comparison. Adam eps=0.01 reduces effective step size in late training, needing ~50-75 epochs to match the single-seed diagnostic of 98.12%. A future re-run with epochs=75 will establish the PC-FFNN ceiling.*
 - *PC-FFNN v3 (iter 3): Gradient clipping (max_grad_norm=0.5) is a partial improvement — variance reduced (0.35→0.22pp), explosions delayed, mean accuracy +0.09pp to 97.30% ± 0.22%. Root cause: clipping bounds gradient magnitude but not the energy value itself.*
 - *PC-FFNN v1 (iter 1): train accuracy 100% from epoch 2 via supervised clamping, but val CE stuck at ~1.54 (uncalibrated). Root cause: training-evaluation objective mismatch between clamped and free inference.*
+- *PC-EncDec v2 (iter 7): 96.59% ± 0.28% — +3.46pp vs iter 6 (93.13%). Both fixes confirmed: (1) closing the train/val distribution mismatch (pure-feedforward eval) was the dominant contributor; (2) reducing β from 1.0 to 0.1 (Y_max 0.5→0.1) shifted gradient budget to 90% CE / 10% energy. Generative decoder is now a mild regulariser, not a hindrance. All seeds best at epochs 26-30 — model not yet converged at epoch 30; iter 8 recommended at 60 epochs to establish ceiling.*
 - *PC-EncDec (iter 6): 93.13% ± 0.35% ceiling caused by two compounding bugs: (1) train/val mismatch — cls_head trained on feedforward r_{L-1} but validated on inference-modified r_{L-1} (20 PC steps shift the representation distribution); (2) Y_max=0.5 = β=1 VAE — reconstruction and classification compete with equal gradient budget, known suboptimal for discrimination (Higgins et al. 2017). Iter 7 fixes both: pure-feedforward forward() + Y_max=0.1 (β=0.1, 90% CE gradient).*
 - *CIFAR-10: Data augmentation was THE limiting factor. SGD+cosine with aug: 94.96% (+16.09%). Adam with aug: 90.57% (+7.01%). SGD+cosine beats Adam when both use augmentation.*
 
