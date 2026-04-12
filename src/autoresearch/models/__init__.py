@@ -4,6 +4,7 @@ from autoresearch.models.cnn import CNN
 from autoresearch.models.ffnn import FFNN
 from autoresearch.models.gru import GRU
 from autoresearch.models.lstm import LSTM
+from autoresearch.models.pc_cnn import PCCNN
 from autoresearch.models.pc_enc_dec import PCEncDec
 from autoresearch.models.pc_ffnn import PCFFNN
 from autoresearch.models.pc_rnn import PCRNN
@@ -21,6 +22,7 @@ __all__ = [
     "CNN",
     "GRU",
     "LSTM",
+    "PCCNN",
     "PCEncDec",
     "PCFFNN",
     "PCRNN",

@@ -1,0 +1,54 @@
+# @package _global_
+# ANP-PCNN Iter 11 — PC-CNN: Predictive Coding over convolutional feature maps.
+#
+# Architecture:
+#   r_0 (1,28,28) → conv1 → r_1 (32,12,12) → conv2 → r_2 (64,4,4)
+#   → FC → r_fc (256) → pc_out → r_out (10)
+#   cls_head(r_fc) → logits  [auxiliary CE head, same as PC-FFNN pattern]
+#
+# PC inference updates {r_1, r_2, r_fc} for T_pc=20 steps.
+# r_out clamped to one_hot(y) during training.
+# No energy schedule needed: ce_weight=1.0 direct blend (same as PC-FFNN).
+
+defaults:
+  - override /dataset: mnist
+  - override /model: pc_cnn
+  - override /optimizer: adam_pc
+
+experiment_group: mnist_pc_cnn_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 30
+num_workers: 4
+validation_split: 0.1
+max_grad_norm: 0.5
+
+model:
+  T_pc: 20
+  lr_pc: 0.05
+  ce_weight: 1.0
+
+early_stopping:
+  enabled: true
+  patience: 7
+  min_delta: 0.01
+  metric: val_accuracy
+  mode: max
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - pc_cnn
+    - predictive_coding
+    - convolutional
+    - lenet
+    - adam
+    - anp
+    - anp-pcnn
+  notes: "ANP-PCNN Iter 11 — PC-CNN: PC inference over spatial conv representations. LeNet-style conv stack (32→64), FC hidden=256, T_pc=20."

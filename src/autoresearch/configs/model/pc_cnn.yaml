@@ -1,0 +1,10 @@
+_target_: autoresearch.models.pc_cnn.PCCNN
+in_channels: 1
+input_hw: 28
+conv_channels: [32, 64]
+kernel_size: 5
+fc_hidden: 256
+num_classes: 10
+T_pc: 20
+lr_pc: 0.05
+ce_weight: 1.0

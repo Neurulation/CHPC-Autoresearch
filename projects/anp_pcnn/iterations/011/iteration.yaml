@@ -1,0 +1,38 @@
+project: anp_pcnn
+iteration: 11
+status: experiment
+goal: >
+  PC-CNN: Apply predictive coding inference to convolutional feature maps.
+  This fills the missing cell in the ANN/PC/SNN comparison matrix
+  (CNN: 99.17% ANN, --% PC, 98.87% SNN).
+
+  Architecture: r_0 (1,28,28) → conv1 → r_1 (32,12,12) → conv2 → r_2 (64,4,4)
+  → FC → r_fc (256) → pc_out → r_out (10). PC inference updates {r_1, r_2, r_fc}
+  for T_pc=20 steps with r_out clamped to one_hot(y) during training.
+  cls_head(r_fc) is the auxiliary CE head (same pattern as PC-FFNN).
+
+  Target: approach ANN-CNN 99.17% (optimistic) or match PC-FFNN 97.30% (conservative).
+  Conv features may allow stronger representations than FC-only PC models.
+created: "2026-04-12"
+
+phases:
+  plan:
+    completed_at: "2026-04-12"
+    notes: >
+      Model follows exact PCFFNN two-phase pattern extended to conv layers.
+      Conv reps r_1/r_2 are spatial (B,C,H,W); FC rep r_fc is (B,256).
+      Energy per conv layer: 0.5*||r_{l+1} - pool(ReLU(conv_l(r_l)))||² summed over all elements.
+      Gradient of energy w.r.t. spatial reps computed via autograd (handles conv Jacobian automatically).
+      No energy_schedule needed (ce_weight=1.0 direct blend, same as PC-FFNN).
+      Walltime: 4h (T_pc=20 per batch → ~40min/seed; early stopping patience=7 expected to trigger).
+
+  implement:
+    completed_at: "2026-04-12"
+    notes: >
+      Created src/autoresearch/models/pc_cnn.py (PCCNN class).
+      Created src/autoresearch/configs/model/pc_cnn.yaml.
+      Created src/autoresearch/configs/experiment/mnist_pc_cnn_adam.yaml.
+      Created experiments/anp_pcnn_iter11_pc_cnn_adam.pbs (walltime=04:00:00).
+      Exported PCCNN from src/autoresearch/models/__init__.py.
+      Smoke test (seed=0, epochs=2, local): ep1 67.02%, ep2 81.67%.
+      Energy decreasing: 11.72 → 2.69. Model working correctly, ready for CHPC.
