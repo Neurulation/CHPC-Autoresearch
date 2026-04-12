@@ -10,7 +10,7 @@ description: >
   comparison. Progresses from static classification (MNIST) to temporal
   next-frame prediction (MNIST-Video, NMNIST) as datasets become available
   from anp_datasets.
-current_iteration: 3
+current_iteration: 5
 branch: "project/anp-spcnn"
 human_direction: >
   Phase E1 (static MNIST): SPC-FFNN and SPC-EncDec under rate then TTFS coding.
@@ -19,4 +19,11 @@ human_direction: >
   Phase E2 (temporal sequences): SPC-EncDec on MNIST-Video and NMNIST.
   Primary objective: next-frame prediction of population activity.
   Depends on anp_datasets for temporal data infrastructure.
+
+  STATUS: iters 2-5 (all SPC-FFNN variants) COMPLETE FAILURE at ~11% chance.
+  Root cause: shared SNN/PC weights are architecturally incompatible.
+  NEXT (iter 6): Redesign with SEPARATE SNN encoder weights and PC generative weights:
+    - SNN encoder: input → [SNN_enc_weights] → spike_accs → cls_head (trained by CE+surrogate)
+    - PC generative: [PC_gen_weights] form a separate network for predictive coding
+    - No weight sharing between SNN and PC pathways
 best_result: null
