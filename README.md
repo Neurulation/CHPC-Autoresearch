@@ -179,6 +179,37 @@ qsub experiments/train_mnist_ffnn.pbs
 qstat -u $CHPC_USERNAME
 ```
 
+### Autonomous Job Monitoring (`/loop`)
+
+After submitting jobs, use `/loop` to have the agent poll CHPC and auto-process results without you having to prompt it:
+
+```
+/loop 10m Check CHPC job status. For each completed job, extract results,
+write metrics.json, update state, commit+push. Resubmit any killed jobs.
+```
+
+**How it works:**
+1. `/loop` parses the interval (`10m`) into a standard 5-field cron expression (`*/10 * * * *`)
+2. It calls `CronCreate` with that expression and your prompt — `CronCreate` returns a job ID (e.g. `eb3ec6ae`)
+3. The prompt runs **immediately**, then repeats on schedule
+4. Each firing only happens while Claude Code is **idle** (never interrupts mid-query)
+5. The job is **session-only** — lost when Claude Code closes — and auto-expires after 7 days
+
+Cancel any time with the job ID printed at scheduling:
+
+```
+CronDelete("eb3ec6ae")
+```
+
+Or just tell the agent: *"stop the loop"* / *"cancel monitoring"*.
+
+**Walltime sizing rule:** `walltime = n_seeds × per_seed_time × 1.2` (20% buffer).
+RNN-class models: use 4h. FFNN/CNN: use 2h. GPU-1 queue max is 48h.
+
+**Walltime kill + resume:** `last_checkpoint.pt` is saved every epoch. Resubmitting
+the same PBS script is safe — seeds that already finished skip immediately; killed
+seeds resume from the last checkpoint. No wasted compute.
+
 See [docs/chpc/](docs/chpc/) for detailed CHPC documentation.
 
 ## Project Structure
@@ -202,6 +233,7 @@ docs/                   # Architecture docs, CHPC guides
 | Skill | Purpose |
 |-------|---------|
 | `/start` | **Kickoff / resume the full autoresearch loop** |
+| `/loop` | **Schedule a recurring poll** — monitors CHPC jobs, auto-analyzes results |
 | `/chpc-submit` | Generate PBS script and submit to CHPC (tries SSH directly) |
 | `/chpc-status` | Check CHPC job status |
 | `/chpc-setup` | Set up repo on CHPC for first time |
