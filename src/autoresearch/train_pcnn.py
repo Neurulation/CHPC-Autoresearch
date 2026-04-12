@@ -299,16 +299,12 @@ def train(
 
     early_stopping = None
     if cfg.early_stopping.enabled:
-        # For PC-FFNN, monitor val_accuracy (max) not val_loss (min).
-        # Val CE is permanently elevated due to calibration; accuracy is the
-        # meaningful signal.
-        mode = getattr(cfg.early_stopping, "mode", "max")
         early_stopping = EarlyStopping(
             patience=cfg.early_stopping.patience,
             min_delta=cfg.early_stopping.min_delta,
-            mode=mode,
+            mode=cfg.early_stopping.mode,
         )
-        log.info("Early stopping: patience=%d, mode=%s", cfg.early_stopping.patience, mode)
+        log.info("Early stopping: patience=%d, mode=%s", cfg.early_stopping.patience, cfg.early_stopping.mode)
 
     # best_metric tracks best val_accuracy (higher is better) for checkpointing.
     # Initialise to 0.0 (will be overwritten on first epoch).
@@ -368,8 +364,8 @@ def train(
                 save_best_model(checkpoint_dir, epoch, model, val_metrics["loss"])
                 log.info("New best val_acc: %.2f%% (epoch %d)", best_val_acc, epoch)
 
-            # Early stopping on val_accuracy
-            if early_stopping is not None and early_stopping(val_metrics["accuracy"]):
+            # Early stopping on val_loss
+            if early_stopping is not None and early_stopping(val_metrics["loss"]):
                 log.info("Early stopping at epoch %d (best val_acc: %.2f%%)",
                          epoch, best_val_acc)
                 save_status(run_dir, "completed", epoch=epoch,
