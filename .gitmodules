@@ -1,0 +1,3 @@
+[submodule "docs/snntorch"]
+	path = docs/snntorch
+	url = git@github.com:jeshraghian/snntorch.git
