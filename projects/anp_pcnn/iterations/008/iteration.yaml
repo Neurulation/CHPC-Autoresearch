@@ -1,0 +1,19 @@
+project: anp_pcnn
+iteration: 8
+status: planned
+goal: >
+  PC-EncDec v2 @ 60 epochs — establish the true accuracy ceiling.
+  Iter 7 (30 epochs) showed all seeds still improving at the last epoch
+  (best epochs 26-30, no plateau). Same config as iter 7 (pure-feedforward
+  eval, Y_max=0.1) but doubled training budget to let the model converge.
+  Expected: further gains above 96.59%, potentially approaching or exceeding
+  PC-FFNN v3 (97.30% ± 0.22%). Early stopping (patience=10) will terminate
+  runs that genuinely plateau before 60 epochs.
+created: "2026-04-12"
+phase_history:
+  - phase: planned
+    completed: "2026-04-12"
+    notes: >
+      Planned after iter 7 concluded at 96.59% ± 0.28% with all seeds still
+      improving at epoch 30. Simply double the training budget; no other
+      changes needed — the architecture and fixes are confirmed working.
