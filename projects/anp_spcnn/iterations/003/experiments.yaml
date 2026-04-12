@@ -6,5 +6,16 @@ jobs:
     seeds: [0, 1, 2, 3, 4]
     epochs: 30
     submitted_at: "2026-04-12"
+    status: completed
+    notes: "WRONG ENTRY POINT: used train.py not train_pcnn. Only cls_head trained. Result: 55.95% (frozen SNN baseline)."
+
+  - job_id: "7172276"
+    name: anp_spcnn_iter3b_spc_ffnn_v2_pcnn_adam
+    pbs_script: experiments/anp_spcnn_iter3b_spc_ffnn_v2_pcnn_adam.pbs
+    queue: gpu_1
+    walltime: "02:00:00"
+    seeds: [0, 1, 2, 3, 4]
+    epochs: 30
+    submitted_at: "2026-04-12"
     status: running
-    notes: "SPC-FFNN v2: CE on reps_init[-2] from _bottom_up(), forward() pure-feedforward SNN"
+    notes: "CORRECTED re-run with train_pcnn. True SPC-FFNN v2 baseline: PC energy + CE, SNN detached."
