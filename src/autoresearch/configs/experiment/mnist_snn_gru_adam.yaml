@@ -1,0 +1,45 @@
+# @package _global_
+# ANP-SNN Iter 4 — SNN-GRU (rate coding) on sequential MNIST.
+# Hybrid: LIF input encoder per row + 2-layer GRU (hidden=256).
+# Direct spiking analogue of the GRU baseline (anp_rnn).
+
+defaults:
+  - override /dataset: mnist
+  - override /model: snn_gru
+  - override /optimizer: adam
+  - override /loss_fn: cross_entropy
+
+experiment_group: mnist_snn_gru_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 30
+num_workers: 4
+validation_split: 0.1
+max_grad_norm: 1.0
+
+early_stopping:
+  enabled: true
+  patience: 7
+  min_delta: 0.001
+  metric: val_loss
+  mode: min
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - snn
+    - gru
+    - lif
+    - rate-coding
+    - sequential
+    - adam
+    - anp
+    - anp-snn
+    - phase-b
+  notes: "ANP-SNN Iter 4 — SNN-GRU (rate coding): hybrid LIF input encoder + 2-layer GRU on sequential MNIST."

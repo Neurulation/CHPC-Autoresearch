@@ -1,0 +1,31 @@
+iteration: 3
+project: anp_snn
+status: experiment
+goal: >
+  SNN-LSTM (rate coding) on sequential MNIST — hybrid spiking-recurrent model.
+  LIF input encoder (T=25 Bernoulli timesteps per row) + 2-layer LSTM (hidden=256).
+  Direct spiking analogue of the LSTM baseline (anp_rnn).
+
+phases:
+  plan:
+    completed_at: "2026-04-12"
+    notes: >
+      Sequential MNIST: treat each 28×28 image as 28 rows of 28 pixels.
+      Per-row SNN encoding: LIF integration over T=25 Bernoulli timesteps → spike counts.
+      LSTM processes the 28-step sequence of spike-count feature vectors.
+      This isolates the effect of rate-coded spiking input on sequence classification.
+
+  implement:
+    completed_at: "2026-04-12"
+    notes: >
+      Created src/autoresearch/models/snn_lstm.py (SNNLSTMModel).
+      Config: src/autoresearch/configs/model/snn_lstm.yaml.
+      Experiment: src/autoresearch/configs/experiment/mnist_snn_lstm_adam.yaml.
+      PBS: experiments/anp_snn_iter3_snn_lstm_adam.pbs (gpu_1, 2h).
+      Smoke test: val_loss 0.082 @ epoch 2 (strong learning signal).
+
+  experiment:
+    started_at: "2026-04-12"
+    notes: >
+      Submitted to CHPC gpu_1. 5 seeds (0–4), 30 epochs, patience=7 on val_loss.
+      max_grad_norm=1.0 for stability. Target: approach LSTM baseline performance.

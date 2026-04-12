@@ -9,7 +9,7 @@ description: >
   the SPCNN (anp_spcnn) and directly tests the central research question:
   does temporal (TTFS) encoding outperform rate coding, and at what task complexity
   does the crossover occur?
-current_iteration: 1
+current_iteration: 5
 branch: "project/anp-snn"
 human_direction: >
   Phase B (rate coding): SNN-CNN, SNN-LSTM, SNN-GRU, SNN-VanillaRNN — all on

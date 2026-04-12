@@ -1,0 +1,14 @@
+# @package _global_.model
+# SNN-LSTM — hybrid spiking LSTM for sequential MNIST.
+# LIF input encoder (T=25 Bernoulli timesteps per row) + 2-layer stacked LSTM (hidden=256).
+# Direct spiking analogue of the LSTM baseline (97.89%).
+
+_target_: autoresearch.models.snn_lstm.SNNLSTMModel
+input_size: 28
+hidden_size: 256
+num_layers: 2
+num_classes: 10
+beta: 0.9
+threshold: 1.0
+timesteps: 25
+dropout: 0.3

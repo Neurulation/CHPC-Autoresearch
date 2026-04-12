@@ -1,0 +1,108 @@
+"""Spiking LSTM — Phase B of the ANP SNN project.
+
+Hybrid spiking-recurrent model for sequential MNIST. The input encoding
+stage uses LIF neurons (rate coding: T=25 Bernoulli timesteps per row),
+producing spike-count features that are fed to a standard 2-layer stacked
+LSTM. This isolates the effect of rate-coded spiking input on sequence
+classification while keeping the recurrent architecture identical to the
+LSTM baseline.
+
+Architecture
+------------
+Input  : (N, 1, 28, 28) MNIST → viewed as 28 rows of 28 pixels
+Per row: Bernoulli rate-encode (T=25) → LIF integration → spike counts (28,)
+LSTM   : 2-layer stacked, input_size=28, hidden_size=256
+Output : Linear(256→10) logits
+
+The LIF layer has no weight projection (current = input spike directly),
+acting as a leaky integrator / coincidence detector on Poisson spike trains.
+"""
+
+from typing import Tuple
+
+import torch
+import torch.nn as nn
+import snntorch as snn
+from snntorch import surrogate
+
+
+class SNNLSTMModel(nn.Module):
+    """Spiking LSTM for sequential MNIST (row-level, T_seq=28).
+
+    Args:
+        input_size:  Pixels per row (28 for MNIST).
+        hidden_size: LSTM hidden state dimension.
+        num_layers:  Number of stacked LSTM layers.
+        num_classes: Output classes.
+        beta:        LIF membrane decay constant.
+        threshold:   LIF firing threshold.
+        timesteps:   SNN rate-coding timesteps per row.
+        dropout:     LSTM inter-layer dropout (ignored if num_layers == 1).
+    """
+
+    def __init__(
+        self,
+        input_size: int = 28,
+        hidden_size: int = 256,
+        num_layers: int = 2,
+        num_classes: int = 10,
+        beta: float = 0.9,
+        threshold: float = 1.0,
+        timesteps: int = 25,
+        dropout: float = 0.3,
+    ) -> None:
+        super().__init__()
+        self.input_size = input_size
+        self.timesteps = timesteps
+
+        spike_grad = surrogate.fast_sigmoid(slope=25)
+        self.lif = snn.Leaky(beta=beta, threshold=threshold, spike_grad=spike_grad)
+
+        lstm_dropout = dropout if num_layers > 1 else 0.0
+        self.lstm = nn.LSTM(
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            batch_first=True,
+            dropout=lstm_dropout,
+        )
+        self.classifier = nn.Linear(hidden_size, num_classes)
+
+    def _encode_row(self, row: torch.Tensor) -> torch.Tensor:
+        """Rate-encode a single image row with LIF neurons.
+
+        Args:
+            row: (N, input_size) pixel values in [0, 1].
+
+        Returns:
+            (N, input_size) spike counts accumulated over T timesteps.
+        """
+        row = row.clamp(0.0, 1.0)
+        mem = self.lif.init_leaky()
+        spk_acc = torch.zeros_like(row)
+        spikes_t = torch.bernoulli(row.unsqueeze(0).expand(self.timesteps, -1, -1))
+        for t in range(self.timesteps):
+            spk, mem = self.lif(spikes_t[t], mem)
+            spk_acc = spk_acc + spk
+        return spk_acc  # (N, input_size)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass.
+
+        Args:
+            x: (N, C, H, W) MNIST image batch.
+
+        Returns:
+            (N, num_classes) logits.
+        """
+        if x.dim() == 4:
+            x = x.squeeze(1)  # (N, 28, 28) — rows × pixels
+
+        N, T_seq, _ = x.shape
+        encoded = []
+        for t in range(T_seq):
+            encoded.append(self._encode_row(x[:, t, :]))  # (N, input_size)
+
+        seq = torch.stack(encoded, dim=1)  # (N, T_seq, input_size)
+        _, (h_n, _) = self.lstm(seq)
+        return self.classifier(h_n[-1])  # (N, num_classes)

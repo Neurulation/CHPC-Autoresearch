@@ -1,0 +1,29 @@
+iteration: 4
+project: anp_snn
+status: experiment
+goal: >
+  SNN-GRU (rate coding) on sequential MNIST — hybrid spiking-recurrent model.
+  LIF input encoder (T=25 Bernoulli timesteps per row) + 2-layer GRU (hidden=256).
+  Direct spiking analogue of the GRU baseline (anp_rnn).
+
+phases:
+  plan:
+    completed_at: "2026-04-12"
+    notes: >
+      Same approach as SNN-LSTM but with nn.GRU. GRU has fewer parameters than LSTM
+      (no separate cell state), often trains faster and generalises similarly.
+      Comparison with SNN-LSTM reveals relative gating complexity effects.
+
+  implement:
+    completed_at: "2026-04-12"
+    notes: >
+      Created src/autoresearch/models/snn_gru.py (SNNGRUModel).
+      Config: src/autoresearch/configs/model/snn_gru.yaml.
+      Experiment: src/autoresearch/configs/experiment/mnist_snn_gru_adam.yaml.
+      PBS: experiments/anp_snn_iter4_snn_gru_adam.pbs (gpu_1, 2h).
+      Smoke test: val_loss 0.065 @ epoch 2 (best of the three RNN variants).
+
+  experiment:
+    started_at: "2026-04-12"
+    notes: >
+      Submitted to CHPC gpu_1. 5 seeds (0–4), 30 epochs, patience=7 on val_loss.

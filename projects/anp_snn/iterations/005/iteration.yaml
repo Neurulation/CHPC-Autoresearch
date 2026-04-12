@@ -1,0 +1,29 @@
+iteration: 5
+project: anp_snn
+status: experiment
+goal: >
+  SNN-VanillaRNN (rate coding) on sequential MNIST — hybrid spiking-recurrent model.
+  LIF input encoder (T=25 Bernoulli timesteps per row) + 2-layer RNN (hidden=256, tanh).
+  Direct spiking analogue of the VanillaRNN baseline (anp_rnn, 97.89% ± 0.35%).
+
+phases:
+  plan:
+    completed_at: "2026-04-12"
+    notes: >
+      Vanilla RNN is often limited by vanishing gradients on long sequences.
+      Expected to underperform LSTM/GRU on sequential MNIST (T=28).
+      Included for completeness and direct comparison with the non-spiking VanillaRNN baseline.
+
+  implement:
+    completed_at: "2026-04-12"
+    notes: >
+      Created src/autoresearch/models/snn_vanilla_rnn.py (SNNVanillaRNNModel).
+      Config: src/autoresearch/configs/model/snn_vanilla_rnn.yaml.
+      Experiment: src/autoresearch/configs/experiment/mnist_snn_vanilla_rnn_adam.yaml.
+      PBS: experiments/anp_snn_iter5_snn_vanilla_rnn_adam.pbs (gpu_1, 2h).
+      Smoke test: val_loss 0.258 @ epoch 2 (higher than LSTM/GRU, expected for vanilla RNN).
+
+  experiment:
+    started_at: "2026-04-12"
+    notes: >
+      Submitted to CHPC gpu_1. 5 seeds (0–4), 30 epochs, patience=7 on val_loss.
