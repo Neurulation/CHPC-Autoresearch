@@ -1,0 +1,21 @@
+project: anp_pcnn
+iteration: 9
+status: implement
+goal: >
+  PC-EncDec v2 + cosine LR decay — accelerate convergence to close the -0.16pp gap.
+  Iter 8 (60ep) reached 97.14% ± 0.21% vs PC-FFNN v3 (97.30% ± 0.22%).
+  Seeds 0/3/4 ran all 60 epochs, still slowly improving at the end — slow convergence
+  is the primary bottleneck. Cosine annealing decays LR from 1e-3 → 1e-6 over
+  60 epochs, avoiding stale large steps at late training.
+  Target: ≥97.30% (match or beat PC-FFNN v3 baseline) within 60 epochs.
+created: "2026-04-12"
+
+phases:
+  plan:
+    completed_at: "2026-04-12"
+    notes: >
+      Cosine annealing (CosineAnnealingLR, T_max=epochs, eta_min=1e-6) is the
+      simplest convergence-acceleration intervention — no architecture changes needed.
+      torch.optim.lr_scheduler.CosineAnnealingLR is already supported by train.py
+      via cfg.scheduler instantiation. All other hyperparameters identical to iter 8.
+      Fair comparison: same 60-epoch training budget.
