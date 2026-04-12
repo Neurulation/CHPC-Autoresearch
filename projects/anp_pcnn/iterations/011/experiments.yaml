@@ -1,1 +1,11 @@
-jobs: []
+jobs:
+  - job_id: "7173479"
+    name: anp_pcnn_iter11_pc_cnn_adam
+    pbs_script: experiments/anp_pcnn_iter11_pc_cnn_adam.pbs
+    queue: gpu_1
+    walltime: "04:00:00"
+    seeds: [0, 1, 2, 3, 4]
+    epochs: 30
+    submitted_at: "2026-04-12"
+    status: running
+    notes: "PC-CNN iter 11: predictive coding over conv feature maps. T_pc=20, lr_pc=0.05, ce_weight=1.0. Smoke test ep1 67.02%, ep2 81.67%."

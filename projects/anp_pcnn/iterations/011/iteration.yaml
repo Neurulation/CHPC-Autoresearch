@@ -36,3 +36,8 @@ phases:
       Exported PCCNN from src/autoresearch/models/__init__.py.
       Smoke test (seed=0, epochs=2, local): ep1 67.02%, ep2 81.67%.
       Energy decreasing: 11.72 → 2.69. Model working correctly, ready for CHPC.
+
+  experiment:
+    started_at: "2026-04-12"
+    notes: >
+      Submitted to CHPC gpu_1 as job 7173479. 5 seeds (0–4), 30 epochs, patience=7 on val_accuracy.
