@@ -1,0 +1,30 @@
+name: "ANP - Dataset Infrastructure"
+slug: anp_datasets
+status: active
+created: "2026-04-12"
+description: >
+  Build and validate all temporal and event-driven datasets required by the ANP
+  research pipeline. The ANP needs to predict next-timestep neural activity,
+  which requires sequential data unavailable in the static MNIST/CIFAR baselines.
+  Covers: MNIST-Video (stacked frames), NMNIST (DVS neuromorphic), Artificial EEG
+  (recorded source SNN activations compressed to 128 channels), Game of Life
+  (procedurally generated spatiotemporal sequences), and real DVS event camera
+  datasets. Each dataset is validated by training a baseline model on it before
+  handing off to anp_spcnn and artificial_neural_prostheses.
+current_iteration: 1
+branch: "project/anp-datasets"
+human_direction: >
+  Iter 1: MNIST-Video — stack N consecutive frames of same digit class into a
+  short video sequence. No new data download required. Implement as a PyTorch
+  Dataset with configurable sequence length. Validate with rate-coded SNN-FFNN.
+  Iter 2: NMNIST — neuromorphic MNIST via DVS. Use tonic library for event-based
+  loading. Convert to frame-based and event-based tensors for both rate and
+  temporal coding pipelines.
+  Iter 3: Artificial EEG — record SNN-FFNN (artificial_neural_prostheses iter 1)
+  layer activations on full test set. Apply dimensionality reduction (PCA vs
+  random projection vs learned linear) to produce 128-channel streams. Compare
+  compression methods on downstream prediction quality.
+  Iter 4: Game of Life — procedurally generated Conway's Game of Life grids.
+  Configurable grid size, sequence length, density. Tests whether SPCNN can
+  learn non-trivial spatiotemporal transition rules.
+best_result: null

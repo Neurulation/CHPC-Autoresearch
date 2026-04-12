@@ -1,6 +1,6 @@
 project: anp_pcnn
 iteration: 5
-status: experiment
+status: completed
 goal: >
   PC-RNN: temporal predictive coding on sequential MNIST (T=28 rows).
   Extends PC-FFNN with recurrent connections — at each timestep t:
@@ -39,3 +39,33 @@ experiment:
   pbs_script: experiments/anp_pcnn_iter5_pc_rnn_adam.pbs
   seeds: [0, 1, 2, 3, 4]
   epochs: 30
+phase_history:
+  - phase: experiment
+    completed: "2026-04-11"
+    notes: >
+      All 5 seeds ran and early-stopped (ep 9-25). Completed on CHPC.
+  - phase: analyze
+    completed: "2026-04-12"
+    notes: >
+      Per-seed best val_acc: seed0=14.62%, seed1=9.48%, seed2=10.50%,
+      seed3=17.53%, seed4=9.73%. Mean: 12.37% ± 3.55%. All near random (10%).
+      Best val_loss 2.30-2.37 ≈ ln(10) = random. Catastrophic failure.
+  - phase: conclude
+    completed: "2026-04-12"
+    notes: >
+      FAILED EXPERIMENT. Root cause: meta-gradient interference between
+      per-timestep PC inference (T_pc=10 gradient steps on r_l at each t)
+      and BPTT through W_rec. The inference steps create non-differentiable
+      intermediate representations — the modified r_l(t) values that BPTT
+      receives bear no consistent relationship to the unmodified feedforward
+      activations, corrupting the recurrent gradient signal completely.
+      This is a known challenge in combining PC inference with sequence
+      learning: the two learning signals (free-energy and BPTT) compete for
+      the same weights without careful separation.
+      Implication for roadmap: (1) SPC-RNN (spiking PC-RNN) will face the
+      same issue — do not attempt until a fix is designed. (2) SPC-EncDec
+      on static MNIST avoids this since there is no temporal recurrence;
+      it should be safe to proceed. (3) For the ANP's temporal prediction
+      objective, the SPCNN architecture should use a different approach to
+      temporal recurrence — e.g., implicit memory via PC inference across
+      frames rather than explicit W_rec.

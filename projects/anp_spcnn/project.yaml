@@ -1,0 +1,22 @@
+name: "ANP - Spiking Predictive Coding Networks"
+slug: anp_spcnn
+status: active
+created: "2026-04-12"
+description: >
+  Build and validate the Spiking Predictive Coding Network (SPCNN) — the core
+  architecture of the Artificial Neural Prosthesis. Combines LIF spiking neurons
+  (from anp_snn) with the PC encoder-decoder structure (from anp_pcnn). Every
+  experiment runs under both rate coding and TTFS temporal coding for direct
+  comparison. Progresses from static classification (MNIST) to temporal
+  next-frame prediction (MNIST-Video, NMNIST) as datasets become available
+  from anp_datasets.
+current_iteration: 1
+branch: "project/anp-spcnn"
+human_direction: >
+  Phase E1 (static MNIST): SPC-FFNN and SPC-EncDec under rate then TTFS coding.
+  Validate that the spiking PC inference loop converges on a known task before
+  adding temporal complexity.
+  Phase E2 (temporal sequences): SPC-EncDec on MNIST-Video and NMNIST.
+  Primary objective: next-frame prediction of population activity.
+  Depends on anp_datasets for temporal data infrastructure.
+best_result: null

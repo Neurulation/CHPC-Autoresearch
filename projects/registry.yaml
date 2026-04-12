@@ -8,10 +8,22 @@ projects:
     current_iteration: 1
     path: projects/artificial_neural_prostheses
   - slug: anp_rnn
-    status: active
-    current_iteration: 4
+    status: completed
+    current_iteration: 3
     path: projects/anp_rnn
   - slug: anp_pcnn
     status: active
     current_iteration: 8
     path: projects/anp_pcnn
+  - slug: anp_snn
+    status: active
+    current_iteration: 1
+    path: projects/anp_snn
+  - slug: anp_spcnn
+    status: active
+    current_iteration: 1
+    path: projects/anp_spcnn
+  - slug: anp_datasets
+    status: active
+    current_iteration: 1
+    path: projects/anp_datasets

@@ -1,0 +1,21 @@
+name: "ANP - Spiking Neural Networks"
+slug: anp_snn
+status: active
+created: "2026-04-12"
+description: >
+  Establish spiking (LIF, snntorch) equivalents of every rate-coded architecture
+  baseline, under both rate coding and temporal coding (TTFS). Covers CNN, LSTM,
+  GRU and Vanilla RNN variants. Produces the spiking building blocks needed for
+  the SPCNN (anp_spcnn) and directly tests the central research question:
+  does temporal (TTFS) encoding outperform rate coding, and at what task complexity
+  does the crossover occur?
+current_iteration: 1
+branch: "project/anp-snn"
+human_direction: >
+  Phase B (rate coding): SNN-CNN, SNN-LSTM, SNN-GRU, SNN-VanillaRNN — all on
+  MNIST / sequential MNIST. Direct spiking analogues of the rate-coded baselines.
+  Use snntorch LIF neurons, surrogate gradients, BPTT. 5 seeds each.
+  Phase C (temporal coding / TTFS): repeat all architectures with TTFS encoding.
+  Compare rate vs temporal on static and sequential MNIST. Produce a
+  cross-architecture encoding comparison table.
+best_result: null
