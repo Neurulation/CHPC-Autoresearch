@@ -75,6 +75,54 @@ The agent should attempt to SSH to CHPC directly. This enables fully autonomous 
 
 **Fallback:** If SSH fails (no keys, network issues), provide the user with the exact commands to run manually. Never get stuck -- always have a fallback.
 
+**SSH and `.env` in the Bash tool:** Use literal variable values from `.env` rather than `source .env`, as `source` and `export` may be blocked in sandbox environments. Read credentials with `head`/`cat` and embed them directly:
+```bash
+# Safe pattern — read vars then embed literals
+CHPC_USER=$(grep CHPC_USERNAME .env | cut -d= -f2)
+CHPC_HOST=$(grep ^CHPC_HOST .env | cut -d= -f2)
+ssh ${CHPC_USER}@${CHPC_HOST} "qstat -u ${CHPC_USER}"
+```
+
+## Autonomous Monitoring (Loop)
+
+When experiments are submitted and the agent needs to wait for CHPC results, use the `/loop` skill to set up a recurring poll rather than blocking.
+
+**Start a monitoring loop:**
+```
+/loop 10m Check CHPC job status. For each completed job, extract results, write metrics.json, update state, commit+push. Resubmit any jobs that died early.
+```
+
+**Under the hood — `CronCreate`:**
+- Schedules a recurring prompt at a given interval (`*/10 * * * *` for 10m)
+- **Session-only by default** — the job lives only while Claude Code is open; it is lost if the session ends
+- **Auto-expires after 7 days** — fires one final time then self-deletes
+- Jobs only fire while the session is **idle** (never mid-query)
+- The scheduler adds a small jitter (up to 10% of the period) to avoid thundering-herd
+
+**Cancel a loop:**
+```
+CronDelete("<job-id>")   # job ID is returned by /loop when scheduled
+```
+Or just tell the agent: "stop the loop" / "cancel the monitoring".
+
+**Standard CHPC poll loop prompt:**
+```
+Check CHPC job status (source .env for credentials). For each job no longer in qstat:
+  1. Read per-seed outputs/train/<experiment_group>/<seed>/status.json and train.log
+  2. Compute mean ± std val_acc across completed seeds
+  3. Write projects/<slug>/iterations/<NNN>/metrics.json
+  4. Update iteration.yaml status → completed, add analyze + conclude phases
+  5. Update experiments.yaml job status → completed
+  6. Update README leaderboard
+  7. git add + commit + push to develop
+For any job that died with incomplete seeds (fewer than 5), resubmit the PBS script
+(pull develop on CHPC first so the updated walltime is picked up).
+```
+
+**PBS walltime sizing rule:** Each sequential seed adds ~N minutes of runtime. Estimate per-seed time from a smoke test or seed 0, then set `walltime = n_seeds × per_seed_time × 1.2` (20% buffer). The gpu_1 queue max is 48h. If in doubt, use 4h for RNN-class models and 2h for FFNN/CNN.
+
+**Resume after walltime kill:** The training framework saves `last_checkpoint.pt` after every epoch. When a killed job is resubmitted, seeds that already completed will detect `start_epoch > epochs` via the checkpoint and exit immediately — no wasted compute. Seeds killed mid-run will resume from the last saved checkpoint.
+
 ## Key Paths
 
 | Path | Purpose |
