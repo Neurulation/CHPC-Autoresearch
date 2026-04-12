@@ -229,17 +229,18 @@ class SPCFFNNModel(nn.Module):
         # Phase 2 — Weight-update energy
         energy = self._energy_active_weights(reps_final)
 
-        # CE head on r_{L-1}: re-run feedforward (differentiable) for gradients
-        h = x_flat
-        for i, layer in enumerate(self.layers[:-1]):
-            h = self._act(i, layer(h))
-        logits = self.cls_head(h)
+        # CE head on r_{L-1} from SNN bottom-up (pure-feedforward, no PC inference).
+        # Using reps_init[-2] ensures training and eval use the same representations.
+        logits = self.cls_head(reps_init[-2])
         ce_loss = F.cross_entropy(logits, y)
 
         return energy + self.ce_weight * ce_loss, energy.detach(), logits.detach()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Evaluation: SNN bottom-up → free inference → cls_head(r_{L-1}).
+        """Evaluation: pure-feedforward SNN → cls_head(r_{L-1}).
+
+        Pure-feedforward (no PC inference) to match the training CE distribution.
+        Training CE uses reps_init[-2] from _bottom_up(); eval uses the same path.
 
         Args:
             x: Images (N, C, H, W).
@@ -249,5 +250,4 @@ class SPCFFNNModel(nn.Module):
         """
         x_flat = x.view(x.shape[0], -1)
         reps_init = self._bottom_up(x_flat)
-        reps_final = self._run_inference(reps_init, clamp_last=None)
-        return self.cls_head(reps_final[-2])  # r_{L-1}
+        return self.cls_head(reps_init[-2])  # pure-feedforward SNN, same as training CE

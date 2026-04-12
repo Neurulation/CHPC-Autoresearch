@@ -1,6 +1,6 @@
 iteration: 2
 project: anp_spcnn
-status: experiment
+status: completed
 goal: >
   SPC-FFNN (rate coding) on MNIST — first true Spiking Predictive Coding network.
   LIF SNN initialises spike-count representations (normalised to firing rates [0,1]);
@@ -29,6 +29,30 @@ phases:
 
   experiment:
     started_at: "2026-04-12"
+    completed_at: "2026-04-12"
     notes: >
       Submitted to CHPC gpu_1. 5 seeds (0–4), 20 epochs, patience=5 on val_loss.
       train_pcnn.py: supervised inference (clamp r_L = one_hot(y)) + weight update.
+      All 5 seeds early-stopped at epoch 6: energy explosion (train_energy ~22-31).
+
+  analyze:
+    completed_at: "2026-04-12"
+    notes: >
+      Complete failure: ~11% val_acc (random) across all 5 seeds.
+      Pattern: epochs 1-5 decreasing energy (~11→1), epoch 6 explosion (~22-31).
+      Val acc stuck at initial value throughout (never improves from epoch 0).
+      Root cause: training CE loss uses raw x_flat→layers[:-1] (no SNN path),
+      but forward() evaluates on SNN spike-counts→PC inference→cls_head.
+      SNN weights never jointly optimized with cls_head. Same bug as PC-EncDec v1.
+
+  conclude:
+    completed_at: "2026-04-12"
+    notes: >
+      FAILURE: SPC-FFNN iter 2 (11.01% ± 0.33%) — random performance.
+      Root cause: train/val distribution mismatch in CE loss path.
+      pc_loss() CE head trains on raw activations (no SNN); forward() evaluates
+      on SNN representations → cls_head sees different distribution at test time.
+      Fix for iter 3 (SPC-FFNN v2): (1) CE in pc_loss() uses reps_init[-2] from
+      _bottom_up(), (2) forward() pure-feedforward SNN (no PC inference).
+      Same fix as PC-EncDec v2 (iter 7, anp_pcnn) which gave +3.46pp.
+      Secondary fix: gradient clipping (max_grad_norm=1.0) to slow energy explosions.
