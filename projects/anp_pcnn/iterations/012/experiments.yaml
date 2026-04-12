@@ -1,11 +1,11 @@
 jobs:
-  - job_id: null
+  - job_id: "7173738"
     name: anp_pcnn_iter12_pc_cnn_v2_adam
     pbs_script: experiments/anp_pcnn_iter12_pc_cnn_v2_adam.pbs
     queue: gpu_1
     walltime: "06:00:00"
     seeds: [0, 1, 2, 3, 4]
     epochs: 60
-    submitted_at: null
+    submitted_at: "2026-04-12"
     status: queued
-    notes: "PC-CNN v2 stabilization: normalized energy scheduling + relaxed clipping. Local smoke test passed; ready to qsub on CHPC."
+    notes: "PC-CNN v2 stabilization: normalized energy scheduling + relaxed clipping. Submitted on CHPC as job 7173738 (state Q)."

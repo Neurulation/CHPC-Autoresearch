@@ -36,4 +36,5 @@ phases:
   experiment:
     started_at: "2026-04-12"
     notes: >
-      Ready for CHPC submission (iter12 v2). Not submitted yet in this session.
+      Submitted to CHPC gpu_1 as job 7173738. 5 seeds (0-4), 60 epochs,
+      patience=10 on val_accuracy. Current queue state: Q (queued).

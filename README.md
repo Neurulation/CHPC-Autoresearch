@@ -124,7 +124,7 @@ Sorted by descending accuracy. Only valid, fully-converged results.
 
 | Project | Iter | Model | Job | Status |
 |---------|------|-------|-----|--------|
-| ANP — PC-NN | 12 | PC-CNN v2 (energy schedule + clip=2.0) | pending | Queued; smoke-tested locally, ready for CHPC submit |
+| ANP — PC-NN | 12 | PC-CNN v2 (energy schedule + clip=2.0) | 7173738 | Queued on gpu_1 (submitted 2026-04-12) |
 
 ### MNIST — Planned
 
