@@ -76,6 +76,7 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 | Image Processing NN | 1 | CNN (2 conv + 1 FC) | Adam | ✗ | 5 | **99.17% ± 0.10%** | spatial | ✅ |
 | ANP — RNN | 2 | GRU (2-layer, h=256) | Adam | ✗ | 5 | **99.06% ± 0.14%** | sequential (T=28) | ✅ |
 | ANP — RNN | 1 | LSTM (2-layer, h=256) | Adam | ✗ | 5 | 98.95% ± 0.11% | sequential (T=28) | ✅ |
+| ANP — SNN | 1 | SNN-CNN (2 Conv+LIF+Pool + 2 FC+LIF, T=25) | Adam | ✗ | 5 | **98.87% ± 0.13%** | rate-coded, spatial | ✅ |
 | Image Processing NN | 1 | FFNN (784-256-128-10) | Adam | ✗ | 5 | 98.06% ± 0.15% | dense | ✅ |
 | ANP — RNN | 3 | Vanilla RNN (2-layer, h=256) | Adam | ✗ | 5 | 97.89% ± 0.35% | sequential (T=28) | ✅ |
 | Artificial Neural Prostheses | 1 | SNN (784-512-256-10 LIF, T=25) | Adam | ✗ | 5 | 97.62% ± 0.12% | rate-coded | ✅ |
@@ -121,7 +122,7 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 *Updated 2026-04-12.*
 
 **Key findings:**
-- *MNIST: CNN outperforms FFNN at 99.17% vs 98.06%. SNN baseline 97.62% ± 0.12% — trails dense nets as expected given rate coding overhead.*
+- *MNIST: CNN outperforms FFNN at 99.17% vs 98.06%. SNN-CNN (iter1, anp_snn) 98.87% ± 0.13% — only -0.30pp behind non-spiking CNN, confirming LIF neurons + rate coding are effective for spatial feature extraction. SNN-FFNN baseline 97.62% ± 0.12%, +1.25pp architecture gain with convolutional spiking layers.*
 - *GRU (iter 2) beats LSTM (iter 1): 99.06% ± 0.14% vs 98.95% ± 0.11%, with 25% fewer parameters (617k vs ~821k). Gate reduction (4→3 gates) did not hurt — confirms GRU parity with LSTM on seq-MNIST (Chung et al. 2014).*
 - *Vanilla RNN (iter 3): 97.89% ± 0.35% — far better than predicted. Literature expects 10-20pp regression from LSTM for T>>10 (Bengio et al. 1994); actual gap from GRU is only 1.17pp. Adam's adaptive LR compensates for vanishing gradients at T=28, acting as a significant equaliser. Completes the RNN trilogy: GRU (99.06%) → LSTM (98.95%) → Vanilla (97.89%). Parameter efficiency: 207k vs 617k (GRU) for 1.17pp.*
 - *LSTM/GRU on sequential MNIST (T=28): competitive with CNN despite processing pixels row-by-row.*

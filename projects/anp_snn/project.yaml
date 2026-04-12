@@ -18,4 +18,16 @@ human_direction: >
   Phase C (temporal coding / TTFS): repeat all architectures with TTFS encoding.
   Compare rate vs temporal on static and sequential MNIST. Produce a
   cross-architecture encoding comparison table.
-best_result: null
+best_result:
+  model: snn_cnn
+  experiment: mnist_snn_cnn_adam
+  dataset: mnist
+  mean_val_acc: 98.87
+  std_val_acc: 0.13
+  best_val_acc: 99.00
+  iteration: 1
+  date: "2026-04-12"
+  notes: >
+    SNN-CNN (rate coding, T=25): 98.87% ± 0.13%. Near-parity with non-spiking CNN
+    (99.17% ± 0.10%, gap -0.30pp). Phase B spiking CNN baseline established.
+    SNN-FFNN (iter2): 97.62% ± 0.12%, consistent -0.44pp vs FFNN.
