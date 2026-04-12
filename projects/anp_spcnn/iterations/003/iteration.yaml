@@ -1,6 +1,6 @@
 iteration: 3
 project: anp_spcnn
-status: experiment
+status: completed
 goal: >
   SPC-FFNN v2 — fix train/val mismatch bug from iter 2.
   Bug: CE was computed on raw linear activations (no SNN), eval on SNN spike-count reps.
@@ -33,5 +33,31 @@ phases:
 
   experiment:
     started_at: "2026-04-12"
+    completed_at: "2026-04-12"
     notes: >
       Submitted to CHPC gpu_1 as job 7171612. 5 seeds (0–4), 30 epochs, patience=7 on val_loss.
+      All 5 seeds completed.
+
+  analyze:
+    completed_at: "2026-04-12"
+    notes: >
+      WandB results: 55.95% ± 2.78% (seeds: 58.58%, 53.68%, 55.27%, 59.13%, 53.08%).
+      Two root causes identified:
+      (1) PBS SCRIPT BUG: anp_spcnn_iter3_spc_ffnn_v2_adam.pbs used
+          `python -m autoresearch.train` instead of `train_pcnn`. This ran standard
+          CE training — only cls_head was updated. self.layers received NO gradient
+          at all (SNN outputs detached, PC energy never computed). Result: linear
+          cls_head on top of randomly-initialized frozen SNN features → 55.95%.
+      (2) DESIGN BUG (would affect train_pcnn too): even with correct entry point,
+          SNN outputs were detached so CE could not flow into self.layers. PC energy
+          is a reconstruction objective — insufficient for discriminative learning.
+          55.95% is approximately what a linear head on random SNN features achieves.
+
+  conclude:
+    completed_at: "2026-04-12"
+    notes: >
+      PARTIAL FAILURE: 55.95% ± 2.78%.
+      Not a complete failure (random = 10%) but far below target (~97%).
+      True root cause: wrong entry point in PBS script + CE gradient blocking.
+      Next: iters 4 (Option A: CE through SNN) and 5 (Option D: CE via BPTT
+      through PC equilibrium) both use train_pcnn and fix the gradient routing.

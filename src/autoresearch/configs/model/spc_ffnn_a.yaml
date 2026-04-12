@@ -1,0 +1,17 @@
+# @package _global_.model
+# SPC-FFNN Option A — CE through SNN via surrogate gradients.
+# SNN spike accumulators are not detached: CE backpropagates through LIF
+# fast_sigmoid surrogate grads into self.layers.
+# self.layers trained by both CE (discriminative) and PC energy (reconstructive).
+
+_target_: autoresearch.models.spc_ffnn.SPCFFNNModel
+input_size: 784
+hidden_dims: [256, 128]
+num_classes: 10
+T_pc: 20
+lr_pc: 0.05
+ce_weight: 1.0
+beta: 0.9
+threshold: 1.0
+timesteps: 25
+ce_mode: "a"

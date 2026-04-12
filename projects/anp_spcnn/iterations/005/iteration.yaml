@@ -1,0 +1,36 @@
+iteration: 5
+project: anp_spcnn
+status: implement
+goal: >
+  SPC-FFNN Option D — CE on PC free-inference equilibrium via BPTT through
+  the PC inference loop. SNN outputs remain detached (no SNN meta-gradient).
+  CE is computed on reps_free[-1] (the free-inference output after T_pc=10
+  differentiable steps), not on raw SNN spike counts. CE gradient backpropagates
+  through all T_pc inference steps into self.layers via the energy function
+  (_energy_fixed_weights_differentiable, weights not detached).
+  Two inference passes per training step: clamped (PC energy) + free (CE-BPTT).
+
+phases:
+  plan:
+    completed_at: "2026-04-12"
+    notes: >
+      Theoretically most coherent for PC: the model's prediction IS the free
+      equilibrium. CE on reps_free[-1] is the natural PC classification objective.
+      BPTT through T_pc inference steps (create_graph=True, retain_graph=True)
+      propagates CE gradient to self.layers without involving the SNN.
+      T_pc reduced to 10 (vs default 20) to limit create_graph memory cost.
+      3h walltime: 2x inference cost + create_graph overhead per step.
+
+  implement:
+    completed_at: "2026-04-12"
+    notes: >
+      Modified src/autoresearch/models/spc_ffnn.py: added ce_mode='d',
+      _energy_fixed_weights_differentiable() (weights not detached),
+      _run_inference_differentiable() (create_graph=True, retain_graph=True,
+      no .detach() between steps, T_pc iterations).
+      Created src/autoresearch/configs/model/spc_ffnn_d.yaml (ce_mode=d, T_pc=10).
+      Created src/autoresearch/configs/experiment/mnist_spc_ffnn_d_adam.yaml.
+      Created experiments/anp_spcnn_iter5_spc_ffnn_d_adam.pbs (train_pcnn, gpu_1, 3h).
+      Smoke test: fixed retain_graph bug (was retain_graph=not is_last, caused
+      "backward through graph second time" error; fixed to retain_graph=True always).
+      Smoke test passed: 2 epochs complete, ~24s/epoch on local GPU.

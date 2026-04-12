@@ -21,7 +21,7 @@ projects:
     path: projects/anp_snn
   - slug: anp_spcnn
     status: active
-    current_iteration: 1
+    current_iteration: 5
     path: projects/anp_spcnn
   - slug: anp_datasets
     status: active

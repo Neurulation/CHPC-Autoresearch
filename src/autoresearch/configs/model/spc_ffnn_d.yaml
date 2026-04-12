@@ -1,0 +1,17 @@
+# @package _global_.model
+# SPC-FFNN Option D — CE on PC free-inference equilibrium via BPTT.
+# SNN stays detached (no meta-gradient). CE backpropagates through T_pc
+# differentiable inference steps into self.layers (BPTT through inner loop).
+# T_pc reduced to 10 (vs default 20) to limit create_graph memory/compute cost.
+
+_target_: autoresearch.models.spc_ffnn.SPCFFNNModel
+input_size: 784
+hidden_dims: [256, 128]
+num_classes: 10
+T_pc: 10
+lr_pc: 0.05
+ce_weight: 1.0
+beta: 0.9
+threshold: 1.0
+timesteps: 25
+ce_mode: "d"

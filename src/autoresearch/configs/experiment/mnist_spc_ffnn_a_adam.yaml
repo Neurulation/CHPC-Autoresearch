@@ -1,0 +1,46 @@
+# @package _global_
+# ANP-SPCNN Iter 4 — SPC-FFNN Option A (CE through SNN).
+# Fix: remove .detach() from SNN spike accumulators so CE backpropagates
+# through LIF surrogate grads into self.layers.
+# Both CE (discriminative) and PC energy (reconstructive) update self.layers.
+
+defaults:
+  - override /dataset: mnist
+  - override /model: spc_ffnn_a
+
+experiment_group: mnist_spc_ffnn_a_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 30
+num_workers: 4
+validation_split: 0.1
+max_grad_norm: 1.0
+
+early_stopping:
+  enabled: true
+  patience: 7
+  min_delta: 0.001
+  metric: val_loss
+  mode: min
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - snn
+    - pc
+    - spc-ffnn
+    - lif
+    - rate-coding
+    - predictive-coding
+    - adam
+    - anp
+    - anp-spcnn
+    - ce-through-snn
+    - option-a
+  notes: "ANP-SPCNN Iter 4 — SPC-FFNN Option A: CE backpropagates through LIF surrogate grads into SNN layers."

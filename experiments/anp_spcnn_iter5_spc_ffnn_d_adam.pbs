@@ -1,0 +1,34 @@
+#!/bin/sh
+#PBS -N anp_spcnn_iter5_spc_ffnn_d_adam
+#PBS -q gpu_1
+#PBS -P CSCI1166
+#PBS -l select=1:ncpus=4:mem=32gb:ngpus=1
+#PBS -l walltime=03:00:00
+#PBS -o /mnt/lustre/users/aschreuder/CHPC-Autoresearch/logs/anp_spcnn_iter5_spc_ffnn_d_adam.out
+#PBS -e /mnt/lustre/users/aschreuder/CHPC-Autoresearch/logs/anp_spcnn_iter5_spc_ffnn_d_adam.err
+#PBS -m abe -M arneschreuder@icloud.com
+
+set -euo pipefail
+
+module purge
+module load chpc/python/anaconda/3-2024.10.1
+
+cd /mnt/lustre/users/aschreuder/CHPC-Autoresearch
+source .venv/bin/activate
+
+echo "=========================================="
+echo "Job: anp_spcnn_iter5_spc_ffnn_d_adam"
+echo "=========================================="
+echo "Start time: $(date)"
+echo ""
+
+# Option D: CE via BPTT through PC free-inference equilibrium (T_pc=10).
+# Uses train_pcnn.py (pc_loss interface). 3h walltime: 2x inference cost
+# (clamped + free differentiable) + create_graph overhead.
+python -m autoresearch.train_pcnn --multirun experiment=mnist_spc_ffnn_d_adam
+
+echo ""
+echo "=========================================="
+echo "JOB COMPLETED"
+echo "=========================================="
+echo "End time: $(date)"

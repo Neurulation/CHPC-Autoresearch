@@ -1,0 +1,34 @@
+iteration: 4
+project: anp_spcnn
+status: implement
+goal: >
+  SPC-FFNN Option A — fix gradient routing by removing .detach() from SNN
+  spike accumulators in _bottom_up(). CE now backpropagates through LIF
+  surrogate gradients (fast_sigmoid) into self.layers. Both CE (discriminative
+  signal) and PC energy (reconstructive signal) update self.layers simultaneously.
+  Hypothesis: CE dominates and drives discriminative feature learning.
+
+  Root cause of iter 3 failure (55.95%): PBS script used train.py (wrong)
+  instead of train_pcnn.py. Only cls_head was trained on frozen random SNN
+  features. Even if train_pcnn had been used, self.layers received no CE
+  gradient (detached SNN) — only PC energy (reconstruction objective).
+
+phases:
+  plan:
+    completed_at: "2026-04-12"
+    notes: >
+      Identified in gradient flow analysis: SNN outputs were fully detached,
+      so CE signal never reached self.layers. Fix: ce_mode='a' removes detach
+      from spike_accs in _bottom_up(), enabling surrogate-gradient CE path.
+      Both CE and PC energy update the same self.layers (additive under Adam).
+
+  implement:
+    completed_at: "2026-04-12"
+    notes: >
+      Modified src/autoresearch/models/spc_ffnn.py: added ce_mode parameter
+      ('v2'|'a'|'d'). Mode 'a' removes .detach() from spike_accs (lines ~143,147).
+      Created src/autoresearch/configs/model/spc_ffnn_a.yaml (ce_mode=a, T_pc=20).
+      Created src/autoresearch/configs/experiment/mnist_spc_ffnn_a_adam.yaml.
+      Created experiments/anp_spcnn_iter4_spc_ffnn_a_adam.pbs (train_pcnn, gpu_1, 2h).
+      Smoke test: completed 2 epochs without error. val_loss ~2.3 at ep2 (too few
+      epochs to judge; energy decreasing from 59→43, same healthy pattern as iter 2).

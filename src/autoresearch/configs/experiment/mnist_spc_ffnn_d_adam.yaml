@@ -1,0 +1,47 @@
+# @package _global_
+# ANP-SPCNN Iter 5 — SPC-FFNN Option D (CE via BPTT through PC inference).
+# CE is computed on the free-inference PC equilibrium output (reps_free[-1]),
+# not on raw SNN spike counts. CE backpropagates through T_pc=10 differentiable
+# inference steps (create_graph=True) into self.layers. SNN stays detached.
+# Two inference passes per step: clamped (PC energy) + free differentiable (CE).
+
+defaults:
+  - override /dataset: mnist
+  - override /model: spc_ffnn_d
+
+experiment_group: mnist_spc_ffnn_d_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 30
+num_workers: 4
+validation_split: 0.1
+max_grad_norm: 1.0
+
+early_stopping:
+  enabled: true
+  patience: 7
+  min_delta: 0.001
+  metric: val_loss
+  mode: min
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - snn
+    - pc
+    - spc-ffnn
+    - lif
+    - rate-coding
+    - predictive-coding
+    - adam
+    - anp
+    - anp-spcnn
+    - bptt-through-inference
+    - option-d
+  notes: "ANP-SPCNN Iter 5 — SPC-FFNN Option D: CE on PC free-inference equilibrium via BPTT through T_pc=10 steps."
