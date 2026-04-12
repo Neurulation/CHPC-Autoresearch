@@ -9,14 +9,13 @@ jobs:
     status: broken
     notes: "BROKEN: threshold=1.0 → LIF silent → spk_acc=0 → ~11% chance accuracy. All seeds invalid."
 
-  - job_id: "7172625"
+  - job_id: "7173430"
     name: anp_snn_iter8b_snn_lstm_ttfs_v2_adam
     pbs_script: experiments/anp_snn_iter8b_snn_lstm_ttfs_v2_adam.pbs
     queue: gpu_1
-    walltime: "02:00:00"
+    walltime: "04:00:00"
     seeds: [0, 1, 2, 3, 4]
     epochs: 30
     submitted_at: "2026-04-12"
-    status: walltime_killed
-    result: "2/5 seeds complete (seeds 0-1 @ ep30). Seeds 2-4 not run. Walltime 2h insufficient (~1h/seed × 5 = 5h needed). Resubmit with walltime=04:00:00."
-    notes: "CORRECTED re-run: threshold=0.9. True TTFS baseline."
+    status: running
+    notes: "Resubmit with walltime=04:00:00. Seeds 0-1 already completed (from job 7172625); seeds 2-4 will run. True TTFS baseline (threshold=0.9)."

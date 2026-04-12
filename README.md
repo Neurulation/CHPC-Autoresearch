@@ -149,8 +149,9 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
   Results (iters 6/7 complete): SFNN TTFS **97.12% ± 0.20%**, SCNN TTFS **98.41% ± 0.17%**.
   TTFS is consistently WORSE than rate: −0.49pp (FFNN) and −0.46pp (CNN). Root cause: LIF summation
   discards spike timing order — TTFS ≈ binarized input; rate coding preserves graded intensity.
-  iter8b/9b/10b (corrected threshold=0.9 reruns, jobs 7172625/6/7): walltime-killed at 2/5 seeds
-  (~1h/seed × 5 = 5h needed; 2h PBS insufficient). Resubmitting with walltime=04:00:00.
+  iter8b/9b/10b (corrected threshold=0.9 reruns): first attempt jobs 7172625/6/7 walltime-killed
+  at 2/5 seeds (~1h/seed × 5 = 5h; 2h insufficient). Resubmitted as jobs 7173430/1/2 (4h walltime).
+  Seeds 0-1 already complete and will skip; seeds 2-4 resuming from checkpoint.
   Partial iter8b signal (2 seeds): LSTM TTFS seed0 ~98.79% > LSTM rate 98.68% — weak early indicator
   TTFS may benefit recurrent models; too few seeds to conclude.  
 ᴰ **ANP — SNN iters 11-14 (fully spiking recurrent — planned):** Next priority after iters 3-10 complete.
