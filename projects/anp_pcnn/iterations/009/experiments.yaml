@@ -1,2 +1,10 @@
-jobs: []
-# Pending implementation and CHPC submission.
+jobs:
+  - job_id: "7171630"
+    name: anp_pcnn_iter9_pc_enc_dec_v2_adam_cosine
+    queue: gpu_1
+    walltime: "02:00:00"
+    seeds: [0, 1, 2, 3, 4]
+    epochs: 60
+    submitted_at: "2026-04-12"
+    status: running
+    notes: "PC-EncDec v2 + CosineAnnealingLR (1e-3 → 1e-6) — target ≥97.30% to match PC-FFNN v3"

@@ -1,6 +1,6 @@
 project: anp_pcnn
 iteration: 9
-status: implement
+status: experiment
 goal: >
   PC-EncDec v2 + cosine LR decay — accelerate convergence to close the -0.16pp gap.
   Iter 8 (60ep) reached 97.14% ± 0.21% vs PC-FFNN v3 (97.30% ± 0.22%).
@@ -19,3 +19,16 @@ phases:
       torch.optim.lr_scheduler.CosineAnnealingLR is already supported by train.py
       via cfg.scheduler instantiation. All other hyperparameters identical to iter 8.
       Fair comparison: same 60-epoch training budget.
+
+  implement:
+    completed_at: "2026-04-12"
+    notes: >
+      Created src/autoresearch/configs/experiment/mnist_pc_enc_dec_v2_adam_cosine.yaml.
+      Added scheduler: CosineAnnealingLR, eta_min=1e-6. train.py instantiates with T_max=epochs.
+      Created experiments/anp_pcnn_iter9_pc_enc_dec_v2_adam_cosine.pbs (gpu_1, 2h).
+      Smoke test: 88.45%→90.07% @ ep1-2 (same as iter8 trajectory, correct).
+
+  experiment:
+    started_at: "2026-04-12"
+    notes: >
+      Submitted to CHPC gpu_1 as job 7171630. 5 seeds (0–4), 60 epochs, patience=10.
