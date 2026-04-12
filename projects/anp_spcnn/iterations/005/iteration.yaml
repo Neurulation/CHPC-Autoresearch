@@ -1,6 +1,6 @@
 iteration: 5
 project: anp_spcnn
-status: implement
+status: experiment
 goal: >
   SPC-FFNN Option D — CE on PC free-inference equilibrium via BPTT through
   the PC inference loop. SNN outputs remain detached (no SNN meta-gradient).

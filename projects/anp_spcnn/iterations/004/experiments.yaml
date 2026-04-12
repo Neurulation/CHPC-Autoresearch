@@ -1,0 +1,10 @@
+jobs:
+  - job_id: "7172210"
+    experiment_group: mnist_spc_ffnn_a_adam
+    pbs_script: experiments/anp_spcnn_iter4_spc_ffnn_a_adam.pbs
+    seeds: [0, 1, 2, 3, 4]
+    submitted_at: "2026-04-12"
+    status: running
+    queue: gpu_1
+    walltime: "02:00:00"
+    notes: "SPC-FFNN Option A: CE through SNN via surrogate grads. train_pcnn.py."

@@ -1,6 +1,6 @@
 iteration: 4
 project: anp_spcnn
-status: implement
+status: experiment
 goal: >
   SPC-FFNN Option A — fix gradient routing by removing .detach() from SNN
   spike accumulators in _bottom_up(). CE now backpropagates through LIF

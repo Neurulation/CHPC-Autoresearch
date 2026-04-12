@@ -1,0 +1,10 @@
+jobs:
+  - job_id: "7172211"
+    experiment_group: mnist_spc_ffnn_d_adam
+    pbs_script: experiments/anp_spcnn_iter5_spc_ffnn_d_adam.pbs
+    seeds: [0, 1, 2, 3, 4]
+    submitted_at: "2026-04-12"
+    status: running
+    queue: gpu_1
+    walltime: "03:00:00"
+    notes: "SPC-FFNN Option D: CE via BPTT through PC free-inference equilibrium (T_pc=10). train_pcnn.py."
