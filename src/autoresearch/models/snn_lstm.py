@@ -25,6 +25,8 @@ import torch.nn as nn
 import snntorch as snn
 from snntorch import surrogate
 
+from autoresearch.utils.spike_encoding import ttfs_encode
+
 
 class SNNLSTMModel(nn.Module):
     """Spiking LSTM for sequential MNIST (row-level, T_seq=28).
@@ -38,6 +40,7 @@ class SNNLSTMModel(nn.Module):
         threshold:   LIF firing threshold.
         timesteps:   SNN rate-coding timesteps per row.
         dropout:     LSTM inter-layer dropout (ignored if num_layers == 1).
+        encoding:    Spike encoding — 'rate' (Bernoulli) or 'ttfs'.
     """
 
     def __init__(
@@ -50,10 +53,12 @@ class SNNLSTMModel(nn.Module):
         threshold: float = 1.0,
         timesteps: int = 25,
         dropout: float = 0.3,
+        encoding: str = "rate",
     ) -> None:
         super().__init__()
         self.input_size = input_size
         self.timesteps = timesteps
+        self.encoding = encoding
 
         spike_grad = surrogate.fast_sigmoid(slope=25)
         self.lif = snn.Leaky(beta=beta, threshold=threshold, spike_grad=spike_grad)
@@ -69,7 +74,7 @@ class SNNLSTMModel(nn.Module):
         self.classifier = nn.Linear(hidden_size, num_classes)
 
     def _encode_row(self, row: torch.Tensor) -> torch.Tensor:
-        """Rate-encode a single image row with LIF neurons.
+        """Encode a single image row to spike counts via LIF integration.
 
         Args:
             row: (N, input_size) pixel values in [0, 1].
@@ -80,7 +85,10 @@ class SNNLSTMModel(nn.Module):
         row = row.clamp(0.0, 1.0)
         mem = self.lif.init_leaky()
         spk_acc = torch.zeros_like(row)
-        spikes_t = torch.bernoulli(row.unsqueeze(0).expand(self.timesteps, -1, -1))
+        if self.encoding == "ttfs":
+            spikes_t = ttfs_encode(row, self.timesteps)
+        else:
+            spikes_t = torch.bernoulli(row.unsqueeze(0).expand(self.timesteps, -1, -1))
         for t in range(self.timesteps):
             spk, mem = self.lif(spikes_t[t], mem)
             spk_acc = spk_acc + spk

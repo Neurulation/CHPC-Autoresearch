@@ -1,0 +1,46 @@
+# @package _global_
+# ANP-SNN Iter 7 — SNN-CNN TTFS on MNIST.
+# Phase C: temporal coding variant. TTFS encoding: bright pixels fire early (t≈0),
+# dark pixels fire late (t≈T-1) or not at all. Comparison against rate-coded
+# SNN-CNN (iter 1, 98.87% ± 0.13%).
+
+defaults:
+  - override /dataset: mnist
+  - override /model: snn_cnn_ttfs
+  - override /optimizer: adam
+  - override /loss_fn: cross_entropy
+
+experiment_group: mnist_snn_cnn_ttfs_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 20
+num_workers: 4
+validation_split: 0.1
+
+early_stopping:
+  enabled: true
+  patience: 5
+  min_delta: 0.001
+  metric: val_loss
+  mode: min
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - snn
+    - snn_cnn
+    - lif
+    - ttfs
+    - temporal-coding
+    - convolutional
+    - adam
+    - anp
+    - anp-snn
+    - phase-c
+  notes: "ANP-SNN Iter 7 — SNN-CNN TTFS: temporal coding variant of rate-coded SNN-CNN."

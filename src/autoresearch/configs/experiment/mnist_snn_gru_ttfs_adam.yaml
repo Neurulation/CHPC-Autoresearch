@@ -1,0 +1,46 @@
+# @package _global_
+# ANP-SNN Iter 9 — SNN-GRU TTFS on sequential MNIST.
+# Phase C: temporal coding variant. TTFS per-row encoding: bright pixels fire first
+# within each row's T-step window. Comparison against rate-coded SNN-GRU (iter 4).
+
+defaults:
+  - override /dataset: mnist
+  - override /model: snn_gru_ttfs
+  - override /optimizer: adam
+  - override /loss_fn: cross_entropy
+
+experiment_group: mnist_snn_gru_ttfs_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 30
+num_workers: 4
+validation_split: 0.1
+max_grad_norm: 1.0
+
+early_stopping:
+  enabled: true
+  patience: 7
+  min_delta: 0.001
+  metric: val_loss
+  mode: min
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - snn
+    - gru
+    - lif
+    - ttfs
+    - temporal-coding
+    - sequential
+    - adam
+    - anp
+    - anp-snn
+    - phase-c
+  notes: "ANP-SNN Iter 9 — SNN-GRU TTFS: temporal coding variant of rate-coded SNN-GRU."

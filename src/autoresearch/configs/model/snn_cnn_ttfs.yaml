@@ -1,0 +1,12 @@
+# @package _global_.model
+# SNN-CNN TTFS — spiking CNN with time-to-first-spike encoding.
+# Phase C: temporal coding variant of the rate-coded SNN-CNN.
+# TTFS: each pixel fires at most once; bright pixels fire early (t≈0), dark late (t≈T-1).
+
+_target_: autoresearch.models.snn_cnn.SNNCNN
+input_channels: 1
+num_classes: 10
+beta: 0.9
+threshold: 1.0
+timesteps: 25
+encoding: ttfs

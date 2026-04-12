@@ -1,0 +1,24 @@
+iteration: 10
+project: anp_snn
+status: implement
+goal: >
+  SNN-VanillaRNN TTFS (Phase C) — temporal coding variant of the rate-coded SNN-VanillaRNN (iter 5).
+  TTFS applied per-row within each image row's T=25-step window.
+  Completes the Phase C TTFS sweep across all 5 architectures (FFNN, CNN, LSTM, GRU, VanillaRNN).
+  Enables full cross-architecture rate vs temporal encoding comparison table.
+
+phases:
+  plan:
+    completed_at: "2026-04-12"
+    notes: >
+      Final Phase C model. After all 5 TTFS results are in, produce the cross-architecture
+      encoding comparison table: rate vs TTFS delta for each architecture.
+      Expected: TTFS may help static MNIST (CNN/FFNN) less than sequential MNIST.
+
+  implement:
+    completed_at: "2026-04-12"
+    notes: >
+      Modified src/autoresearch/models/snn_vanilla_rnn.py: added encoding='rate'/'ttfs' param.
+      Created src/autoresearch/configs/model/snn_vanilla_rnn_ttfs.yaml.
+      Created src/autoresearch/configs/experiment/mnist_snn_vanilla_rnn_ttfs_adam.yaml.
+      Created experiments/anp_snn_iter10_snn_vanilla_rnn_ttfs_adam.pbs (gpu_1, 2h).

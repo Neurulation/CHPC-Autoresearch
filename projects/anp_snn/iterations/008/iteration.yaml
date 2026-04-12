@@ -1,0 +1,26 @@
+iteration: 8
+project: anp_snn
+status: implement
+goal: >
+  SNN-LSTM TTFS (Phase C) — temporal coding variant of the rate-coded SNN-LSTM (iter 3).
+  TTFS applied per-row: within each 28-pixel row, bright pixels fire first.
+  After LIF integration, spike counts are 0/1 (binary) rather than 0..T as in rate coding.
+  Tests: does TTFS improve SNN-LSTM performance on sequential MNIST?
+
+phases:
+  plan:
+    completed_at: "2026-04-12"
+    notes: >
+      Sequential MNIST: 28 rows processed sequentially by LSTM.
+      Per-row TTFS: each pixel fires at most once (binary feature) within T=25 steps.
+      Rate coding gives spike counts 0..T (graded intensity); TTFS gives 0/1 (presence/absence).
+      TTFS may hurt RNN tasks because the LSTM sees binary rather than graded inputs.
+
+  implement:
+    completed_at: "2026-04-12"
+    notes: >
+      Modified src/autoresearch/models/snn_lstm.py: added encoding='rate'/'ttfs' param.
+      _encode_row() now dispatches to ttfs_encode when encoding='ttfs'.
+      Created src/autoresearch/configs/model/snn_lstm_ttfs.yaml.
+      Created src/autoresearch/configs/experiment/mnist_snn_lstm_ttfs_adam.yaml.
+      Created experiments/anp_snn_iter8_snn_lstm_ttfs_adam.pbs (gpu_1, 2h).
