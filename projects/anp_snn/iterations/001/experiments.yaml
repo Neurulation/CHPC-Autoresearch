@@ -1,0 +1,10 @@
+jobs:
+  - job_id: "7171406"
+    name: anp_snn_iter1_snn_cnn_adam
+    queue: gpu_1
+    walltime: "01:00:00"
+    seeds: [0, 1, 2, 3, 4]
+    epochs: 20
+    submitted_at: "2026-04-12"
+    status: queued
+    notes: "SNN-CNN rate coding, T=25 timesteps, beta=0.9, batch=128, Adam lr=1e-3"
