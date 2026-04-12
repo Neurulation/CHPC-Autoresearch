@@ -1,6 +1,6 @@
 project: anp_pcnn
 iteration: 8
-status: planned
+status: experiment
 goal: >
   PC-EncDec v2 @ 60 epochs — establish the true accuracy ceiling.
   Iter 7 (30 epochs) showed all seeds still improving at the last epoch
@@ -17,3 +17,14 @@ phase_history:
       Planned after iter 7 concluded at 96.59% ± 0.28% with all seeds still
       improving at epoch 30. Simply double the training budget; no other
       changes needed — the architecture and fixes are confirmed working.
+  - phase: implement
+    completed: "2026-04-12"
+    notes: >
+      New experiment config: mnist_pc_enc_dec_v2_adam_60ep.yaml (epochs=60,
+      patience=10). PBS script: anp_pcnn_iter8_pc_enc_dec_v2_adam_60ep.pbs
+      (2h walltime — iter 7 took ~35min for 30 epochs, 60 should fit in 75min).
+  - phase: experiment
+    completed: null
+    notes: >
+      Submitted job 7171099 on 2026-04-12 (gpu_1, 2h walltime).
+      5 seeds (0-4), experiment=mnist_pc_enc_dec_v2_adam_60ep, epochs=60.

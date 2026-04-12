@@ -1,0 +1,21 @@
+project: anp_pcnn
+iteration: 8
+experiment_config: mnist_pc_enc_dec_v2_adam_60ep
+seeds: [0, 1, 2, 3, 4]
+epochs: 60
+
+jobs:
+  - job_id: "7171099"
+    job_name: anp_pcnn_iter8_pc_enc_dec_v2_adam_60ep
+    queue: gpu_1
+    status: queued
+    elapsed: "00:00"
+    submitted: "2026-04-12"
+    pbs_script: experiments/anp_pcnn_iter8_pc_enc_dec_v2_adam_60ep.pbs
+    log_out: logs/anp_pcnn_iter8_pc_enc_dec_v2_adam_60ep.out
+    log_err: logs/anp_pcnn_iter8_pc_enc_dec_v2_adam_60ep.err
+    walltime: "02:00:00"
+    nodes: 1
+    cpus: 4
+    gpus: 1
+    memory: 64gb
