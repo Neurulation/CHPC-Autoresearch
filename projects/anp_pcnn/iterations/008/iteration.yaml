@@ -1,6 +1,6 @@
 project: anp_pcnn
 iteration: 8
-status: experiment
+status: completed
 goal: >
   PC-EncDec v2 @ 60 epochs — establish the true accuracy ceiling.
   Iter 7 (30 epochs) showed all seeds still improving at the last epoch
@@ -24,7 +24,24 @@ phase_history:
       patience=10). PBS script: anp_pcnn_iter8_pc_enc_dec_v2_adam_60ep.pbs
       (2h walltime — iter 7 took ~35min for 30 epochs, 60 should fit in 75min).
   - phase: experiment
-    completed: null
+    completed: "2026-04-12"
     notes: >
       Submitted job 7171099 on 2026-04-12 (gpu_1, 2h walltime).
       5 seeds (0-4), experiment=mnist_pc_enc_dec_v2_adam_60ep, epochs=60.
+      All 5 seeds completed successfully.
+  - phase: analyze
+    completed: "2026-04-12"
+    notes: >
+      Best val_acc per seed: [97.48, 96.93, 97.18, 97.03, 97.07].
+      Mean: 97.14% ± 0.21%. Seeds 1 and 2 early-stopped (patience=10 on val_acc).
+      Seeds 0/3/4 ran all 60 epochs, still improving near convergence.
+      vs iter7 (30ep): +0.55pp (96.59%→97.14%), variance reduced (0.28→0.21).
+      vs PC-FFNN v3: gap now only -0.16pp (down from -0.71pp at 30ep).
+  - phase: conclude
+    completed: "2026-04-12"
+    notes: >
+      Result: 97.14% ± 0.21%. Training budget alone closed 78% of the gap
+      to PC-FFNN v3. The architecture can match feedforward PC with sufficient
+      training — but slow convergence remains the bottleneck. Next experiment
+      should add cosine LR decay or warmup to accelerate convergence,
+      potentially reaching or exceeding PC-FFNN v3 within 30-40 epochs.

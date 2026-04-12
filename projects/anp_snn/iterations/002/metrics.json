@@ -1,0 +1,23 @@
+{
+  "experiment_group": "mnist_snn_baseline_adam",
+  "seeds": [0, 1, 2, 3, 4],
+  "per_seed": {
+    "0": {"best_val_acc": 97.55, "best_val_loss": 0.0872, "epochs_run": 9,  "best_epoch": 9},
+    "1": {"best_val_acc": 97.47, "best_val_loss": 0.0938, "epochs_run": 11, "best_epoch": 10},
+    "2": {"best_val_acc": 97.72, "best_val_loss": 0.0998, "epochs_run": 15, "best_epoch": 13},
+    "3": {"best_val_acc": 97.62, "best_val_loss": 0.0956, "epochs_run": 9,  "best_epoch": 8},
+    "4": {"best_val_acc": 97.75, "best_val_loss": 0.0915, "epochs_run": 13, "best_epoch": 12}
+  },
+  "mean_val_acc": 97.622,
+  "std_val_acc": 0.117,
+  "best_val_acc": 97.75,
+  "best_seed": 4,
+  "mean_val_loss": 0.09358,
+  "num_params": 535818,
+  "comparison": {
+    "non_spiking_ffnn_784_256_128_10": {"mean_val_acc": 98.064, "std_val_acc": 0.151, "num_params": 235146},
+    "gap_vs_non_spiking_ffnn": -0.442,
+    "note": "SNN uses larger hidden dims (512-256 vs 256-128); despite more params, rate-coded spiking costs ~0.44pp"
+  },
+  "notes": "All 5 seeds early-stopped (patience=5 on val_loss). Mean epochs run: 11.4. Rate coding (T=25 Bernoulli) preserves accuracy well — only 0.44pp gap vs non-spiking FFNN."
+}

@@ -1,0 +1,26 @@
+{
+  "experiment_group": "mnist_pc_enc_dec_v2_adam_60ep",
+  "seeds": [0, 1, 2, 3, 4],
+  "per_seed": {
+    "0": {"best_val_acc": 97.48, "best_epoch": 58, "epochs_run": 60, "status": "completed"},
+    "1": {"best_val_acc": 96.93, "best_epoch": 42, "epochs_run": 42, "status": "early_stopped"},
+    "2": {"best_val_acc": 97.18, "best_epoch": 55, "epochs_run": 55, "status": "early_stopped"},
+    "3": {"best_val_acc": 97.03, "best_epoch": 55, "epochs_run": 60, "status": "completed"},
+    "4": {"best_val_acc": 97.07, "best_epoch": 54, "epochs_run": 60, "status": "completed"}
+  },
+  "mean_val_accuracy": 97.14,
+  "std_val_accuracy": 0.21,
+  "mean_val_loss": 0.10328,
+  "best_seed": 0,
+  "best_val_accuracy": 97.48,
+  "num_params": 470948,
+  "epochs": 60,
+  "all_seeds_completed": true,
+  "comparison": {
+    "iter7_30ep": {"mean_val_acc": 96.59, "std_val_acc": 0.28},
+    "gap_vs_iter7": +0.55,
+    "pc_ffnn_v3_30ep": {"mean_val_acc": 97.30, "std_val_acc": 0.22},
+    "gap_vs_pc_ffnn_v3": -0.16
+  },
+  "notes": "PC-EncDec v2 @ 60ep: +0.55pp over 30ep (96.59%→97.14%). Seeds 1 and 2 early-stopped (patience=10). Convergence still slow — seeds 0/3/4 needed all 60 epochs. Gap vs PC-FFNN v3 reduced to -0.16pp (from -0.71pp at 30ep). Architecture is competitive but needs more epochs or LR scheduling."
+}
