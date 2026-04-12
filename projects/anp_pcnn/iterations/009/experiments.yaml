@@ -6,5 +6,7 @@ jobs:
     seeds: [0, 1, 2, 3, 4]
     epochs: 60
     submitted_at: "2026-04-12"
-    status: running
-    notes: "PC-EncDec v2 + CosineAnnealingLR (1e-3 → 1e-6) — target ≥97.30% to match PC-FFNN v3"
+    status: completed
+    completed_at: "2026-04-12"
+    notes: "PC-EncDec v2 + CosineAnnealingLR — INVALID RESULT due to two code bugs (see iteration.yaml). All 5 seeds stopped at epoch 11: val_acc=95.82%±0.20%, worse than iter8 (97.14%). Result is not a valid measure of cosine LR effect."
+    result: "val_acc=95.82%±0.20% (5/5 seeds stopped epoch 11) — INVALID: early stopping bug + scheduler not applied"

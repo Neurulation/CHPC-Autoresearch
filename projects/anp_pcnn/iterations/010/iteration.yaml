@@ -1,0 +1,43 @@
+project: anp_pcnn
+iteration: 10
+status: implement
+goal: >
+  PC-EncDec v2 + cosine LR decay (valid rerun) — accelerate convergence to close
+  the -0.16pp gap vs PC-FFNN v3.
+  Iter 9 was invalid due to two bugs: (1) wrong PBS entry point (train.py instead of
+  train_pcnn.py) and (2) train.py mode='max' on val_loss causes early stopping at epoch 11.
+  Both bugs fixed in train_pcnn.py. This iter10 is the first valid cosine LR measurement.
+  Target: ≥97.30% (match or beat PC-FFNN v3 baseline) within 60 epochs.
+created: "2026-04-12"
+
+phases:
+  plan:
+    completed_at: "2026-04-12"
+    notes: >
+      Cosine annealing (CosineAnnealingLR, T_max=60, eta_min=1e-6) decays LR from
+      1e-3 to 1e-6 over 60 epochs. All other hyperparameters identical to iter 8
+      (the reference run: 97.14%±0.21% @ 60ep with flat LR=1e-3, train_pcnn.py).
+      Two fixes applied to train_pcnn.py:
+        1. Early stopping reverted to val_accuracy (val_metrics["accuracy"], mode=max)
+        2. Added scheduler support: instantiate cfg.scheduler in main(), pass to train(),
+           call scheduler.step() after each epoch, log train/lr to wandb.
+      New experiment_group: mnist_pc_enc_dec_v2_adam_cosine_v2 (fresh outputs directory,
+      avoids collision with iter9's completed status.json files).
+      PBS uses train_pcnn.py (correct entry point for PC models).
+
+  implement:
+    completed_at: "2026-04-12"
+    notes: >
+      Fixed src/autoresearch/train_pcnn.py:
+        - early_stopping now calls val_metrics["accuracy"] (reverted from val_loss)
+        - Added scheduler: Optional[Any] = None parameter to train()
+        - Added scheduler.step() after train_one_epoch_pc()
+        - Added train/lr logging to wandb when scheduler is active
+        - Added scheduler instantiation in main(): instantiate(cfg.scheduler, optimizer, T_max=cfg.epochs)
+      Created src/autoresearch/configs/experiment/mnist_pc_enc_dec_v2_adam_cosine_v2.yaml
+        (identical to iter9 config except experiment_group updated to v2).
+      Created experiments/anp_pcnn_iter10_pc_enc_dec_v2_adam_cosine_v2.pbs
+        (train_pcnn.py entry point, gpu_1, 2h).
+      Smoke test (seed=0, epochs=2, local): ep1 88.52%, ep2 90.08%.
+        Early stopping mode=max did NOT fire — val_accuracy improved as expected.
+        Scheduler confirmed working (no errors).

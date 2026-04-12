@@ -1,0 +1,67 @@
+# @package _global_
+# ANP-PCNN Iter 10 — PC-EncDec v2 + cosine LR (valid rerun of iter 9).
+#
+# Iter 9 was invalid due to:
+#   1. PBS script used train.py instead of train_pcnn.py (wrong entry point)
+#   2. train.py mode='max' on val_loss → early stopping fired at epoch 11
+# Both bugs fixed in train_pcnn.py before this run.
+#
+# Iter 8 reference (flat LR, train_pcnn.py): 97.14% ± 0.21% @ 60ep.
+# Target: ≥97.30% to match PC-FFNN v3 (97.30% ± 0.22%).
+
+defaults:
+  - override /dataset: mnist
+  - override /model: pc_enc_dec
+  - override /optimizer: adam_pc
+
+experiment_group: mnist_pc_enc_dec_v2_adam_cosine_v2
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 60
+num_workers: 4
+validation_split: 0.1
+max_grad_norm: 0.5
+
+model:
+  T_pc: 20
+  lr_pc: 0.05
+  dec_weight: 0.5
+
+energy_schedule:
+  max: 0.1
+  warmup_epochs: 10
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+  eta_min: 1.0e-6
+
+early_stopping:
+  enabled: true
+  patience: 10
+  min_delta: 0.01
+  metric: val_accuracy
+  mode: max
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - pc_enc_dec
+    - predictive_coding
+    - encoder_decoder
+    - bidirectional_pc
+    - reconstruction
+    - skip_connections
+    - adam
+    - cosine_lr
+    - anp
+    - anp-pcnn
+    - proto_spcnn
+    - energy_schedule
+    - val_fix
+  notes: "ANP-PCNN Iter 10 — PC-EncDec v2 + cosine LR (valid rerun of iter 9, both bugs fixed)."

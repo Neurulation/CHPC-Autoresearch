@@ -286,11 +286,13 @@ def train(
     wandb_run_id: Optional[str],
     wandb_enabled: bool,
     run_dir: Path,
+    scheduler: Optional[Any] = None,
 ) -> None:
     """PC training loop.
 
-    Early stopping and checkpointing use val_accuracy (mode=max) by default.
-    Val loss is still logged for reference but is no longer the stopping metric.
+    Early stopping monitors val_accuracy (mode=max) — consistent with all PC
+    experiment configs which set metric=val_accuracy, mode=max.
+    Val loss is logged for reference but is not the stopping metric.
     """
     checkpoint_dir = run_dir / "checkpoints"
 
@@ -327,6 +329,8 @@ def train(
                 max_grad_norm=cfg.get("max_grad_norm", None),
                 energy_weight=energy_weight,
             )
+            if scheduler is not None:
+                scheduler.step()
             val_metrics = validate_pc(
                 model, val_loader, device=next(model.parameters()).device
             )
@@ -351,6 +355,8 @@ def train(
                 }
                 if energy_weight is not None:
                     log_dict["train/energy_weight"] = energy_weight
+                if scheduler is not None:
+                    log_dict["train/lr"] = scheduler.get_last_lr()[0]
                 wandb.log(log_dict)
 
             if cfg.checkpoint.enabled and epoch % cfg.checkpoint.save_frequency == 0:
@@ -364,8 +370,8 @@ def train(
                 save_best_model(checkpoint_dir, epoch, model, val_metrics["loss"])
                 log.info("New best val_acc: %.2f%% (epoch %d)", best_val_acc, epoch)
 
-            # Early stopping on val_loss
-            if early_stopping is not None and early_stopping(val_metrics["loss"]):
+            # Early stopping on val_accuracy (mode=max, consistent with PC experiment configs)
+            if early_stopping is not None and early_stopping(val_metrics["accuracy"]):
                 log.info("Early stopping at epoch %d (best val_acc: %.2f%%)",
                          epoch, best_val_acc)
                 save_status(run_dir, "completed", epoch=epoch,
@@ -459,10 +465,16 @@ def main(cfg: DictConfig) -> None:
         {"num_model_params": num_params, "T_pc": cfg.model.T_pc, "lr_pc": cfg.model.lr_pc},
     )
 
+    # LR scheduler (optional)
+    scheduler = None
+    if cfg.get("scheduler") is not None:
+        scheduler = instantiate(cfg.scheduler, optimizer=optimizer, T_max=cfg.epochs)
+
     # Train
     train(
         cfg, model, train_loader, val_loader, optimizer,
         start_epoch, best_metric, wandb_run_id, wandb_enabled, run_dir,
+        scheduler=scheduler,
     )
 
 

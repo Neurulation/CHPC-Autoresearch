@@ -1,6 +1,6 @@
 project: anp_pcnn
 iteration: 9
-status: experiment
+status: completed
 goal: >
   PC-EncDec v2 + cosine LR decay — accelerate convergence to close the -0.16pp gap.
   Iter 8 (60ep) reached 97.14% ± 0.21% vs PC-FFNN v3 (97.30% ± 0.22%).
@@ -30,5 +30,48 @@ phases:
 
   experiment:
     started_at: "2026-04-12"
+    completed_at: "2026-04-12"
     notes: >
       Submitted to CHPC gpu_1 as job 7171630. 5 seeds (0–4), 60 epochs, patience=10.
+      All 5 seeds completed early stopped at epoch 11.
+      Per-seed val_acc: [96.05, 95.75, 96.00, 95.68, 95.60]. Mean: 95.82% ±0.20%.
+
+  analyze:
+    completed_at: "2026-04-12"
+    notes: >
+      INVALID RESULT — two independent code bugs caused premature stopping at epoch 11:
+
+      Bug 1 — Wrong entry point in PBS script (PRIMARY):
+        anp_pcnn_iter9_pc_enc_dec_v2_adam_cosine.pbs uses "python -m autoresearch.train"
+        instead of "python -m autoresearch.train_pcnn". train.py was used for a PC model.
+
+      Bug 2 — EarlyStopping metric/mode mismatch in train.py:
+        train.py calls early_stopping(val_metrics["loss"]) with mode=cfg.early_stopping.mode.
+        PC experiment configs set mode='max' (intended for use with val_accuracy).
+        With mode='max' and monotonically decreasing val_loss: for every epoch after epoch 1,
+        score (val_loss) < best_score (epoch-1 loss) + min_delta=0.01. Counter increments
+        every epoch. patience=10 → fires at epoch 11 for ALL 5 seeds deterministically.
+        Val_loss trajectory for seed0: 0.4147→0.3191→...→0.1282 — strictly decreasing
+        yet "Early stopping triggered at epoch 11" reported for every seed.
+
+      Note: train.py DOES have scheduler support, so cosine LR was being applied for 11
+      epochs. But stopping at epoch 11 makes the cosine LR effect unmeasurable (LR decays
+      from 1e-3 to ~9.8e-4 by epoch 11 — barely different from flat LR).
+
+      Combined: iter9 effectively ran 11 epochs of near-flat-LR training with the wrong
+      entry point. Val_acc 95.82%±0.20% is not a valid measure of cosine LR acceleration.
+
+  conclude:
+    completed_at: "2026-04-12"
+    notes: >
+      RESULT INVALID: 95.82%±0.20% at epoch 11 is not a valid cosine LR measurement.
+      Root causes:
+        1. PBS script used train.py instead of train_pcnn.py (wrong entry point for PC models)
+        2. train.py mode='max' on val_loss → early stopping fires at epoch 11
+      Fixes applied to train_pcnn.py:
+        - Early stopping reverted to val_accuracy (mode=max is correct for val_accuracy)
+        - Added scheduler parameter + instantiation in main() (cosine LR now works)
+      NEXT (iter 10): Rerun cosine LR experiment with corrected PBS script using train_pcnn.py
+      and new experiment_group mnist_pc_enc_dec_v2_adam_cosine_v2 (fresh outputs directory).
+      Fair comparison to iter8 (97.14%±0.21% @ 60ep, flat LR, train_pcnn.py).
+      Target: ≥97.30% (match or beat PC-FFNN v3 baseline) within 60 epochs.
