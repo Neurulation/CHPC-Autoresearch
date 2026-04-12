@@ -65,6 +65,29 @@ python -m autoresearch.train --multirun experiment=mnist_ffnn_adam
 | `mnist_snn_baseline_adam` | MNIST | SNN (784-512-256-10 LIF, T=25) | Adam | 20 epochs, 5 seeds |
 | `cifar10_resnet18_adam` | CIFAR-10 | ResNet-18 (CIFAR-modified) | Adam | 100 epochs, 5 seeds |
 
+## Research Roadmap: ANN → SNN
+
+The overarching goal is a **fully biologically plausible, end-to-end spiking implementation** with three requirements:
+1. **No backpropagation** — replaced by local learning rules (Hebbian, STDP) in later phases
+2. **Fully spike-driven** — every inter-layer signal is binary spikes {0,1}; no float hidden states between layers
+3. **Neuromorphic-deployable** — theoretically runnable on energy-efficient spiking hardware
+
+### Architecture Ladder
+
+| Step | ANN | Fully Spiking SNN | snntorch primitive | Status |
+|------|-----|--------------------|-------------------|--------|
+| 1 | FFNN | **SFNN** | `snn.Leaky` per FC layer | Done ✓ |
+| 2 | CNN | **SCNN** | `snn.Leaky` after each conv | Done ✓ |
+| 3 | Vanilla RNN | **SRNN** | `snn.RLeaky(linear_features=N)` — recurrent LIF | Planned |
+| 4 | LSTM | **SLSTM** | `snn.SLSTM(input_size, hidden_size)` | Planned |
+| 5 | GRU | **SGRU** | No native — custom LIF-gated GRU | Deferred |
+| 6 | Transformer | **STransformer** | No native — research-level | Deferred |
+
+**Hybrid ≠ Fully Spiking.** Phase B/C experiments (iters 3–10) used a hybrid architecture:
+`snn.Leaky` encoder → spike counts → standard `nn.LSTM/GRU/RNN`. This is NOT the target
+fully spiking design. These results answer a separate but useful question: *do spike-encoded
+inputs help standard RNNs?* The genuine SRNN and SLSTM implementations are in iters 11–14.
+
 ## Leaderboard
 
 Results grouped by dataset. Val Acc = mean ± std across seeds where available. ⚠️ = preliminary (single seed / partial run).
@@ -77,6 +100,8 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 | ANP — RNN | 2 | GRU (2-layer, h=256) | Adam | ✗ | 5 | **99.06% ± 0.14%** | sequential (T=28) | ✅ |
 | ANP — RNN | 1 | LSTM (2-layer, h=256) | Adam | ✗ | 5 | 98.95% ± 0.11% | sequential (T=28) | ✅ |
 | ANP — SNN | 1 | SNN-CNN (2 Conv+LIF+Pool + 2 FC+LIF, T=25) | Adam | ✗ | 5 | **98.87% ± 0.13%** | rate-coded, spatial | ✅ |
+| ANP — SNN | 4 | **Hybrid**-GRU (LIF encoder + 2-layer GRU h=256, T=25) | Adam | ✗ | 5 | 98.75% ± 0.15%ᴮ | hybrid baseline — not fully spiking | ✅ |
+| ANP — SNN | 3 | **Hybrid**-LSTM (LIF encoder + 2-layer LSTM h=256, T=25) | Adam | ✗ | 5 | 98.68% ± 0.04%ᴮ | hybrid baseline — not fully spiking | ✅ |
 | Image Processing NN | 1 | FFNN (784-256-128-10) | Adam | ✗ | 5 | 98.06% ± 0.15% | dense | ✅ |
 | ANP — RNN | 3 | Vanilla RNN (2-layer, h=256) | Adam | ✗ | 5 | 97.89% ± 0.35% | sequential (T=28) | ✅ |
 | ANP — SNN | 2 | SNN-FFNN (784-512-256-10 LIF, T=25) | Adam | ✗ | 5 | 97.62% ± 0.12%ᴬ | rate-coded (Phase B baseline) | ✅ |
@@ -88,24 +113,35 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 | ANP — PC-NN | 1 | PC-FFNN (784-256-128-10) | Adam | ✗ | 5 | ~96%¹ / 89.0% ± 4.7%² | predictive coding | ⚠️ |
 | ANP — PC-NN | 4 | PC-FFNN v4 + eps=0.01 (784-256-128-10) | Adam (eps=0.01) | ✗ | 5 | 93.95% ± 0.27%⁵ | not converged | ⚠️ |
 | ANP — PC-NN | 6 | PC-EncDec v1 (784-256-128 enc+dec) | Adam | ✗ | 5 | 93.13% ± 0.35%⁶ | train/val mismatch + β=1 | ⚠️ |
-| ANP — SNN | 3 | SNN-LSTM (LIF encoder + 2-layer LSTM h=256, T=25) | Adam | ✗ | 5 | pendingᴮ | rate-coded, sequential | ⏳ |
-| ANP — SNN | 4 | SNN-GRU (LIF encoder + 2-layer GRU h=256, T=25) | Adam | ✗ | 5 | pendingᴮ | rate-coded, sequential | ⏳ |
-| ANP — SNN | 5 | SNN-VanillaRNN (LIF encoder + 2-layer RNN h=256, T=25) | Adam | ✗ | 5 | pendingᴮ | rate-coded, sequential | ⏳ |
-| ANP — SNN | 6 | SNN-FFNN TTFS (784-512-256-10 LIF, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | temporal coding (Phase C) | ⏳ |
-| ANP — SNN | 7 | SNN-CNN TTFS (2 Conv+LIF+Pool + 2 FC+LIF, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | temporal coding (Phase C) | ⏳ |
-| ANP — SNN | 8 | SNN-LSTM TTFS (LIF encoder + LSTM, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | temporal coding (Phase C) | ⏳ |
-| ANP — SNN | 9 | SNN-GRU TTFS (LIF encoder + GRU, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | temporal coding (Phase C) | ⏳ |
-| ANP — SNN | 10 | SNN-VanillaRNN TTFS (LIF encoder + RNN, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | temporal coding (Phase C) | ⏳ |
+| ANP — SNN | 5 | **Hybrid**-VanillaRNN (LIF encoder + 2-layer RNN h=256, T=25) | Adam | ✗ | 5 | pendingᴮ | hybrid baseline — not fully spiking | ⏳ |
+| ANP — SNN | 6 | SFNN TTFS (784-512-256-10 LIF, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | fully spiking, temporal coding | ⏳ |
+| ANP — SNN | 7 | SCNN TTFS (2 Conv+LIF+Pool + 2 FC+LIF, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | fully spiking, temporal coding | ⏳ |
+| ANP — SNN | 8 | **Hybrid**-LSTM TTFS (LIF encoder + LSTM, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | hybrid baseline — not fully spiking | ⏳ |
+| ANP — SNN | 9 | **Hybrid**-GRU TTFS (LIF encoder + GRU, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | hybrid baseline — not fully spiking | ⏳ |
+| ANP — SNN | 10 | **Hybrid**-VanillaRNN TTFS (LIF encoder + RNN, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | hybrid baseline — not fully spiking | ⏳ |
+| ANP — SNN | 11 | **SRNN** rate (snn.RLeaky T=28, h=256) | Adam | ✗ | 5 | plannedᴰ | **fully spiking recurrent** | 📋 |
+| ANP — SNN | 12 | **SLSTM** rate (snn.SLSTM T=28, h=256) | Adam | ✗ | 5 | plannedᴰ | **fully spiking recurrent** | 📋 |
+| ANP — SNN | 13 | **SRNN** TTFS (snn.RLeaky T=28, TTFS) | Adam | ✗ | 5 | plannedᴰ | **fully spiking recurrent** | 📋 |
+| ANP — SNN | 14 | **SLSTM** TTFS (snn.SLSTM T=28, TTFS) | Adam | ✗ | 5 | plannedᴰ | **fully spiking recurrent** | 📋 |
 | ANP — SPCNN | 2 | SPC-FFNN v1 (SNN-FFNN + PC inference loop) | Adam | ✗ | 5 | ~11%ˢ | COMPLETE FAILURE | ❌ |
 | ANP — SPCNN | 3 | SPC-FFNN v2 (train/val mismatch fixed) | Adam | ✗ | 5 | pendingˢ | post-fix validation | ⏳ |
 
 ᴬ **ANP — SNN iter 2 (SNN-FFNN rate coding):** 97.62% ± 0.12% (535k params). Rate coding (T=25 Bernoulli) preserves
   accuracy well — only −0.44pp gap vs non-spiking FFNN despite larger hidden dims (512-256 vs 256-128).  
-ᴮ **ANP — SNN iters 3-5 (Phase B: SNN-LSTM/GRU/VanillaRNN):** Jobs 7171472-7171474, submitted 2026-04-12.
-  Seed 0 elapsed at time of last check: LSTM 44m, GRU 20m per seed. Results pending.  
+ᴮ **ANP — SNN iters 3-5 (Phase B: Hybrid-LSTM/GRU/VanillaRNN):** Jobs 7171472-7171474, submitted 2026-04-12.
+  Architecture: `snn.Leaky` input encoder (T=25 Bernoulli per row) → rate-coded spike counts → standard `nn.LSTM/GRU/RNN`.
+  **These are hybrid comparison baselines, NOT the target fully spiking design.**
+  They answer: "do spike-encoded inputs help standard RNNs?"
+  Results (iter 3/4 complete): SNN-GRU **98.75% ± 0.15%**, SNN-LSTM **98.68% ± 0.04%** — both 5/5 seeds, 30 epochs.
+  Rate-coded spiking input is near-lossless for recurrent models: only −0.31pp gap vs non-spiking GRU (99.06%).
+  SNN-VanillaRNN (iter 5): still running (4/5 seeds complete: 97.45%±0.50% estimated; seed4 in progress).  
 ᶜ **ANP — SNN iters 6-10 (Phase C TTFS):** Jobs 7171613-7171617, queued behind Phase B.
+  iters 6-7 (SFNN/SCNN TTFS) are fully spiking. iters 8-10 (LSTM/GRU/VanillaRNN TTFS) are hybrid baselines.
   Tests whether TTFS temporal coding improves over rate coding for static/sequential MNIST.  
-¹ Estimated best-epoch val_acc (~epoch 3) based on smoke test; true best-epoch val_acc not directly recorded.  
+ᴰ **ANP — SNN iters 11-14 (fully spiking recurrent — planned):** Next priority after iters 3-10 complete.
+  SRNN uses `snn.RLeaky(linear_features=256)` over T=28 MNIST rows — fully binary spikes throughout.
+  SLSTM uses `snn.SLSTM(28, 256)` — standard LSTM gates internally but thresholded membrane output → binary spikes.
+  These are the first *truly* fully spiking recurrent models in the ladder; no standard PyTorch RNN cells.  
 ² Mean last-epoch val_acc at early-stop (epochs 9-11). High variance and degradation compared to best epoch
   is caused by a training-evaluation objective mismatch (see key findings below).  
 ³ Best-epoch val_acc across 5 seeds (early stopping on val_acc, mode=max). CE head resolves iter 1 calibration failure.
@@ -150,6 +186,7 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 
 **Key findings:**
 - *MNIST: CNN outperforms FFNN at 99.17% vs 98.06%. SNN-CNN (iter1, anp_snn) 98.87% ± 0.13% — only -0.30pp behind non-spiking CNN, confirming LIF neurons + rate coding are effective for spatial feature extraction. SNN-FFNN baseline (iter2, anp_snn) 97.62% ± 0.12% — -0.44pp vs non-spiking FFNN despite larger hidden dims (512-256 vs 256-128). Architecture gain: +1.25pp from adding convolutional spiking layers.*
+- *SNN Phase B (iters 3-4, anp_snn) — hybrid spiking recurrent results: SNN-GRU 98.75% ± 0.15% (iter4), SNN-LSTM 98.68% ± 0.04% (iter3). Rate-coded spiking input is near-lossless for sequential MNIST: only −0.31pp gap vs non-spiking GRU (99.06%). LIF spike-count features (T=25 Bernoulli) preserve almost all information needed for recurrent classification. SNN-GRU gap from LSTM (0.07pp) mirrors the non-spiking gap (0.11pp) — gating dynamics unaffected by spiking encoder.*
 - *GRU (iter 2) beats LSTM (iter 1): 99.06% ± 0.14% vs 98.95% ± 0.11%, with 25% fewer parameters (617k vs ~821k). Gate reduction (4→3 gates) did not hurt — confirms GRU parity with LSTM on seq-MNIST (Chung et al. 2014).*
 - *Vanilla RNN (iter 3): 97.89% ± 0.35% — far better than predicted. Literature expects 10-20pp regression from LSTM for T>>10 (Bengio et al. 1994); actual gap from GRU is only 1.17pp. Adam's adaptive LR compensates for vanishing gradients at T=28, acting as a significant equaliser. Completes the RNN trilogy: GRU (99.06%) → LSTM (98.95%) → Vanilla (97.89%). Parameter efficiency: 207k vs 617k (GRU) for 1.17pp.*
 - *LSTM/GRU on sequential MNIST (T=28): competitive with CNN despite processing pixels row-by-row.*
@@ -232,6 +269,7 @@ docs/                   # Architecture docs, CHPC guides
 
 | Skill | Purpose |
 |-------|---------|
+| `/snntorch-docs` | Look up snntorch neuron classes, equations, and API from local docs |
 | `/start` | **Kickoff / resume the full autoresearch loop** |
 | `/loop` | **Schedule a recurring poll** — monitors CHPC jobs, auto-analyzes results |
 | `/chpc-submit` | Generate PBS script and submit to CHPC (tries SSH directly) |

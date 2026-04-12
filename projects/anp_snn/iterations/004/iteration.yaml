@@ -1,6 +1,6 @@
 iteration: 4
 project: anp_snn
-status: experiment
+status: completed
 goal: >
   SNN-GRU (rate coding) on sequential MNIST — hybrid spiking-recurrent model.
   LIF input encoder (T=25 Bernoulli timesteps per row) + 2-layer GRU (hidden=256).
@@ -25,5 +25,21 @@ phases:
 
   experiment:
     started_at: "2026-04-12"
+    completed_at: "2026-04-12"
     notes: >
       Submitted to CHPC gpu_1. 5 seeds (0–4), 30 epochs, patience=7 on val_loss.
+      All 5 seeds completed. Best seed: seed0 @ 98.93%.
+
+  analyze:
+    completed_at: "2026-04-12"
+    notes: >
+      metrics.json written. Mean val_acc=98.75%+-0.15% (5 seeds). All ran 30 epochs.
+      Best Phase B model overall. Seed 2 lowest at 98.58% — higher variance than LSTM.
+
+  conclude:
+    completed_at: "2026-04-12"
+    notes: >
+      SNN-GRU Phase B result: 98.75%+-0.15%. Best hybrid spiking result across all architectures.
+      Marginally outperforms SNN-LSTM (98.68%) despite fewer parameters (no cell state).
+      Higher variance than SNN-LSTM — GRU more sensitive to weight initialisation.
+      Conclusion: SNN-GRU is the strongest Phase B model; rate coding + GRU = near-lossless.

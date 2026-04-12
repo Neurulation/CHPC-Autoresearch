@@ -1,6 +1,6 @@
 iteration: 3
 project: anp_snn
-status: experiment
+status: completed
 goal: >
   SNN-LSTM (rate coding) on sequential MNIST — hybrid spiking-recurrent model.
   LIF input encoder (T=25 Bernoulli timesteps per row) + 2-layer LSTM (hidden=256).
@@ -26,6 +26,22 @@ phases:
 
   experiment:
     started_at: "2026-04-12"
+    completed_at: "2026-04-12"
     notes: >
       Submitted to CHPC gpu_1. 5 seeds (0–4), 30 epochs, patience=7 on val_loss.
       max_grad_norm=1.0 for stability. Target: approach LSTM baseline performance.
+      All 5 seeds completed. Best seed: seed1 @ 98.73%.
+
+  analyze:
+    completed_at: "2026-04-12"
+    notes: >
+      metrics.json written. Mean val_acc=98.68%+-0.04% (5 seeds). All ran 30 epochs.
+      Strong result: LIF rate-coded input adds minimal overhead vs pure LSTM baseline.
+
+  conclude:
+    completed_at: "2026-04-12"
+    notes: >
+      SNN-LSTM Phase B result: 98.68%+-0.04%. Rate coding preserves most LSTM performance.
+      Spiking encoder (T=25, Bernoulli rate coding) → 98.68% vs. expected pure LSTM ~98.9%.
+      LIF spike-count features are nearly as informative as raw pixel rows for LSTM.
+      Conclusion: Hybrid SNN-LSTM is a viable, near-lossless spiking integration point.

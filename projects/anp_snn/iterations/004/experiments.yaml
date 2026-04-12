@@ -6,5 +6,7 @@ jobs:
     seeds: [0, 1, 2, 3, 4]
     epochs: 30
     submitted_at: "2026-04-12"
-    status: queued
+    status: completed
+    completed_at: "2026-04-12"
+    result: "val_acc=98.75%+-0.15% (5/5 seeds), val_loss=0.0410+-0.0020, all 30 epochs"
     notes: "SNN-GRU hybrid: LIF input encoder (T=25) + 2-layer GRU (hidden=256), sequential MNIST, Adam lr=1e-3"

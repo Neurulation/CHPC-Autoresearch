@@ -1,0 +1,25 @@
+{
+  "experiment": "mnist_snn_lstm_adam",
+  "model": "SNN-LSTM",
+  "phase": "B",
+  "encoding": "rate",
+  "description": "SNN-LSTM: LIF encoder (T=25) + 2-layer LSTM (hidden=256) on sequential MNIST",
+  "dataset": "MNIST",
+  "seeds": [0, 1, 2, 3, 4],
+  "per_seed": [
+    {"seed": 0, "val_accuracy": 98.6667, "val_loss": 0.044419, "best_epoch": 30},
+    {"seed": 1, "val_accuracy": 98.7333, "val_loss": 0.036843, "best_epoch": 30},
+    {"seed": 2, "val_accuracy": 98.6667, "val_loss": 0.042830, "best_epoch": 30},
+    {"seed": 3, "val_accuracy": 98.6333, "val_loss": 0.045654, "best_epoch": 30},
+    {"seed": 4, "val_accuracy": 98.7000, "val_loss": 0.049812, "best_epoch": 30}
+  ],
+  "summary": {
+    "val_accuracy_mean": 98.68,
+    "val_accuracy_std": 0.038,
+    "val_loss_mean": 0.043912,
+    "val_loss_std": 0.004723,
+    "n_seeds": 5,
+    "n_seeds_completed": 5
+  },
+  "notes": "All 5 seeds ran to epoch 30 (no early stopping triggered). Strong result: 98.68%+-0.04% vs. pure LSTM baseline (expected ~98.9%)."
+}

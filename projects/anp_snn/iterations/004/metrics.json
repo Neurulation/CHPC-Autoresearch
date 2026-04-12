@@ -1,0 +1,25 @@
+{
+  "experiment": "mnist_snn_gru_adam",
+  "model": "SNN-GRU",
+  "phase": "B",
+  "encoding": "rate",
+  "description": "SNN-GRU: LIF encoder (T=25) + 2-layer GRU (hidden=256) on sequential MNIST",
+  "dataset": "MNIST",
+  "seeds": [0, 1, 2, 3, 4],
+  "per_seed": [
+    {"seed": 0, "val_accuracy": 98.9333, "val_loss": 0.040351, "best_epoch": 30},
+    {"seed": 1, "val_accuracy": 98.8833, "val_loss": 0.037988, "best_epoch": 30},
+    {"seed": 2, "val_accuracy": 98.5833, "val_loss": 0.043368, "best_epoch": 30},
+    {"seed": 3, "val_accuracy": 98.6500, "val_loss": 0.040899, "best_epoch": 30},
+    {"seed": 4, "val_accuracy": 98.6833, "val_loss": 0.042156, "best_epoch": 30}
+  ],
+  "summary": {
+    "val_accuracy_mean": 98.7466,
+    "val_accuracy_std": 0.1529,
+    "val_loss_mean": 0.040952,
+    "val_loss_std": 0.002027,
+    "n_seeds": 5,
+    "n_seeds_completed": 5
+  },
+  "notes": "All 5 seeds ran to epoch 30 (no early stopping triggered). Best Phase B result: 98.75%+-0.15%. Seed 2 is lowest (98.58%) but still strong."
+}
