@@ -9,13 +9,13 @@ jobs:
     status: broken
     notes: "BROKEN: threshold=1.0 → LIF silent → spk_acc=0 → ~11% chance accuracy. All seeds invalid."
 
-  - job_id: null
+  - job_id: "7172625"
     name: anp_snn_iter8b_snn_lstm_ttfs_v2_adam
     pbs_script: experiments/anp_snn_iter8b_snn_lstm_ttfs_v2_adam.pbs
     queue: gpu_1
     walltime: "02:00:00"
     seeds: [0, 1, 2, 3, 4]
     epochs: 30
-    submitted_at: null
-    status: pending
+    submitted_at: "2026-04-12"
+    status: running
     notes: "CORRECTED re-run: threshold=0.9. True TTFS baseline."
