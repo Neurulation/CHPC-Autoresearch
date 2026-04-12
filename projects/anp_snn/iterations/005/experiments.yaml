@@ -1,0 +1,10 @@
+jobs:
+  - job_id: "7171474"
+    name: anp_snn_iter5_snn_vanilla_rnn_adam
+    queue: gpu_1
+    walltime: "02:00:00"
+    seeds: [0, 1, 2, 3, 4]
+    epochs: 30
+    submitted_at: "2026-04-12"
+    status: queued
+    notes: "SNN-VanillaRNN hybrid: LIF input encoder (T=25) + 2-layer RNN (hidden=256, tanh), sequential MNIST, Adam lr=1e-3"

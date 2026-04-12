@@ -1,0 +1,10 @@
+jobs:
+  - job_id: "7171472"
+    name: anp_snn_iter3_snn_lstm_adam
+    queue: gpu_1
+    walltime: "02:00:00"
+    seeds: [0, 1, 2, 3, 4]
+    epochs: 30
+    submitted_at: "2026-04-12"
+    status: queued
+    notes: "SNN-LSTM hybrid: LIF input encoder (T=25) + 2-layer LSTM (hidden=256), sequential MNIST, Adam lr=1e-3"
