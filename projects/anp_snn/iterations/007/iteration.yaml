@@ -1,6 +1,6 @@
 iteration: 7
 project: anp_snn
-status: implement
+status: experiment
 goal: >
   SNN-CNN TTFS (Phase C) — temporal coding variant of the rate-coded SNN-CNN (iter 1, 98.87%±0.13%).
   TTFS applied to full image: each spatial pixel fires at most once over T=25 timesteps.
@@ -23,3 +23,8 @@ phases:
       Created src/autoresearch/configs/model/snn_cnn_ttfs.yaml (encoding: ttfs).
       Created src/autoresearch/configs/experiment/mnist_snn_cnn_ttfs_adam.yaml.
       Created experiments/anp_snn_iter7_snn_cnn_ttfs_adam.pbs (gpu_1, 1h).
+
+  experiment:
+    started_at: "2026-04-12"
+    notes: >
+      Submitted to CHPC gpu_1 as job 7171614. 5 seeds (0–4), 20 epochs, patience=5 on val_loss.

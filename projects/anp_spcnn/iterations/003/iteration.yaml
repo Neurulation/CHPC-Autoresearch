@@ -1,6 +1,6 @@
 iteration: 3
 project: anp_spcnn
-status: implement
+status: experiment
 goal: >
   SPC-FFNN v2 — fix train/val mismatch bug from iter 2.
   Bug: CE was computed on raw linear activations (no SNN), eval on SNN spike-count reps.
@@ -30,3 +30,8 @@ phases:
       Created experiments/anp_spcnn_iter3_spc_ffnn_v2_adam.pbs (gpu_1, 2h).
       Smoke test: val_acc 39.43% @ep1, 46.72% @ep2 (vs iter2: 10% stuck throughout).
       No energy explosion observed. Fix confirmed working.
+
+  experiment:
+    started_at: "2026-04-12"
+    notes: >
+      Submitted to CHPC gpu_1 as job 7171612. 5 seeds (0–4), 30 epochs, patience=7 on val_loss.

@@ -1,6 +1,6 @@
 iteration: 6
 project: anp_snn
-status: implement
+status: experiment
 goal: >
   SNN-FFNN TTFS (Phase C) — temporal coding variant of the rate-coded SNN-FFNN (iter 2, 97.62%±0.12%).
   Time-to-first-spike encoding: bright pixels fire at t≈0, dark pixels at t≈T-1 or not at all.
@@ -24,3 +24,8 @@ phases:
       Created src/autoresearch/configs/model/snn_baseline_ttfs.yaml (encoding: ttfs).
       Created src/autoresearch/configs/experiment/mnist_snn_baseline_ttfs_adam.yaml.
       Created experiments/anp_snn_iter6_snn_baseline_ttfs_adam.pbs (gpu_1, 1h).
+
+  experiment:
+    started_at: "2026-04-12"
+    notes: >
+      Submitted to CHPC gpu_1 as job 7171613. 5 seeds (0–4), 20 epochs, patience=5 on val_loss.

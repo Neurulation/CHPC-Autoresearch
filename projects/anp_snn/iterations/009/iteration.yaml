@@ -1,6 +1,6 @@
 iteration: 9
 project: anp_snn
-status: implement
+status: experiment
 goal: >
   SNN-GRU TTFS (Phase C) — temporal coding variant of the rate-coded SNN-GRU (iter 4).
   TTFS applied per-row within each image row's T=25-step window.
@@ -20,3 +20,8 @@ phases:
       Created src/autoresearch/configs/model/snn_gru_ttfs.yaml.
       Created src/autoresearch/configs/experiment/mnist_snn_gru_ttfs_adam.yaml.
       Created experiments/anp_snn_iter9_snn_gru_ttfs_adam.pbs (gpu_1, 2h).
+
+  experiment:
+    started_at: "2026-04-12"
+    notes: >
+      Submitted to CHPC gpu_1 as job 7171616. 5 seeds (0–4), 20 epochs, patience=5 on val_loss.

@@ -1,2 +1,10 @@
-jobs: []
-# Pending submission to CHPC — awaiting Phase B results and code merge to develop.
+jobs:
+  - job_id: "7171616"
+    name: anp_snn_iter9_snn_gru_ttfs_adam
+    queue: gpu_1
+    walltime: "02:00:00"
+    seeds: [0, 1, 2, 3, 4]
+    epochs: 20
+    submitted_at: "2026-04-12"
+    status: running
+    notes: "SNN-GRU TTFS: time-to-first-spike encoding, t_fire=floor((1-p)*T)"

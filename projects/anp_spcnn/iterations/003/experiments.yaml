@@ -1,2 +1,10 @@
-jobs: []
-# Pending submission to CHPC — awaiting smoke test and code merge to develop.
+jobs:
+  - job_id: "7171612"
+    name: anp_spcnn_iter3_spc_ffnn_v2_adam
+    queue: gpu_1
+    walltime: "02:00:00"
+    seeds: [0, 1, 2, 3, 4]
+    epochs: 30
+    submitted_at: "2026-04-12"
+    status: running
+    notes: "SPC-FFNN v2: CE on reps_init[-2] from _bottom_up(), forward() pure-feedforward SNN"
