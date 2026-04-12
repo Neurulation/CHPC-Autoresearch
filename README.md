@@ -124,7 +124,9 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 | ANP — SNN | 13 | **SRNN** TTFS (snn.RLeaky T=28, TTFS) | Adam | ✗ | 5 | plannedᴰ | **fully spiking recurrent** | 📋 |
 | ANP — SNN | 14 | **SLSTM** TTFS (snn.SLSTM T=28, TTFS) | Adam | ✗ | 5 | plannedᴰ | **fully spiking recurrent** | 📋 |
 | ANP — SPCNN | 2 | SPC-FFNN v1 (SNN-FFNN + PC inference loop) | Adam | ✗ | 5 | ~11%ˢ | COMPLETE FAILURE | ❌ |
-| ANP — SPCNN | 3 | SPC-FFNN v2 (train/val mismatch fixed) | Adam | ✗ | 5 | pendingˢ | post-fix validation | ⏳ |
+| ANP — SPCNN | 3b | SPC-FFNN v2 (PC energy + CE on detached SNN reps) | Adam | ✗ | 5 | ~11%ˢ | COMPLETE FAILURE — shared weights | ❌ |
+| ANP — SPCNN | 4 | SPC-FFNN A (CE through LIF surrogate grads) | Adam | ✗ | 5 | ~11%ˢ | COMPLETE FAILURE — competing gradients | ❌ |
+| ANP — SPCNN | 5 | SPC-FFNN D (CE via BPTT through PC inference) | Adam | ✗ | 5 | ~11%ˢ | COMPLETE FAILURE — uniform collapse | ❌ |
 
 ᴬ **ANP — SNN iter 2 (SNN-FFNN rate coding):** 97.62% ± 0.12% (535k params). Rate coding (T=25 Bernoulli) preserves
   accuracy well — only −0.44pp gap vs non-spiking FFNN despite larger hidden dims (512-256 vs 256-128).  
@@ -170,10 +172,18 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 ⁹ **anp_pcnn iter 9 (PC-EncDec v2 + cosine LR):** Job 7171630, queued 2026-04-12.
   CosineAnnealingLR: lr 1e-3 → 1e-6 over 60 epochs. All other hyperparameters identical to iter 8.
   Hypothesis: cosine decay avoids stale large late-training steps, accelerating convergence to close -0.16pp gap.
-ˢ **SPC-FFNN iter 2 — COMPLETE FAILURE (train/val distribution mismatch):** ~11% val_acc (random) across all 5 seeds.
-  Root cause: `pc_loss()` computed CE on raw linear activations `x_flat→layers[:-1]` (bypassing SNN entirely),
-  while `forward()` evaluated on SNN spike-count representations. SNN weights were never jointly trained with `cls_head`.
-  Energy explosion at epoch 6 (secondary effect: competing CE + PC gradients on same weights).
+ˢ **SPC-FFNN architectural failure (iters 2-5, anp_spcnn) — ALL variants produce chance accuracy (~11%):**
+  Root cause: `self.layers` is shared between the SNN feedforward pathway (binary spike processing for classification)
+  and the PC generative model (continuous representation reconstruction). These objectives are architecturally incompatible:
+  - **v2 (iter3b):** SNN outputs detached — CE only updates `cls_head`; PC energy trains `self.layers` for reconstruction.
+    Reconstructive objective alone cannot produce discriminative features → chance.
+  - **Option A (iter4):** CE flows through LIF surrogate gradients to `self.layers`. Competing CE + PC energy gradients
+    cause energy explosion (7.9→57.6 over 8 epochs); optimization collapses → chance.
+  - **Option D (iter5):** CE via BPTT through T_pc=10 PC inference steps. Two-pass overhead adds no benefit over A;
+    most uniform failure (val_loss 2.3021-2.3023 all seeds) → complete uniform prediction collapse.
+  **Required fix (iter6+):** Separate SNN encoder weights from PC generative model weights. SNN encoder trained
+  discriminatively (CE + surrogate grads). PC generative model has its own separate weight matrices.
+  No architecture with shared SNN/PC weights can reconcile these gradient conflicts.
   Same bug class as PC-EncDec v1 (anp_pcnn iter 6). Fix (iter 3): CE now uses `reps_init[-2]` from `_bottom_up()`;
   `forward()` changed to pure-feedforward SNN (no PC inference). Smoke test: 39.43%→46.72% @ ep1-2.
   Job 7171612, queued 2026-04-12.
@@ -202,7 +212,7 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 - *PC-EncDec v2 @ 60ep (iter 8): 97.14% ± 0.21% — +0.55pp over 30ep (96.59%). Training budget alone closed 78% of the gap to PC-FFNN v3 (-0.71pp→-0.16pp). Seeds 1/2 early-stopped; seeds 0/3/4 needed all 60 epochs — slow convergence is the main bottleneck. Cosine LR decay submitted for iter 9 to accelerate convergence.*
 - *PC-EncDec v2 (iter 7): 96.59% ± 0.28% — +3.46pp vs iter 6 (93.13%). Both fixes confirmed: (1) closing the train/val distribution mismatch (pure-feedforward eval) was the dominant contributor; (2) reducing β from 1.0 to 0.1 (Y_max 0.5→0.1) shifted gradient budget to 90% CE / 10% energy. Generative decoder is now a mild regulariser, not a hindrance. All seeds best at epochs 26-30 — model not yet converged at epoch 30; iter 8 recommended at 60 epochs to establish ceiling.*
 - *PC-EncDec (iter 6): 93.13% ± 0.35% ceiling caused by two compounding bugs: (1) train/val mismatch — cls_head trained on feedforward r_{L-1} but validated on inference-modified r_{L-1} (20 PC steps shift the representation distribution); (2) Y_max=0.5 = β=1 VAE — reconstruction and classification compete with equal gradient budget, known suboptimal for discrimination (Higgins et al. 2017). Iter 7 fixes both: pure-feedforward forward() + Y_max=0.1 (β=0.1, 90% CE gradient).*
-- ***SPC-FFNN v1 (anp_spcnn iter 2) — COMPLETE FAILURE:** ~11% val_acc (random chance) across all 5 seeds. Root cause: the "train/val distribution mismatch" bug class. `pc_loss()` computed CE on raw linear activations (bypassing SNN entirely), while `forward()` evaluated on SNN spike-count representations. SNN weights were NEVER updated via CE. Secondary: competing CE + PC gradients on shared `self.layers` caused energy explosion at epoch 6. Fix (iter 3): CE uses `reps_init[-2]` from `_bottom_up()` (detached SNN reps); `forward()` changed to pure-feedforward SNN (no PC inference during eval). Smoke test: 39.43%→46.72% @ ep1-2 — fix confirmed working. **Recurring bug pattern:** This train/val mismatch has appeared in PC-EncDec v1 (iter 6, -4.17pp penalty) and now SPC-FFNN v1 (complete failure). Fix template: always ensure training CE path and eval path use identical representation source.*
+- ***SPC-FFNN architectural failure (anp_spcnn iters 2-5) — ALL variants COMPLETE FAILURE:** ~11% (chance) across all variants and seeds. Architectural root cause: `self.layers` shared between SNN feedforward pathway and PC generative model. Three gradient routing strategies all fail: (v2, iter3b) PC energy alone — cannot produce discriminative features; (A, iter4) CE through LIF surrogate grads — energy explodes (7.9→57.6), optimization collapses; (D, iter5) CE via BPTT through PC inference — most uniform collapse (val_loss 2.3021-2.3023). Required fix: separate SNN encoder weights from PC generative model weights. SNN encoder trained discriminatively (CE+surrogate); PC model has independent weight matrices. Iter6 will implement this two-pathway architecture.*
 - *CIFAR-10: Data augmentation was THE limiting factor. SGD+cosine with aug: 94.96% (+16.09%). Adam with aug: 90.57% (+7.01%). SGD+cosine beats Adam when both use augmentation.*
 
 ## CHPC Usage

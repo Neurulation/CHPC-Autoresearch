@@ -1,6 +1,6 @@
 iteration: 4
 project: anp_spcnn
-status: experiment
+status: completed
 goal: >
   SPC-FFNN Option A — fix gradient routing by removing .detach() from SNN
   spike accumulators in _bottom_up(). CE now backpropagates through LIF
@@ -32,3 +32,38 @@ phases:
       Created experiments/anp_spcnn_iter4_spc_ffnn_a_adam.pbs (train_pcnn, gpu_1, 2h).
       Smoke test: completed 2 epochs without error. val_loss ~2.3 at ep2 (too few
       epochs to judge; energy decreasing from 59→43, same healthy pattern as iter 2).
+
+  experiment:
+    started_at: "2026-04-12"
+    completed_at: "2026-04-12"
+    notes: >
+      Submitted to CHPC gpu_1 as job 7172210. 5 seeds (0–4), 30 epochs, patience=7 on val_loss.
+      All 5 seeds completed early stopped at epoch 8.
+
+  analyze:
+    completed_at: "2026-04-12"
+    notes: >
+      ALL 5 seeds at chance: val_loss=2.301-2.302, val_acc≈11%, early stopped epoch 8.
+      Energy explosion confirmed: train energy increases from ~7.9 to ~57.6 over 8 epochs.
+      Despite CE flowing through LIF surrogate gradients (fast_sigmoid), self.layers receives
+      competing gradients from CE (discriminative: push weights to classify) and PC energy
+      (reconstructive: push weights to minimize prediction errors). The PC energy gradient
+      direction opposes useful discriminative feature formation.
+      CE LR signal completely overwhelmed by PC energy gradient explosion.
+      Same result as all other SPC-FFNN variants: chance accuracy at early stopping.
+
+  conclude:
+    completed_at: "2026-04-12"
+    notes: >
+      COMPLETE FAILURE: ~11% (chance), early stopped epoch 8. Option A does not work.
+      CE through SNN surrogate gradients adds a NEW conflict: self.layers now receives
+      two competing gradients simultaneously:
+        1. CE gradient (via fast_sigmoid surrogate): push weights toward discriminative features
+        2. PC energy gradient: push weights toward minimizing reconstruction error
+      These objectives are architecturally incompatible with shared self.layers weights.
+      The energy explosion (7.9→57.6) suggests the PC energy gradient is dominant and drives
+      the optimization in the wrong direction, overwhelming the CE surrogate gradient.
+      ALL THREE variants (v2/iter3b, A/iter4, D/iter5) have now failed.
+      CONCLUSION: SPC-FFNN with shared SNN/PC weights is fundamentally unworkable.
+      Required fix: SEPARATE the SNN projection weights from the PC generative model weights.
+      Proposed iter6 architecture TBD — two-pathway design with no shared weight matrices.

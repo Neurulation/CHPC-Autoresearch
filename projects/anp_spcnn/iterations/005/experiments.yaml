@@ -4,7 +4,9 @@ jobs:
     pbs_script: experiments/anp_spcnn_iter5_spc_ffnn_d_adam.pbs
     seeds: [0, 1, 2, 3, 4]
     submitted_at: "2026-04-12"
-    status: running
+    status: completed
+    completed_at: "2026-04-12"
+    result: "val_acc≈11% chance, all 5 seeds early stopped epoch 8. Most uniform result (2.3021-2.3023): collapsed predictions."
     queue: gpu_1
     walltime: "03:00:00"
     notes: "SPC-FFNN Option D: CE via BPTT through PC free-inference equilibrium (T_pc=10). train_pcnn.py."

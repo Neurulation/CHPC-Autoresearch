@@ -1,6 +1,6 @@
 iteration: 5
 project: anp_spcnn
-status: experiment
+status: completed
 goal: >
   SPC-FFNN Option D — CE on PC free-inference equilibrium via BPTT through
   the PC inference loop. SNN outputs remain detached (no SNN meta-gradient).
@@ -34,3 +34,41 @@ phases:
       Smoke test: fixed retain_graph bug (was retain_graph=not is_last, caused
       "backward through graph second time" error; fixed to retain_graph=True always).
       Smoke test passed: 2 epochs complete, ~24s/epoch on local GPU.
+
+  experiment:
+    started_at: "2026-04-12"
+    completed_at: "2026-04-12"
+    notes: >
+      Submitted to CHPC gpu_1 as job 7172211. 5 seeds (0–4), 30 epochs, patience=7 on val_loss.
+      All 5 seeds completed early stopped at epoch 8.
+
+  analyze:
+    completed_at: "2026-04-12"
+    notes: >
+      ALL 5 seeds at chance: val_loss=2.302, val_acc≈11%, early stopped epoch 8.
+      Highly uniform values across seeds (2.3021-2.3023) suggest collapsed uniform predictions.
+      Despite BPTT creating differentiable path from free-inference equilibrium through T_pc
+      steps to self.layers, the optimization still fails completely. The PC inference loop
+      (T_pc=10 differentiable steps) itself is incapable of reaching a useful equilibrium
+      that supports discriminative learning when the generative model weights (self.layers)
+      are simultaneously serving as SNN feature extractors.
+      Most uniform result of all three variants — Option D's two-pass inference (clamped + free)
+      may add optimization instability beyond Option A's already-failing single-pass approach.
+
+  conclude:
+    completed_at: "2026-04-12"
+    notes: >
+      COMPLETE FAILURE: ~11% (chance), early stopped epoch 8. Option D does not work.
+      Option D's BPTT-through-inference approach is theoretically well-motivated (CE on the
+      model's natural prediction = free-inference equilibrium) but fails in practice due to
+      the same shared-weights architectural conflict as Options v2 and A.
+      Two-pass inference per training step (clamped + free with create_graph=True) adds
+      memory and compute overhead but provides no training improvement over v2/A.
+      FINAL VERDICT on SPC-FFNN v1 architecture (iters 2-5):
+        - v2 (detached SNN + PC energy only): ❌ chance
+        - A (CE through SNN surrogate grads): ❌ chance
+        - D (CE via BPTT through PC inference): ❌ chance
+      Shared self.layers between SNN and PC generative model is an architectural dead end.
+      Proposed path forward (iter 6): separate SNN encoder weights from PC generative weights.
+      The SNN encoder should be trained purely discriminatively (CE + surrogate grads).
+      The PC generative model should have its own separate weight matrices.

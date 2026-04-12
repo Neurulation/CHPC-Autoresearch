@@ -17,5 +17,7 @@ jobs:
     seeds: [0, 1, 2, 3, 4]
     epochs: 30
     submitted_at: "2026-04-12"
-    status: running
-    notes: "CORRECTED re-run with train_pcnn. True SPC-FFNN v2 baseline: PC energy + CE, SNN detached."
+    status: completed
+    completed_at: "2026-04-12"
+    result: "val_acc=~11% chance, early stopped epoch 8. PC energy reconstruction objective alone cannot drive discriminative learning."
+    notes: "CORRECTED re-run with train_pcnn. True SPC-FFNN v2 baseline: PC energy + CE, SNN detached. ALSO FAILS: design flaw confirmed."
