@@ -1,0 +1,30 @@
+iteration: 2
+project: anp_snn
+status: experiment
+goal: >
+  SNN-FFNN (rate coding) — spiking analogue of the FFNN baseline (99.17% ± 0.10%).
+  784→512→256→10 fully-connected LIF network (SNNBaseline). T=25 Bernoulli timesteps.
+  Already implemented. Establishes the spiking FFNN Phase B baseline.
+
+phases:
+  plan:
+    completed_at: "2026-04-12"
+    notes: >
+      SNNBaseline was implemented at the start of the ANP project as the
+      Phase 1 source network. Repurposed here as the Phase B SNN-FFNN baseline.
+      Config: mnist_snn_baseline_adam.yaml (20ep, patience=5, 5 seeds, Adam lr=1e-3).
+
+  implement:
+    completed_at: "2026-04-12"
+    notes: >
+      Already implemented: src/autoresearch/models/snn_baseline.py (SNNBaseline).
+      Config: src/autoresearch/configs/model/snn_baseline.yaml.
+      Experiment: src/autoresearch/configs/experiment/mnist_snn_baseline_adam.yaml.
+      PBS script: experiments/anp_snn_iter2_snn_ffnn_adam.pbs.
+
+  experiment:
+    started_at: "2026-04-12"
+    notes: >
+      Submitted anp_snn_iter2_snn_ffnn_adam.pbs to CHPC gpu_1 queue.
+      5 seeds (0–4), 20 epochs each, early stopping patience=5 on val_loss.
+      Target: match or exceed FFNN baseline (99.17% ± 0.10%).
