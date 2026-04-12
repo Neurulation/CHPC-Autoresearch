@@ -3,21 +3,46 @@ slug: anp_snn
 status: active
 created: "2026-04-12"
 description: >
-  Establish spiking (LIF, snntorch) equivalents of every rate-coded architecture
-  baseline, under both rate coding and temporal coding (TTFS). Covers CNN, LSTM,
-  GRU and Vanilla RNN variants. Produces the spiking building blocks needed for
-  the SPCNN (anp_spcnn) and directly tests the central research question:
-  does temporal (TTFS) encoding outperform rate coding, and at what task complexity
-  does the crossover occur?
+  Build a complete ANN→SNN progressive ladder toward a fully biologically plausible,
+  end-to-end spiking implementation. Every layer must pass binary spikes {0,1} with
+  no continuous-valued hidden states between layers — spike-in, spike-out throughout,
+  enabling theoretical deployment on neuromorphic hardware.
+
+  Architecture ladder (snntorch primitives):
+    SFNN       snn.Leaky per FC layer                iter 2  DONE ✓
+    SCNN       snn.Leaky after each conv              iter 1  DONE ✓
+    SRNN       snn.RLeaky (recurrent LIF, T=28)       iter 11 planned
+    SLSTM      snn.SLSTM (spiking LSTM cell, T=28)    iter 12 planned
+    SGRU       custom LIF-gated GRU                   deferred — no snntorch native
+    STransformer  custom/research-level               deferred
+
+  Phase B/C (iters 3–10) used a HYBRID architecture: snn.Leaky encoder +
+  standard nn.LSTM/GRU/RNN. These are NOT the target fully spiking design.
+  They serve as comparison baselines (do spike-encoded inputs help standard RNNs?).
+
+  Later phases will replace BPTT with local learning rules (Hebbian, STDP) for full
+  biological plausibility with no backpropagation.
 current_iteration: 10
 branch: "project/anp-snn"
 human_direction: >
-  Phase B (rate coding): SNN-CNN, SNN-LSTM, SNN-GRU, SNN-VanillaRNN — all on
-  MNIST / sequential MNIST. Direct spiking analogues of the rate-coded baselines.
-  Use snntorch LIF neurons, surrogate gradients, BPTT. 5 seeds each.
-  Phase C (temporal coding / TTFS): repeat all architectures with TTFS encoding.
-  Compare rate vs temporal on static and sequential MNIST. Produce a
-  cross-architecture encoding comparison table.
+  Research goal: a strictly biologically plausible, end-to-end spiking model.
+  Three hard requirements:
+    1. No backpropagation eventually — local learning rules (Hebbian/STDP).
+    2. Fully spike-driven — every layer outputs binary {0,1} spikes; no float
+       hidden states between layers.
+    3. Theoretically deployable on neuromorphic / energy-efficient hardware.
+
+  Immediate next: implement truly fully spiking recurrent models (new iterations):
+    iter 11: SRNN rate  — snn.RLeaky(linear_features=256) over T=28 MNIST rows
+    iter 12: SLSTM rate — snn.SLSTM(28, 256) over T=28 MNIST rows
+    iter 13: SRNN TTFS  — same as iter 11 with TTFS input encoding
+    iter 14: SLSTM TTFS — same as iter 12 with TTFS input encoding
+
+  iters 3–10 (hybrid) should be allowed to complete as comparison baselines.
+  Do NOT rerun them — their data answers a separate question (spiking input encoding
+  vs standard RNN) that is still scientifically useful.
+
+  Do NOT implement spiking GRU or spiking Transformer yet (no native snntorch support).
 best_result:
   model: snn_cnn
   experiment: mnist_snn_cnn_adam

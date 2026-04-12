@@ -108,7 +108,8 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 | ANP — SNN | 2 | SNN-FFNN (784-512-256-10 LIF, T=25) | Adam | ✗ | 5 | 97.62% ± 0.12%ᴬ | rate-coded (Phase B baseline) | ✅ |
 | ANP — PC-NN | 3 | PC-FFNN v3 + CE head + grad clip (784-256-128-10) | Adam | ✗ | 5 | **97.30% ± 0.22%**⁴ | predictive coding | ✅ |
 | ANP — PC-NN | 2 | PC-FFNN v2 + CE head (784-256-128-10) | Adam | ✗ | 5 | **97.21% ± 0.35%**³ | predictive coding | ✅ |
-| ANP — PC-NN | 9 | PC-EncDec v2 + cosine LR (784-256-128 enc+dec, β=0.1) | Adam+Cosine | ✗ | 5 | pending⁹ | target ≥97.30% | ⏳ |
+| ANP — PC-NN | 10 | PC-EncDec v2 + cosine LR v2 (784-256-128 enc+dec, β=0.1) | Adam+Cosine | ✗ | 5 | pending¹⁰ | valid cosine rerun (iter9 bugs fixed) | ⏳ |
+| ANP — PC-NN | 9 | PC-EncDec v2 + cosine LR (784-256-128 enc+dec, β=0.1) | Adam+Cosine | ✗ | 5 | ~~95.82% ± 0.20%~~⁹ (INVALID) | wrong entry point + ES bug | ❌ |
 | ANP — PC-NN | 8 | PC-EncDec v2 @ 60ep (784-256-128 enc+dec, β=0.1) | Adam | ✗ | 5 | **97.14% ± 0.21%**⁸ | generative PC, 60ep ceiling | ✅ |
 | ANP — SNN | 6 | SFNN TTFS (784-512-256-10 LIF, TTFS T=25) | Adam | ✗ | 5 | 97.12% ± 0.20%ᶜ | fully spiking, temporal coding | ✅ |
 | ANP — PC-NN | 7 | PC-EncDec v2 (784-256-128 enc+dec, β=0.1) | Adam | ✗ | 5 | **96.59% ± 0.28%**⁷ | generative PC, ff-forward eval | ✅ |
@@ -169,9 +170,15 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 ⁸ **Training budget closes the efficiency gap.** +0.55pp over 30ep (96.59%→97.14%). Seeds 1 and 2 early-stopped
   (patience=10), seeds 0/3/4 needed all 60 epochs (slow convergence). Gap to PC-FFNN v3 reduced from -0.71pp to -0.16pp.
   Architecture is competitive; bottleneck is slow convergence. Cosine LR decay recommended for iter 9.
-⁹ **anp_pcnn iter 9 (PC-EncDec v2 + cosine LR):** Job 7171630, queued 2026-04-12.
-  CosineAnnealingLR: lr 1e-3 → 1e-6 over 60 epochs. All other hyperparameters identical to iter 8.
-  Hypothesis: cosine decay avoids stale large late-training steps, accelerating convergence to close -0.16pp gap.
+⁹ **anp_pcnn iter 9 (PC-EncDec v2 + cosine LR — INVALID):** Job 7171630, 95.82%±0.20% at epoch 11.
+  Two bugs invalidated the result: (1) PBS script used `autoresearch.train` instead of `autoresearch.train_pcnn`
+  (wrong entry point); (2) `train.py` evaluates `val_loss` with `mode='max'` → early stopping counter increments
+  every epoch with improving val_loss → fires at patience+1 = 11 epochs for all 5 seeds deterministically.
+  Cosine LR was applied (train.py has scheduler support) but unmeasurable — LR barely changed by epoch 11.
+  Fixes applied to `train_pcnn.py`: early stopping reverted to `val_accuracy` (mode=max); scheduler support added.
+¹⁰ **anp_pcnn iter 10 (PC-EncDec v2 + cosine LR — valid rerun):** Job 7172728, submitted 2026-04-12.
+  Corrected PBS uses `train_pcnn.py`. New experiment_group `mnist_pc_enc_dec_v2_adam_cosine_v2` (fresh outputs).
+  Smoke test: ep1 88.52%, ep2 90.08%, no premature early stopping — both fixes confirmed working.
 ˢ **SPC-FFNN architectural failure (iters 2-5, anp_spcnn) — ALL variants produce chance accuracy (~11%):**
   Root cause: `self.layers` is shared between the SNN feedforward pathway (binary spike processing for classification)
   and the PC generative model (continuous representation reconstruction). These objectives are architecturally incompatible:

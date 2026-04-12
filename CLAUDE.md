@@ -123,6 +123,51 @@ For any job that died with incomplete seeds (fewer than 5), resubmit the PBS scr
 
 **Resume after walltime kill:** The training framework saves `last_checkpoint.pt` after every epoch. When a killed job is resubmitted, seeds that already completed will detect `start_epoch > epochs` via the checkpoint and exit immediately — no wasted compute. Seeds killed mid-run will resume from the last saved checkpoint.
 
+## Research Roadmap: ANN → SNN Ladder
+
+The overarching goal is a **fully biologically plausible, end-to-end spiking implementation**:
+1. No backpropagation — local learning rules (Hebbian, STDP) eventually
+2. Fully spike-driven — every layer emits binary spikes {0,1}; no float hidden states between layers
+3. Deployable on neuromorphic / energy-efficient hardware
+
+**Architecture ladder and snntorch primitives:**
+
+| ANN | Fully Spiking SNN | snntorch | Status |
+|-----|-------------------|----------|--------|
+| FFNN | **SFNN** | `snn.Leaky` per FC layer | Done (anp_snn iter 2) ✓ |
+| CNN | **SCNN** | `snn.Leaky` after each conv | Done (anp_snn iter 1) ✓ |
+| Vanilla RNN | **SRNN** | `snn.RLeaky(linear_features=N)` | Planned (iter 11) |
+| LSTM | **SLSTM** | `snn.SLSTM(input_size, hidden_size)` | Planned (iter 12) |
+| GRU | **SGRU** | No native — custom LIF-gated GRU | Deferred |
+| Transformer | **STransformer** | No native — research-level | Deferred |
+
+**Hybrid ≠ Fully Spiking.** The anp_snn Phase B/C experiments (iters 3–10) used
+a hybrid architecture: `snn.Leaky` encoder → rate-coded spike counts → standard
+`nn.LSTM/GRU/RNN`. These are comparison baselines. SRNN and SLSTM need dedicated
+implementations using `snn.RLeaky` and `snn.SLSTM` respectively.
+
+**Key snntorch API:**
+```python
+# SRNN (snn.RLeaky — recurrent LIF, fully spiking VanillaRNN analogue)
+# U[t+1] = β·U[t] + I_in[t+1] + V(S_out[t]) - R·U_thr
+self.srnn = snn.RLeaky(beta=0.9, linear_features=256)  # all-to-all recurrent
+spk, mem = self.srnn.init_rleaky()
+for t in range(T_seq):  # T_seq=28 MNIST rows
+    cur = self.fc_in(x_spk[:, t, :])  # x_spk is binary input spikes
+    spk, mem = self.srnn(cur, spk, mem)  # spk is binary output
+
+# SLSTM (snn.SLSTM — spiking LSTM cell, thresholded membrane output)
+# Standard LSTM gates (σ/tanh) internally; output mem thresholded → binary spikes
+self.slstm = snn.SLSTM(input_size=28, hidden_size=256)
+syn, mem = self.slstm.init_slstm()
+for t in range(T_seq):
+    spk, syn, mem = self.slstm(x_spk[:, t, :], syn, mem)
+```
+
+**For SFNN and SCNN** (already done): `snn.Leaky` processes spikes from the previous layer
+and outputs spikes to the next. The only float tensor within a layer is the membrane
+potential — this is the LIF internal state, not the inter-layer signal.
+
 ## Key Paths
 
 | Path | Purpose |
