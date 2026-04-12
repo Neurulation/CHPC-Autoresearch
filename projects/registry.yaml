@@ -13,7 +13,7 @@ projects:
     path: projects/anp_rnn
   - slug: anp_pcnn
     status: active
-    current_iteration: 8
+    current_iteration: 12
     path: projects/anp_pcnn
   - slug: anp_snn
     status: active

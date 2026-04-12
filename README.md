@@ -104,27 +104,27 @@ Sorted by descending accuracy. Only valid, fully-converged results.
 | 4 | ANP — SNN | 1 | SNN-CNN (rate, T=25) | 98.87% ± 0.13% ᴬ | fully spiking, spatial |
 | 5 | ANP — SNN | 4 | Hybrid-GRU (rate, T=25) | 98.75% ± 0.15% ᴮ | hybrid baseline |
 | 6 | ANP — SNN | 3 | Hybrid-LSTM (rate, T=25) | 98.68% ± 0.04% ᴮ | hybrid baseline |
-| 7 | ANP — SNN | 7 | SCNN TTFS (T=25) | 98.41% ± 0.17% ᶜ | fully spiking, temporal |
-| 8 | Image Processing NN | 1 | FFNN (784-256-128-10) | 98.06% ± 0.15% | dense |
-| 9 | ANP — RNN | 3 | Vanilla RNN (2-layer, h=256) | 97.89% ± 0.35% | sequential T=28 |
-| 10 | ANP — SNN | 2 | SNN-FFNN (rate, T=25) | 97.62% ± 0.12% ᴬ | fully spiking, dense |
-| 11 | ANP — PC-NN | 3 | PC-FFNN v3 + CE + grad clip | **97.30% ± 0.22%** | **best PC result** |
-| 12 | ANP — PC-NN | 2 | PC-FFNN v2 + CE head | 97.21% ± 0.35% | predictive coding |
-| 13 | ANP — SNN | 5 | Hybrid-VanillaRNN (rate, T=25) | 97.17% ± 0.52% ᴮ | hybrid baseline |
-| 14 | ANP — PC-NN | 8 | PC-EncDec v2 @ 60ep | **97.14% ± 0.21%** | **best PC-EncDec** |
-| 15 | ANP — SNN | 6 | SFNN TTFS (T=25) | 97.12% ± 0.20% ᶜ | fully spiking, temporal |
-| 16 | ANP — PC-NN | 10 | PC-EncDec v2 + cosine LR | 96.75% ± 0.19% | cosine LR degraded −0.39pp vs flat |
-| 17 | ANP — PC-NN | 7 | PC-EncDec v2 @ 30ep | 96.59% ± 0.28% | |
+| 7 | ANP — SNN | 8b | Hybrid-LSTM TTFS (threshold=0.9) ᶜ | 98.67% ± 0.20% | corrected TTFS run; ~parity with rate |
+| 8 | ANP — SNN | 9b | Hybrid-GRU TTFS (threshold=0.9) ᶜ | 98.63% ± 0.19% | corrected TTFS run; -0.12pp vs rate |
+| 9 | ANP — SNN | 7 | SCNN TTFS (T=25) | 98.41% ± 0.17% ᶜ | fully spiking, temporal |
+| 10 | Image Processing NN | 1 | FFNN (784-256-128-10) | 98.06% ± 0.15% | dense |
+| 11 | ANP — RNN | 3 | Vanilla RNN (2-layer, h=256) | 97.89% ± 0.35% | sequential T=28 |
+| 12 | ANP — SNN | 2 | SNN-FFNN (rate, T=25) | 97.62% ± 0.12% ᴬ | fully spiking, dense |
+| 13 | ANP — PC-NN | 3 | PC-FFNN v3 + CE + grad clip | **97.30% ± 0.22%** | **best PC result** |
+| 14 | ANP — PC-NN | 2 | PC-FFNN v2 + CE head | 97.21% ± 0.35% | predictive coding |
+| 15 | ANP — SNN | 5 | Hybrid-VanillaRNN (rate, T=25) | 97.17% ± 0.52% ᴮ | hybrid baseline |
+| 16 | ANP — PC-NN | 8 | PC-EncDec v2 @ 60ep | **97.14% ± 0.21%** | **best PC-EncDec** |
+| 17 | ANP — SNN | 6 | SFNN TTFS (T=25) | 97.12% ± 0.20% ᶜ | fully spiking, temporal |
+| 18 | ANP — SNN | 10b | Hybrid-VanillaRNN TTFS (threshold=0.9) ᶜ | 96.87% ± 0.35% | corrected TTFS run; -0.31pp vs rate |
+| 19 | ANP — PC-NN | 10 | PC-EncDec v2 + cosine LR | 96.75% ± 0.19% | cosine LR degraded -0.39pp vs flat |
+| 20 | ANP — PC-NN | 7 | PC-EncDec v2 @ 30ep | 96.59% ± 0.28% | |
+| 21 | ANP — PC-NN | 11 | PC-CNN | 93.12% ± 0.56% | first PC-CNN; underperforms PC baselines |
 
 ### MNIST — In Progress
 
 | Project | Iter | Model | Job | Status |
 |---------|------|-------|-----|--------|
-| ANP — SNN | 8b | Hybrid-LSTM TTFS (threshold=0.9) ᶜ | 7173430 | Seeds 2–4 running (4h walltime) |
-| ANP — SNN | 9b | Hybrid-GRU TTFS (threshold=0.9) ᶜ | 7173431 | Seeds 2–4 running (4h walltime) |
-| ANP — SNN | 10b | Hybrid-VanillaRNN TTFS (threshold=0.9) ᶜ | 7173432 | Seeds 2–4 running (4h walltime) |
-
-Seeds 0–1 already completed in prior run (walltime-killed at 2/5 seeds). Resubmitted with 4h — seeds 2–4 resume from checkpoint.
+| ANP — PC-NN | 12 | PC-CNN v2 (energy schedule + clip=2.0) | pending | Queued; smoke-tested locally, ready for CHPC submit |
 
 ### MNIST — Planned
 
@@ -145,7 +145,7 @@ Excluded from the leaderboard. Listed for traceability.
 | ANP — PC-NN | 1 | PC-FFNN v1 | ~96% / 89.0% ± 4.7% | Training-evaluation objective mismatch; superseded by iter2 |
 | ANP — PC-NN | 4 | PC-FFNN v4 eps=0.01 | 93.95% ± 0.27% | Under-trained (30ep; needs ~75ep); not a real ceiling |
 | ANP — PC-NN | 6 | PC-EncDec v1 | 93.13% ± 0.35% | Two architectural bugs; both fixed in iter7 |
-| ANP — SNN | 8/9/10 | Hybrid-LSTM/GRU/VanillaRNN TTFS | ~11% | threshold=1.0 → LIF silent; fixed in iter8b/9b/10b (threshold=0.9) |
+| ANP — SNN | 8/9/10 | Hybrid-LSTM/GRU/VanillaRNN TTFS | ~11% | threshold=1.0 → LIF silent; corrected and superseded by valid iter8b/9b/10b results |
 | ANP — SPCNN | 2–5 | SPC-FFNN v1/v2/A/D | ~11% | Shared SNN/PC weights — architecturally incompatible; all variants collapse to chance |
 
 ---
@@ -154,7 +154,7 @@ Excluded from the leaderboard. Listed for traceability.
 
 ᴮ **Phase B hybrid baselines (anp_snn iters 3–5) — all complete:** `snn.Leaky` encoder (T=25 Bernoulli per row) → spike counts → standard `nn.LSTM/GRU/RNN`. **Hybrid, not fully spiking.** Results: GRU 98.75% (−0.31pp vs non-spiking), LSTM 98.68% (−0.27pp), VanillaRNN 97.17% (−0.72pp). Gated architectures absorb spike encoding loss (−0.27–0.31pp gap); plain RNN is 2.3× more sensitive (−0.72pp gap, amplified by vanishing gradients + sparse spikes).
 
-ᶜ **Phase C TTFS (anp_snn iters 6–10):** TTFS is consistently WORSE than rate: SFNN −0.49pp (iter6), SCNN −0.46pp (iter7). LIF summation discards spike timing order — TTFS ≈ binarized input vs rate coding's graded intensity. Iters 8b/9b/10b (hybrid recurrent TTFS, threshold=0.9) currently running (jobs 7173430/1/2). Seeds 2–4 finishing up; seeds 0–1 already complete.
+ᶜ **Phase C TTFS (anp_snn iters 6–10):** TTFS is consistently WORSE than rate across all tested architectures: SFNN −0.49pp (iter6), SCNN −0.46pp (iter7), Hybrid-LSTM −0.01pp (iter8b), Hybrid-GRU −0.12pp (iter9b), Hybrid-VanillaRNN −0.31pp (iter10b). LIF summation largely discards spike timing order, so TTFS behaves like a binarized proxy of input intensity and offers no gain over rate coding here.
 
 ᴰ **Fully spiking recurrent — planned (anp_snn iters 11–14):** SRNN uses `snn.RLeaky(linear_features=256)` over T=28 rows — binary spikes throughout, no standard RNN cells. SLSTM uses `snn.SLSTM(28, 256)` — standard LSTM gates internally, but thresholded membrane → binary output spikes. First genuinely fully spiking recurrent models in the ladder.
 

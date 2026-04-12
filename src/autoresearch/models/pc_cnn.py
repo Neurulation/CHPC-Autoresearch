@@ -48,7 +48,7 @@ class PCCNN(nn.Module):
         self,
         in_channels: int = 1,
         input_hw: int = 28,
-        conv_channels: List[int] = [32, 64],
+        conv_channels: Optional[List[int]] = None,
         kernel_size: int = 5,
         fc_hidden: int = 256,
         num_classes: int = 10,
@@ -57,6 +57,9 @@ class PCCNN(nn.Module):
         ce_weight: float = 1.0,
     ):
         super().__init__()
+
+        if conv_channels is None:
+            conv_channels = [32, 64]
 
         self.T_pc = T_pc
         self.lr_pc = lr_pc
@@ -239,7 +242,10 @@ class PCCNN(nn.Module):
     # --------------------------------------------------------------------------
 
     def pc_loss(
-        self, x: torch.Tensor, y: torch.Tensor
+        self,
+        x: torch.Tensor,
+        y: torch.Tensor,
+        energy_weight: Optional[float] = None,
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Compute PC training loss (supervised inference + energy + CE head).
 
@@ -248,10 +254,15 @@ class PCCNN(nn.Module):
             y: Class labels  (B,)
 
         Returns:
-            combined_loss: energy + ce_weight * ce_loss — backprop this.
+            combined_loss:
+                - legacy mode (energy_weight is None):
+                    energy + ce_weight * ce_loss
+                - scheduled mode (energy_weight provided):
+                    energy_weight * (energy / B) + (1 - energy_weight) * ce_loss
             energy:        PC free energy scalar (detached, for logging).
             logits:        (B, num_classes) from cls_head(r_fc) (detached, for logging).
         """
+        B = x.shape[0]
         target = F.one_hot(y, self.num_classes).float()
         reps_init = self._bottom_up(x)
         reps_final = self._run_inference(reps_init, clamp_last=target)
@@ -267,7 +278,13 @@ class PCCNN(nn.Module):
         logits = self.cls_head(r_fc)
         ce_loss = F.cross_entropy(logits, y)
 
-        combined_loss = energy + self.ce_weight * ce_loss
+        if energy_weight is None:
+            # Backward-compatible path used by iter11.
+            combined_loss = energy + self.ce_weight * ce_loss
+        else:
+            # Scheduled convex blend on per-sample energy scale.
+            energy_norm = energy / B
+            combined_loss = energy_weight * energy_norm + (1.0 - energy_weight) * ce_loss
         return combined_loss, energy.detach(), logits.detach()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

@@ -1,6 +1,6 @@
 iteration: 8
 project: anp_snn
-status: experiment
+status: completed
 goal: >
   SNN-LSTM TTFS (Phase C) — temporal coding variant of the rate-coded SNN-LSTM (iter 3).
   TTFS applied per-row: within each 28-pixel row, bright pixels fire first.
@@ -27,9 +27,30 @@ phases:
 
   experiment:
     started_at: "2026-04-12"
+    completed_at: "2026-04-12"
     notes: >
       Submitted to CHPC gpu_1 as job 7171615. 5 seeds (0–4), 20 epochs, patience=5 on val_loss.
       BUG FOUND 2026-04-12: threshold=1.0 causes LIF silence: TTFS spike amplitude=1.0,
       snntorch H(mem-thr)=H(0)=0 (strict >) → LIF never fires → spk_acc=0 → ~11% (chance).
       FIX: threshold=0.9 in snn_lstm_ttfs.yaml. Re-run as iter8b with new experiment_group
       mnist_snn_lstm_ttfs_v2_adam (PBS: anp_snn_iter8b_snn_lstm_ttfs_v2_adam.pbs).
+
+  analyze:
+    completed_at: "2026-04-12"
+    notes: >
+      Completed analysis from CHPC outputs for corrected run (iter8b, job 7173430).
+      All 5 seeds completed at epoch 30.
+      Per-seed val_acc: [98.93, 98.65, 98.85, 98.42, 98.50].
+      Mean: 98.67% ± 0.20% (std=0.1976).
+      Per-seed best_val_loss: [0.0383, 0.0458, 0.0455, 0.0532, 0.0533].
+      Mean best_val_loss: 0.0472 ± 0.0056.
+
+      Comparison to rate baseline (iter3 SNN-LSTM rate: 98.68%): TTFS delta = -0.01pp.
+      Interpretation: essentially parity with slight underperformance; TTFS does not provide a
+      meaningful gain on this hybrid recurrent setup.
+
+  conclude:
+    completed_at: "2026-04-12"
+    notes: >
+      Corrected TTFS LSTM run (threshold=0.9) is valid and stable across seeds, but does not
+      beat rate coding (98.67% vs 98.68%). Keep rate coding as preferred default for hybrid LSTM.

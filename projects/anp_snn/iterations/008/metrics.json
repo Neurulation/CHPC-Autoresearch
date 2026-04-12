@@ -1,0 +1,33 @@
+{
+  "experiment": "mnist_snn_lstm_ttfs_v2_adam",
+  "model": "Hybrid-LSTM TTFS",
+  "phase": "C",
+  "encoding": "ttfs",
+  "description": "Corrected TTFS run (threshold=0.9): snn.Leaky encoder (T=25) + 2-layer LSTM on sequential MNIST",
+  "dataset": "MNIST",
+  "seeds": [0, 1, 2, 3, 4],
+  "per_seed": [
+    {"seed": 0, "val_accuracy": 98.9333, "val_loss": 0.044188, "best_val_loss": 0.038292, "epochs_run": 30},
+    {"seed": 1, "val_accuracy": 98.6500, "val_loss": 0.054644, "best_val_loss": 0.045777, "epochs_run": 30},
+    {"seed": 2, "val_accuracy": 98.8500, "val_loss": 0.048966, "best_val_loss": 0.045537, "epochs_run": 30},
+    {"seed": 3, "val_accuracy": 98.4167, "val_loss": 0.070265, "best_val_loss": 0.053187, "epochs_run": 30},
+    {"seed": 4, "val_accuracy": 98.5000, "val_loss": 0.056685, "best_val_loss": 0.053280, "epochs_run": 30}
+  ],
+  "summary": {
+    "val_accuracy_mean": 98.67,
+    "val_accuracy_std": 0.1976,
+    "best_val_loss_mean": 0.047215,
+    "best_val_loss_std": 0.005603,
+    "n_seeds": 5,
+    "n_seeds_completed": 5
+  },
+  "comparison": {
+    "baseline_experiment": "mnist_snn_lstm_adam",
+    "baseline_model": "Hybrid-LSTM rate",
+    "baseline_iter": 3,
+    "baseline_val_accuracy_mean": 98.68,
+    "delta_pp": -0.01,
+    "conclusion": "TTFS is marginally worse than rate coding for hybrid LSTM on sequential MNIST"
+  },
+  "notes": "All 5 seeds completed successfully on corrected run (threshold=0.9). TTFS reached near-parity with rate but did not improve mean performance."
+}

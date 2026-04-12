@@ -1,0 +1,39 @@
+project: anp_pcnn
+iteration: 12
+status: experiment
+goal: >
+  PC-CNN v2 stabilization run after iter11 underperformance.
+  Hypothesis: raw PC energy + strict clipping caused optimization imbalance and update suppression.
+  Introduce normalized energy schedule and relaxed gradient clipping.
+created: "2026-04-12"
+
+phases:
+  plan:
+    completed_at: "2026-04-12"
+    notes: >
+      Investigation on iter11 indicates severe clipping compression and energy-dominated gradients.
+      Planned fixes:
+        1) Support energy_weight in PCCNN.pc_loss with per-sample energy normalization.
+        2) Use energy_schedule (max=0.1, warmup=10) like successful PC-EncDec strategy.
+        3) Relax max_grad_norm from 0.5 to 2.0.
+        4) Run 60 epochs with patience=10 for stabilized convergence.
+
+  implement:
+    completed_at: "2026-04-12"
+    notes: >
+      Updated src/autoresearch/models/pc_cnn.py to accept optional energy_weight in pc_loss().
+      Added scheduled normalized-loss path:
+        combined = energy_weight * (energy / B) + (1 - energy_weight) * CE.
+      Preserved backward compatibility when energy_weight is None.
+      Added src/autoresearch/configs/experiment/mnist_pc_cnn_v2_adam.yaml.
+      Added experiments/anp_pcnn_iter12_pc_cnn_v2_adam.pbs (walltime=06:00:00).
+
+      Local smoke test (seed=0, epochs=2, wandb disabled) passed:
+        Epoch 1: val_acc 95.08%, val_ce 0.1596
+        Epoch 2: val_acc 97.13%, val_ce 0.0974
+      Stabilized objective is functioning and converges quickly in local validation.
+
+  experiment:
+    started_at: "2026-04-12"
+    notes: >
+      Ready for CHPC submission (iter12 v2). Not submitted yet in this session.

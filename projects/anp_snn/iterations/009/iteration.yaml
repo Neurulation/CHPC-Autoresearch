@@ -1,6 +1,6 @@
 iteration: 9
 project: anp_snn
-status: experiment
+status: completed
 goal: >
   SNN-GRU TTFS (Phase C) — temporal coding variant of the rate-coded SNN-GRU (iter 4).
   TTFS applied per-row within each image row's T=25-step window.
@@ -23,7 +23,27 @@ phases:
 
   experiment:
     started_at: "2026-04-12"
+    completed_at: "2026-04-12"
     notes: >
       Submitted to CHPC gpu_1 as job 7171616. 5 seeds (0–4), 20 epochs, patience=5 on val_loss.
       BUG FOUND 2026-04-12: threshold=1.0 causes LIF silence → ~11% (chance).
       FIX: threshold=0.9. Re-run as iter9b (mnist_snn_gru_ttfs_v2_adam).
+
+  analyze:
+    completed_at: "2026-04-12"
+    notes: >
+      Completed analysis from CHPC outputs for corrected run (iter9b, job 7173431).
+      All 5 seeds completed at epoch 30.
+      Per-seed val_acc: [98.88, 98.50, 98.75, 98.35, 98.65].
+      Mean: 98.63% ± 0.19% (std=0.1867).
+      Per-seed best_val_loss: [0.0453, 0.0433, 0.0475, 0.0509, 0.0452].
+      Mean best_val_loss: 0.0464 ± 0.0026.
+
+      Comparison to rate baseline (iter4 SNN-GRU rate: 98.75%): TTFS delta = -0.12pp.
+      TTFS underperforms the rate-coded GRU baseline with no robustness advantage.
+
+  conclude:
+    completed_at: "2026-04-12"
+    notes: >
+      Corrected TTFS GRU run is valid but inferior to rate coding (98.63% vs 98.75%, -0.12pp).
+      For hybrid GRU on sequential MNIST, rate coding remains the better encoding choice.

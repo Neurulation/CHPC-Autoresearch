@@ -1,6 +1,6 @@
 project: anp_pcnn
 iteration: 11
-status: experiment
+status: completed
 goal: >
   PC-CNN: Apply predictive coding inference to convolutional feature maps.
   This fills the missing cell in the ANN/PC/SNN comparison matrix
@@ -39,5 +39,31 @@ phases:
 
   experiment:
     started_at: "2026-04-12"
+    completed_at: "2026-04-12"
     notes: >
       Submitted to CHPC gpu_1 as job 7173479. 5 seeds (0–4), 30 epochs, patience=7 on val_accuracy.
+
+  analyze:
+    completed_at: "2026-04-12"
+    notes: >
+      5/5 seeds completed at epoch 30.
+      Per-seed val_acc: [93.37, 92.67, 94.12, 92.63, 92.82].
+      Mean: 93.12% ± 0.56% (std=0.5637).
+      Per-seed val_loss: [0.2643, 0.2970, 0.2571, 0.2948, 0.2899].
+      Mean val_loss: 0.2806 ± 0.0166.
+
+      Comparison:
+        - ANN CNN baseline (99.17%): -6.05pp
+        - SNN-CNN rate (98.87%): -5.75pp
+        - PC-FFNN v3 (97.30%): -4.18pp
+        - PC-EncDec v2 best (97.14%): -4.02pp
+
+      PC-CNN underperforms all established PC baselines despite valid convergence.
+
+  conclude:
+    completed_at: "2026-04-12"
+    notes: >
+      PC-CNN (iter11) is not competitive in its current formulation (93.12% ± 0.56%).
+      Predictive coding over spatial conv feature maps appears optimization-limited at T_pc=20 and
+      current learning dynamics. Priority should return to stronger PC variants (PC-FFNN v3,
+      PC-EncDec v2 flat LR) or targeted PC-CNN stabilization experiments.

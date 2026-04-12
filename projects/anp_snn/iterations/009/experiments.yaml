@@ -17,5 +17,7 @@ jobs:
     seeds: [0, 1, 2, 3, 4]
     epochs: 30
     submitted_at: "2026-04-12"
-    status: running
-    notes: "Resubmit with walltime=04:00:00. Seeds 0-1 already completed (from job 7172626); seeds 2-4 will run. True TTFS baseline (threshold=0.9)."
+    status: completed
+    completed_at: "2026-04-12"
+    result: "5/5 seeds complete at epoch 30. Mean val_acc: 98.63% +- 0.19% (delta vs rate GRU: -0.12pp)."
+    notes: "Resubmit with walltime=04:00:00 due prior walltime kill. Corrected threshold=0.9 run is valid."

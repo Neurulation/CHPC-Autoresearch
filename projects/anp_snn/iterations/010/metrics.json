@@ -1,0 +1,33 @@
+{
+  "experiment": "mnist_snn_vanilla_rnn_ttfs_v2_adam",
+  "model": "Hybrid-VanillaRNN TTFS",
+  "phase": "C",
+  "encoding": "ttfs",
+  "description": "Corrected TTFS run (threshold=0.9): snn.Leaky encoder (T=25) + 2-layer vanilla RNN on sequential MNIST",
+  "dataset": "MNIST",
+  "seeds": [0, 1, 2, 3, 4],
+  "per_seed": [
+    {"seed": 0, "val_accuracy": 96.9833, "val_loss": 0.109498, "best_val_loss": 0.094198, "epochs_run": 30},
+    {"seed": 1, "val_accuracy": 96.2667, "val_loss": 0.136568, "best_val_loss": 0.098053, "epochs_run": 30},
+    {"seed": 2, "val_accuracy": 97.3500, "val_loss": 0.101839, "best_val_loss": 0.095138, "epochs_run": 30},
+    {"seed": 3, "val_accuracy": 96.7833, "val_loss": 0.117619, "best_val_loss": 0.100305, "epochs_run": 30},
+    {"seed": 4, "val_accuracy": 96.9500, "val_loss": 0.114544, "best_val_loss": 0.105815, "epochs_run": 30}
+  ],
+  "summary": {
+    "val_accuracy_mean": 96.8667,
+    "val_accuracy_std": 0.3525,
+    "best_val_loss_mean": 0.098702,
+    "best_val_loss_std": 0.004161,
+    "n_seeds": 5,
+    "n_seeds_completed": 5
+  },
+  "comparison": {
+    "baseline_experiment": "mnist_snn_vanilla_rnn_adam",
+    "baseline_model": "Hybrid-VanillaRNN rate",
+    "baseline_iter": 5,
+    "baseline_val_accuracy_mean": 97.1733,
+    "delta_pp": -0.31,
+    "conclusion": "TTFS is clearly worse than rate coding for hybrid vanilla RNN on sequential MNIST"
+  },
+  "notes": "All 5 seeds completed successfully on corrected run (threshold=0.9). This is the weakest recurrent TTFS result and confirms a negative TTFS trend in hybrid recurrent models."
+}

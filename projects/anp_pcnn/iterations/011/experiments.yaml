@@ -7,5 +7,7 @@ jobs:
     seeds: [0, 1, 2, 3, 4]
     epochs: 30
     submitted_at: "2026-04-12"
-    status: running
-    notes: "PC-CNN iter 11: predictive coding over conv feature maps. T_pc=20, lr_pc=0.05, ce_weight=1.0. Smoke test ep1 67.02%, ep2 81.67%."
+    status: completed
+    completed_at: "2026-04-12"
+    result: "5/5 seeds complete at epoch 30. Mean val_acc: 93.12% +- 0.56%. PC-CNN underperforms PC-FFNN and PC-EncDec baselines."
+    notes: "PC-CNN iter 11: predictive coding over conv feature maps. T_pc=20, lr_pc=0.05, ce_weight=1.0."

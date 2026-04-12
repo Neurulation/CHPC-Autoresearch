@@ -1,6 +1,6 @@
 iteration: 10
 project: anp_snn
-status: experiment
+status: completed
 goal: >
   SNN-VanillaRNN TTFS (Phase C) — temporal coding variant of the rate-coded SNN-VanillaRNN (iter 5).
   TTFS applied per-row within each image row's T=25-step window.
@@ -25,7 +25,28 @@ phases:
 
   experiment:
     started_at: "2026-04-12"
+    completed_at: "2026-04-12"
     notes: >
       Submitted to CHPC gpu_1 as job 7171617. 5 seeds (0–4), 20 epochs, patience=5 on val_loss.
       BUG FOUND 2026-04-12: threshold=1.0 causes LIF silence → ~11% (chance).
       FIX: threshold=0.9. Re-run as iter10b (mnist_snn_vanilla_rnn_ttfs_v2_adam).
+
+  analyze:
+    completed_at: "2026-04-12"
+    notes: >
+      Completed analysis from CHPC outputs for corrected run (iter10b, job 7173432).
+      All 5 seeds completed at epoch 30.
+      Per-seed val_acc: [96.98, 96.27, 97.35, 96.78, 96.95].
+      Mean: 96.87% ± 0.35% (std=0.3525).
+      Per-seed best_val_loss: [0.0942, 0.0981, 0.0951, 0.1003, 0.1058].
+      Mean best_val_loss: 0.0987 ± 0.0042.
+
+      Comparison to rate baseline (iter5 SNN-VanillaRNN rate: 97.17%): TTFS delta = -0.31pp.
+      TTFS worsens both mean accuracy and variance profile versus rate coding.
+
+  conclude:
+    completed_at: "2026-04-12"
+    notes: >
+      Corrected TTFS VanillaRNN run is valid but clearly worse than rate coding
+      (96.87% vs 97.17%, -0.31pp). Phase C conclusion for hybrid recurrent models:
+      TTFS does not beat rate coding for LSTM/GRU/VanillaRNN on sequential MNIST.
