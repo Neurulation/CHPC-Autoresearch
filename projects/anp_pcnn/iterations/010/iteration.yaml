@@ -1,6 +1,6 @@
 project: anp_pcnn
 iteration: 10
-status: implement
+status: experiment
 goal: >
   PC-EncDec v2 + cosine LR decay (valid rerun) — accelerate convergence to close
   the -0.16pp gap vs PC-FFNN v3.
@@ -41,3 +41,8 @@ phases:
       Smoke test (seed=0, epochs=2, local): ep1 88.52%, ep2 90.08%.
         Early stopping mode=max did NOT fire — val_accuracy improved as expected.
         Scheduler confirmed working (no errors).
+
+  experiment:
+    started_at: "2026-04-12"
+    notes: >
+      Submitted to CHPC gpu_1 as job 7172728. 5 seeds (0–4), 60 epochs, patience=10 on val_accuracy.

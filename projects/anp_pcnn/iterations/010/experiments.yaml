@@ -1,1 +1,10 @@
-jobs: []
+jobs:
+  - job_id: "7172728"
+    name: anp_pcnn_iter10_pc_enc_dec_v2_adam_cosine_v2
+    queue: gpu_1
+    walltime: "02:00:00"
+    seeds: [0, 1, 2, 3, 4]
+    epochs: 60
+    submitted_at: "2026-04-12"
+    status: running
+    notes: "PC-EncDec v2 + CosineAnnealingLR (train_pcnn.py, fixed) — first valid cosine LR measurement. Target: ≥97.30% to match PC-FFNN v3."
