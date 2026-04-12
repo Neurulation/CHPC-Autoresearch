@@ -1,6 +1,6 @@
 iteration: 5
 project: anp_snn
-status: experiment
+status: completed
 goal: >
   SNN-VanillaRNN (rate coding) on sequential MNIST — hybrid spiking-recurrent model.
   LIF input encoder (T=25 Bernoulli timesteps per row) + 2-layer RNN (hidden=256, tanh).
@@ -25,5 +25,42 @@ phases:
 
   experiment:
     started_at: "2026-04-12"
+    completed_at: "2026-04-12"
     notes: >
       Submitted to CHPC gpu_1. 5 seeds (0–4), 30 epochs, patience=7 on val_loss.
+      All 5 seeds completed at epoch 30.
+
+  analyze:
+    completed_at: "2026-04-12"
+    notes: >
+      5/5 seeds completed at epoch 30. Per-seed val_acc: [97.97, 97.50, 96.75, 97.12, 96.53].
+      Mean: 97.17% ± 0.52%. Best seed 0: 97.97%.
+      Per-seed val_loss: [0.0839, 0.0943, 0.0968, 0.0958, 0.0968]. Mean loss: 0.0935.
+
+      Phase B comparisons (spiking vs non-spiking):
+        Non-spiking VanillaRNN (anp_rnn iter3): 97.89% ± 0.35% → delta: -0.72pp
+        SNN-LSTM (iter3): 98.68% ± 0.04% → gap: -1.51pp
+        SNN-GRU (iter4): 98.75% ± 0.15% → gap: -1.58pp
+
+      The spike coding gap for VanillaRNN (-0.72pp) is notably larger than for LSTM (-0.27pp)
+      and GRU (-0.31pp). Hypothesis: VanillaRNN lacks gating, so it is more sensitive to
+      loss of input precision (rate-coded graded intensity vs binary spikes). LSTM/GRU gates
+      filter and compress the input signal, absorbing the encoding change more gracefully.
+
+      High variance (0.52pp std) vs SNN-LSTM (0.04pp) and SNN-GRU (0.15pp) mirrors the
+      non-spiking pattern where VanillaRNN had std=0.35pp vs LSTM 0.11pp — amplified in
+      the spiking variant. Vanishing gradients in VanillaRNN interact with sparse spike inputs
+      to produce more stochastic optimization.
+
+  conclude:
+    completed_at: "2026-04-12"
+    notes: >
+      SNN-VanillaRNN Phase B: 97.17% ± 0.52% (5 seeds, epoch 30).
+      Rate-coded spiking input introduces -0.72pp penalty vs non-spiking VanillaRNN.
+      This is 2.3× larger than the LSTM (-0.27pp) and GRU (-0.31pp) gaps.
+      Finding: gated architectures absorb spike encoding loss better than plain RNNs.
+      VanillaRNN spike sensitivity is consistent with its known vanishing gradient vulnerability.
+      Phase B complete: SNN-GRU > SNN-LSTM > SNN-VanillaRNN (98.75 > 98.68 > 97.17%).
+      Non-spiking ordering preserved: GRU > LSTM >> VanillaRNN. Gating benefit maintained
+      through spike encoding. VanillaRNN uniquely loses the most from sparse binary inputs.
+

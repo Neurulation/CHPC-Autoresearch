@@ -1,0 +1,23 @@
+{
+  "experiment_group": "mnist_snn_vanilla_rnn_adam",
+  "job_id": "7171998",
+  "seeds": [0, 1, 2, 3, 4],
+  "epochs": [30, 30, 30, 30, 30],
+  "per_seed_val_accuracy": [97.9667, 97.5, 96.75, 97.1167, 96.5333],
+  "per_seed_val_loss": [0.083937, 0.094314, 0.096798, 0.095773, 0.096782],
+  "mean_accuracy": 97.1733,
+  "std_accuracy": 0.5154,
+  "mean_loss": 0.093521,
+  "std_loss": 0.004877,
+  "best_seed": 0,
+  "best_accuracy": 97.9667,
+  "num_seeds_complete": 5,
+  "comparison": {
+    "non_spiking_vanilla_rnn": 97.89,
+    "delta_vs_non_spiking": -0.72,
+    "snn_lstm_rate": 98.68,
+    "snn_gru_rate": 98.75,
+    "gap_vs_lstm": -1.51,
+    "gap_vs_gru": -1.58
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "experiment_group": "mnist_pc_enc_dec_v2_adam_cosine_v2",
+  "job_id": "7172728",
+  "seeds": [0, 1, 2, 3, 4],
+  "epochs": [60, 56, 53, 55, 60],
+  "per_seed_val_accuracy": [97.1, 96.7167, 96.7667, 96.5667, 96.6],
+  "per_seed_val_loss": [0.099209, 0.109447, 0.116428, 0.116594, 0.115304],
+  "mean_accuracy": 96.75,
+  "std_accuracy": 0.1897,
+  "mean_loss": 0.111396,
+  "std_loss": 0.006577,
+  "best_seed": 0,
+  "best_accuracy": 97.1,
+  "num_seeds_complete": 5,
+  "comparison": {
+    "iter8_flat_lr": 97.14,
+    "delta_vs_iter8": -0.39,
+    "pc_ffnn_v3": 97.30,
+    "delta_vs_pc_ffnn_v3": -0.55
+  }
+}

@@ -1,6 +1,6 @@
 project: anp_pcnn
 iteration: 10
-status: experiment
+status: completed
 goal: >
   PC-EncDec v2 + cosine LR decay (valid rerun) — accelerate convergence to close
   the -0.16pp gap vs PC-FFNN v3.
@@ -44,5 +44,45 @@ phases:
 
   experiment:
     started_at: "2026-04-12"
+    completed_at: "2026-04-12"
     notes: >
       Submitted to CHPC gpu_1 as job 7172728. 5 seeds (0–4), 60 epochs, patience=10 on val_accuracy.
+      All 5 seeds completed.
+
+  analyze:
+    completed_at: "2026-04-12"
+    notes: >
+      5/5 seeds completed. Epochs: [60, 56, 53, 55, 60].
+      Per-seed val_acc: [97.10, 96.72, 96.77, 96.57, 96.60].
+      Mean: 96.75% ± 0.19%. Best seed 0: 97.10%.
+      Per-seed val_loss: [0.0992, 0.1094, 0.1164, 0.1166, 0.1153]. Mean loss: 0.1114.
+
+      Seeds 1/2/3 early-stopped at ep 56/53/55; seeds 0 and 4 ran full 60 epochs.
+      Early stopping (patience=10, val_accuracy, mode=max) fired on seeds 1-3 before epoch 60.
+
+      Key comparisons:
+        iter8 flat LR=1e-3 (reference):  97.14% ± 0.21% → delta: -0.39pp (DEGRADED)
+        PC-FFNN v3 (best PC result):     97.30%          → delta: -0.55pp (still behind)
+
+      Cosine LR degraded PC-EncDec performance. Hypothesis: the PC model's error-driven
+      weight updates (energy minimization via inference phases) are sensitive to aggressive
+      LR decay. As LR drops exponentially from ep30 onward, the PC network's slow credit
+      assignment can no longer make meaningful corrections, stalling at a local optimum.
+      Unlike backprop models (which have direct gradient signal), PC models rely on
+      sustained inference phases — reduced LR cuts off the energy landscape traversal.
+
+      Seeds 1-3 early-stopping (before ep60) with cosine LR is unusual: as LR decays,
+      val_acc plateaus rather than continuing to improve, so patience triggers. With flat
+      LR (iter8), all seeds continued improving slowly up to ep60.
+
+  conclude:
+    completed_at: "2026-04-12"
+    notes: >
+      Cosine LR (T_max=60, etamin=1e-6) HURTS PC-EncDec: 96.75%±0.19% vs flat LR 97.14%±0.21% (-0.39pp).
+      Still -0.55pp behind PC-FFNN v3 (97.30%) which uses flat LR.
+      Finding: PC models are more LR-sensitive than backprop models. Aggressive decay
+      over 60 epochs stalls convergence in the slow inference-phase learning loop.
+      iter8 flat LR remains the best PC configuration tested. Next steps:
+        (a) Try longer training (e.g. 120ep flat LR) to allow further PC convergence, OR
+        (b) Gentle cosine with T_max>60 or warm restarts to avoid premature plateau, OR
+        (c) Investigate capacity: PC-EncDec may be architecturally limited vs PC-FFNN v3.

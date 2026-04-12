@@ -17,5 +17,6 @@ jobs:
     seeds: [0, 1, 2, 3, 4]
     epochs: 30
     submitted_at: "2026-04-12"
-    status: running
+    status: walltime_killed
+    result: "2/5 seeds complete (seeds 0-1 @ ep30). Seeds 2-4 not run. Walltime 2h insufficient (~1h/seed × 5 = 5h needed). Resubmit with walltime=04:00:00."
     notes: "CORRECTED re-run: threshold=0.9. True TTFS baseline."

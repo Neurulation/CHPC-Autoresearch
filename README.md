@@ -108,7 +108,7 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 | ANP — SNN | 2 | SNN-FFNN (784-512-256-10 LIF, T=25) | Adam | ✗ | 5 | 97.62% ± 0.12%ᴬ | rate-coded (Phase B baseline) | ✅ |
 | ANP — PC-NN | 3 | PC-FFNN v3 + CE head + grad clip (784-256-128-10) | Adam | ✗ | 5 | **97.30% ± 0.22%**⁴ | predictive coding | ✅ |
 | ANP — PC-NN | 2 | PC-FFNN v2 + CE head (784-256-128-10) | Adam | ✗ | 5 | **97.21% ± 0.35%**³ | predictive coding | ✅ |
-| ANP — PC-NN | 10 | PC-EncDec v2 + cosine LR v2 (784-256-128 enc+dec, β=0.1) | Adam+Cosine | ✗ | 5 | pending¹⁰ | valid cosine rerun (iter9 bugs fixed) | ⏳ |
+| ANP — PC-NN | 10 | PC-EncDec v2 + cosine LR v2 (784-256-128 enc+dec, β=0.1) | Adam+Cosine | ✗ | 5 | 96.75% ± 0.19%¹⁰ | cosine LR degraded −0.39pp vs flat LR | ✅ |
 | ANP — PC-NN | 9 | PC-EncDec v2 + cosine LR (784-256-128 enc+dec, β=0.1) | Adam+Cosine | ✗ | 5 | ~~95.82% ± 0.20%~~⁹ (INVALID) | wrong entry point + ES bug | ❌ |
 | ANP — PC-NN | 8 | PC-EncDec v2 @ 60ep (784-256-128 enc+dec, β=0.1) | Adam | ✗ | 5 | **97.14% ± 0.21%**⁸ | generative PC, 60ep ceiling | ✅ |
 | ANP — SNN | 6 | SFNN TTFS (784-512-256-10 LIF, TTFS T=25) | Adam | ✗ | 5 | 97.12% ± 0.20%ᶜ | fully spiking, temporal coding | ✅ |
@@ -116,10 +116,10 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 | ANP — PC-NN | 1 | PC-FFNN (784-256-128-10) | Adam | ✗ | 5 | ~96%¹ / 89.0% ± 4.7%² | predictive coding | ⚠️ |
 | ANP — PC-NN | 4 | PC-FFNN v4 + eps=0.01 (784-256-128-10) | Adam (eps=0.01) | ✗ | 5 | 93.95% ± 0.27%⁵ | not converged | ⚠️ |
 | ANP — PC-NN | 6 | PC-EncDec v1 (784-256-128 enc+dec) | Adam | ✗ | 5 | 93.13% ± 0.35%⁶ | train/val mismatch + β=1 | ⚠️ |
-| ANP — SNN | 5 | **Hybrid**-VanillaRNN (LIF encoder + 2-layer RNN h=256, T=25) | Adam | ✗ | 5 | pendingᴮ | hybrid baseline — not fully spiking | ⏳ |
-| ANP — SNN | 8 | **Hybrid**-LSTM TTFS (LIF encoder + LSTM, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | hybrid baseline — not fully spiking | ⏳ |
-| ANP — SNN | 9 | **Hybrid**-GRU TTFS (LIF encoder + GRU, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | hybrid baseline — not fully spiking | ⏳ |
-| ANP — SNN | 10 | **Hybrid**-VanillaRNN TTFS (LIF encoder + RNN, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | hybrid baseline — not fully spiking | ⏳ |
+| ANP — SNN | 5 | **Hybrid**-VanillaRNN (LIF encoder + 2-layer RNN h=256, T=25) | Adam | ✗ | 5 | 97.17% ± 0.52%ᴮ | hybrid baseline — not fully spiking | ✅ |
+| ANP — SNN | 8 | **Hybrid**-LSTM TTFS (LIF encoder + LSTM, TTFS T=25) | Adam | ✗ | 5 | ⚠️ 2/5 seedsᶜ | walltime kill — resubmitting 4h | ⚠️ |
+| ANP — SNN | 9 | **Hybrid**-GRU TTFS (LIF encoder + GRU, TTFS T=25) | Adam | ✗ | 5 | ⚠️ 2/5 seedsᶜ | walltime kill — resubmitting 4h | ⚠️ |
+| ANP — SNN | 10 | **Hybrid**-VanillaRNN TTFS (LIF encoder + RNN, TTFS T=25) | Adam | ✗ | 5 | ⚠️ 2/5 seedsᶜ | walltime kill — resubmitting 4h | ⚠️ |
 | ANP — SNN | 11 | **SRNN** rate (snn.RLeaky T=28, h=256) | Adam | ✗ | 5 | plannedᴰ | **fully spiking recurrent** | 📋 |
 | ANP — SNN | 12 | **SLSTM** rate (snn.SLSTM T=28, h=256) | Adam | ✗ | 5 | plannedᴰ | **fully spiking recurrent** | 📋 |
 | ANP — SNN | 13 | **SRNN** TTFS (snn.RLeaky T=28, TTFS) | Adam | ✗ | 5 | plannedᴰ | **fully spiking recurrent** | 📋 |
@@ -131,21 +131,28 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 
 ᴬ **ANP — SNN iter 2 (SNN-FFNN rate coding):** 97.62% ± 0.12% (535k params). Rate coding (T=25 Bernoulli) preserves
   accuracy well — only −0.44pp gap vs non-spiking FFNN despite larger hidden dims (512-256 vs 256-128).  
-ᴮ **ANP — SNN iters 3-5 (Phase B: Hybrid-LSTM/GRU/VanillaRNN):** Jobs 7171472-7171474, submitted 2026-04-12.
+ᴮ **ANP — SNN iters 3-5 (Phase B: Hybrid-LSTM/GRU/VanillaRNN — complete):** Jobs 7171472-7171474.
   Architecture: `snn.Leaky` input encoder (T=25 Bernoulli per row) → rate-coded spike counts → standard `nn.LSTM/GRU/RNN`.
   **These are hybrid comparison baselines, NOT the target fully spiking design.**
   They answer: "do spike-encoded inputs help standard RNNs?"
-  Results (iter 3/4 complete): SNN-GRU **98.75% ± 0.15%**, SNN-LSTM **98.68% ± 0.04%** — both 5/5 seeds, 30 epochs.
-  Rate-coded spiking input is near-lossless for recurrent models: only −0.31pp gap vs non-spiking GRU (99.06%).
-  SNN-VanillaRNN (iter 5): still running (4/5 seeds complete: 97.45%±0.50% estimated; seed4 in progress).  
-ᶜ **ANP — SNN iters 6-10 (Phase C TTFS):** Jobs 7171613-7171617, queued behind Phase B.
-  iters 6-7 (SFNN/SCNN TTFS) are fully spiking. iters 8-10 (LSTM/GRU/VanillaRNN TTFS) are hybrid baselines.
+  Results (all 3 complete, 5/5 seeds each, 30 epochs):
+    SNN-GRU (iter4): **98.75% ± 0.15%** — gap vs non-spiking GRU: −0.31pp
+    SNN-LSTM (iter3): **98.68% ± 0.04%** — gap vs non-spiking LSTM: −0.27pp
+    SNN-VanillaRNN (iter5): **97.17% ± 0.52%** — gap vs non-spiking VanillaRNN: −0.72pp
+  Rate-coded spiking input is near-lossless for gated models (−0.27–0.31pp). VanillaRNN gap (−0.72pp)
+  is 2.3× larger — gating absorbs spike encoding loss; ungated RNNs are more sensitive.
+  High variance for VanillaRNN (0.52pp std vs 0.04-0.15pp) amplified by vanishing gradients + sparse spikes.
+  **Phase B conclusion: gated architectures (LSTM/GRU) absorb spike encoding loss; plain RNNs do not.**  
+ᶜ **ANP — SNN iters 6-10 (Phase C TTFS):** iters 6-7 (SFNN/SCNN TTFS) fully spiking — complete.
+  iters 8-10 (LSTM/GRU/VanillaRNN TTFS) are hybrid baselines.
   Tests whether TTFS temporal coding improves over rate coding for static/sequential MNIST.
   Results (iters 6/7 complete): SFNN TTFS **97.12% ± 0.20%**, SCNN TTFS **98.41% ± 0.17%**.
-  TTFS is consistently WORSE than rate: −0.49pp (FFNN) and −0.46pp (CNN). Consistent gap across both
-  architectures suggests encoding-driven penalty, not architecture-specific. Root cause: LIF summation
-  discards spike timing order — TTFS is effectively binarized input vs. rate-coded intensity.
-  Iters 8-10 (TTFS hybrid): broken due to threshold=1.0 LIF silence bug; rerun as iter8b/9b/10b (threshold=0.9).  
+  TTFS is consistently WORSE than rate: −0.49pp (FFNN) and −0.46pp (CNN). Root cause: LIF summation
+  discards spike timing order — TTFS ≈ binarized input; rate coding preserves graded intensity.
+  iter8b/9b/10b (corrected threshold=0.9 reruns, jobs 7172625/6/7): walltime-killed at 2/5 seeds
+  (~1h/seed × 5 = 5h needed; 2h PBS insufficient). Resubmitting with walltime=04:00:00.
+  Partial iter8b signal (2 seeds): LSTM TTFS seed0 ~98.79% > LSTM rate 98.68% — weak early indicator
+  TTFS may benefit recurrent models; too few seeds to conclude.  
 ᴰ **ANP — SNN iters 11-14 (fully spiking recurrent — planned):** Next priority after iters 3-10 complete.
   SRNN uses `snn.RLeaky(linear_features=256)` over T=28 MNIST rows — fully binary spikes throughout.
   SLSTM uses `snn.SLSTM(28, 256)` — standard LSTM gates internally but thresholded membrane output → binary spikes.
@@ -176,9 +183,12 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
   every epoch with improving val_loss → fires at patience+1 = 11 epochs for all 5 seeds deterministically.
   Cosine LR was applied (train.py has scheduler support) but unmeasurable — LR barely changed by epoch 11.
   Fixes applied to `train_pcnn.py`: early stopping reverted to `val_accuracy` (mode=max); scheduler support added.
-¹⁰ **anp_pcnn iter 10 (PC-EncDec v2 + cosine LR — valid rerun):** Job 7172728, submitted 2026-04-12.
-  Corrected PBS uses `train_pcnn.py`. New experiment_group `mnist_pc_enc_dec_v2_adam_cosine_v2` (fresh outputs).
-  Smoke test: ep1 88.52%, ep2 90.08%, no premature early stopping — both fixes confirmed working.
+¹⁰ **anp_pcnn iter 10 (PC-EncDec v2 + cosine LR — valid rerun, complete):** Job 7172728, 5/5 seeds.
+  96.75% ± 0.19% (epochs [60, 56, 53, 55, 60]). Seeds 1/2/3 early-stopped (patience=10 on val_accuracy).
+  **Cosine LR DEGRADED performance −0.39pp vs flat LR iter8 (97.14%).**
+  PC models are LR-sensitive: aggressive cosine decay over 60 epochs stalls the slow inference-phase
+  credit assignment before convergence. Flat LR (iter8) remains the best PC-EncDec result.
+  Still −0.55pp behind PC-FFNN v3 (97.30%). Cosine annealing is not beneficial for PC-EncDec on MNIST.
 ˢ **SPC-FFNN architectural failure (iters 2-5, anp_spcnn) — ALL variants produce chance accuracy (~11%):**
   Root cause: `self.layers` is shared between the SNN feedforward pathway (binary spike processing for classification)
   and the PC generative model (continuous representation reconstruction). These objectives are architecturally incompatible:
@@ -208,7 +218,7 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 
 **Key findings:**
 - *MNIST: CNN outperforms FFNN at 99.17% vs 98.06%. SNN-CNN (iter1, anp_snn) 98.87% ± 0.13% — only -0.30pp behind non-spiking CNN, confirming LIF neurons + rate coding are effective for spatial feature extraction. SNN-FFNN baseline (iter2, anp_snn) 97.62% ± 0.12% — -0.44pp vs non-spiking FFNN despite larger hidden dims (512-256 vs 256-128). Architecture gain: +1.25pp from adding convolutional spiking layers.*
-- *SNN Phase B (iters 3-4, anp_snn) — hybrid spiking recurrent results: SNN-GRU 98.75% ± 0.15% (iter4), SNN-LSTM 98.68% ± 0.04% (iter3). Rate-coded spiking input is near-lossless for sequential MNIST: only −0.31pp gap vs non-spiking GRU (99.06%). LIF spike-count features (T=25 Bernoulli) preserve almost all information needed for recurrent classification. SNN-GRU gap from LSTM (0.07pp) mirrors the non-spiking gap (0.11pp) — gating dynamics unaffected by spiking encoder.*
+- *SNN Phase B (iters 3-5, anp_snn) — hybrid spiking recurrent results (all complete): SNN-GRU 98.75% ± 0.15% (iter4), SNN-LSTM 98.68% ± 0.04% (iter3), SNN-VanillaRNN 97.17% ± 0.52% (iter5). Rate-coded spiking input is near-lossless for gated recurrent models: −0.27pp (LSTM) and −0.31pp (GRU) gap vs non-spiking counterparts. VanillaRNN gap −0.72pp is 2.3× larger — demonstrates that gating (LSTM/GRU gates filter + compress input signal) absorbs spike encoding loss; plain RNN without gating is more sensitive to input precision. High variance for VanillaRNN (0.52pp std vs 0.04-0.15pp for LSTM/GRU) amplified by interaction of vanishing gradients with sparse spike inputs.*
 - *SNN Phase C TTFS (iters 6-7, anp_snn) — TTFS is consistently WORSE than rate coding for static MNIST: SFNN TTFS 97.12% ± 0.20% vs rate 97.62% (−0.49pp, iter6); SCNN TTFS 98.41% ± 0.17% vs rate 98.87% (−0.46pp, iter7). Remarkably consistent ~0.47pp penalty across two different architectures points to the encoding itself, not the downstream model, as the cause. Mechanism: LIF spike-count integration discards temporal order information — TTFS spike-count = binarized image (pixel fires or not within T steps), whereas rate coding preserves graded intensity via Bernoulli sampling. For static MNIST, graded intensity > spike timing.*
 - *GRU (iter 2) beats LSTM (iter 1): 99.06% ± 0.14% vs 98.95% ± 0.11%, with 25% fewer parameters (617k vs ~821k). Gate reduction (4→3 gates) did not hurt — confirms GRU parity with LSTM on seq-MNIST (Chung et al. 2014).*
 - *Vanilla RNN (iter 3): 97.89% ± 0.35% — far better than predicted. Literature expects 10-20pp regression from LSTM for T>>10 (Bengio et al. 1994); actual gap from GRU is only 1.17pp. Adam's adaptive LR compensates for vanishing gradients at T=28, acting as a significant equaliser. Completes the RNN trilogy: GRU (99.06%) → LSTM (98.95%) → Vanilla (97.89%). Parameter efficiency: 207k vs 617k (GRU) for 1.17pp.*
@@ -216,7 +226,8 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 - *PC-FFNN v4 (iter 4): eps=0.01 fix CONFIRMED zero energy explosions across all 5 seeds (energy monotonically decreases to ~0.21 at ep30). However 93.95% is a convergence artifact — not a performance comparison. Adam eps=0.01 reduces effective step size in late training, needing ~50-75 epochs to match the single-seed diagnostic of 98.12%. A future re-run with epochs=75 will establish the PC-FFNN ceiling.*
 - *PC-FFNN v3 (iter 3): Gradient clipping (max_grad_norm=0.5) is a partial improvement — variance reduced (0.35→0.22pp), explosions delayed, mean accuracy +0.09pp to 97.30% ± 0.22%. Root cause: clipping bounds gradient magnitude but not the energy value itself.*
 - *PC-FFNN v1 (iter 1): train accuracy 100% from epoch 2 via supervised clamping, but val CE stuck at ~1.54 (uncalibrated). Root cause: training-evaluation objective mismatch between clamped and free inference.*
-- *PC-EncDec v2 @ 60ep (iter 8): 97.14% ± 0.21% — +0.55pp over 30ep (96.59%). Training budget alone closed 78% of the gap to PC-FFNN v3 (-0.71pp→-0.16pp). Seeds 1/2 early-stopped; seeds 0/3/4 needed all 60 epochs — slow convergence is the main bottleneck. Cosine LR decay submitted for iter 9 to accelerate convergence.*
+- *PC-EncDec v2 @ 60ep (iter 8): 97.14% ± 0.21% — +0.55pp over 30ep (96.59%). Training budget alone closed 78% of the gap to PC-FFNN v3 (-0.71pp→-0.16pp). Seeds 1/2 early-stopped; seeds 0/3/4 needed all 60 epochs — slow convergence is the main bottleneck. Cosine LR decay tested in iter 10 — result: DEGRADED by −0.39pp (96.75%). Flat LR remains optimal for PC-EncDec.*
+- *PC-EncDec v2 + cosine LR (iter 10): 96.75% ± 0.19% — cosine LR (T_max=60, eta_min=1e-6) HURT convergence by −0.39pp vs flat LR iter8 (97.14%). PC models are more LR-sensitive than backprop models: aggressive decay stalls slow inference-phase credit assignment before full convergence. Seeds 1/2/3 early-stopped (patience=10 on val_accuracy) while seed 0/4 ran full 60ep. Flat LR (iter8) remains best PC-EncDec result. Still −0.55pp behind PC-FFNN v3 (97.30% flat LR). Next direction: longer flat-LR training (120ep) or architectural improvements.*
 - *PC-EncDec v2 (iter 7): 96.59% ± 0.28% — +3.46pp vs iter 6 (93.13%). Both fixes confirmed: (1) closing the train/val distribution mismatch (pure-feedforward eval) was the dominant contributor; (2) reducing β from 1.0 to 0.1 (Y_max 0.5→0.1) shifted gradient budget to 90% CE / 10% energy. Generative decoder is now a mild regulariser, not a hindrance. All seeds best at epochs 26-30 — model not yet converged at epoch 30; iter 8 recommended at 60 epochs to establish ceiling.*
 - *PC-EncDec (iter 6): 93.13% ± 0.35% ceiling caused by two compounding bugs: (1) train/val mismatch — cls_head trained on feedforward r_{L-1} but validated on inference-modified r_{L-1} (20 PC steps shift the representation distribution); (2) Y_max=0.5 = β=1 VAE — reconstruction and classification compete with equal gradient budget, known suboptimal for discrimination (Higgins et al. 2017). Iter 7 fixes both: pure-feedforward forward() + Y_max=0.1 (β=0.1, 90% CE gradient).*
 - ***SPC-FFNN architectural failure (anp_spcnn iters 2-5) — ALL variants COMPLETE FAILURE:** ~11% (chance) across all variants and seeds. Architectural root cause: `self.layers` shared between SNN feedforward pathway and PC generative model. Three gradient routing strategies all fail: (v2, iter3b) PC energy alone — cannot produce discriminative features; (A, iter4) CE through LIF surrogate grads — energy explodes (7.9→57.6), optimization collapses; (D, iter5) CE via BPTT through PC inference — most uniform collapse (val_loss 2.3021-2.3023). Required fix: separate SNN encoder weights from PC generative model weights. SNN encoder trained discriminatively (CE+surrogate); PC model has independent weight matrices. Iter6 will implement this two-pathway architecture.*

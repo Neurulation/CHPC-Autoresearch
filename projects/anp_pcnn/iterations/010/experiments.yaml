@@ -6,5 +6,7 @@ jobs:
     seeds: [0, 1, 2, 3, 4]
     epochs: 60
     submitted_at: "2026-04-12"
-    status: running
+    status: completed
+    completed_at: "2026-04-12"
+    result: "5/5 seeds complete. Epochs [60, 56, 53, 55, 60]. Mean val_acc: 96.75% ± 0.19%. Seeds 1/2/3 early-stopped; cosine LR degraded vs flat LR (-0.39pp)."
     notes: "PC-EncDec v2 + CosineAnnealingLR (train_pcnn.py, fixed) — first valid cosine LR measurement. Target: ≥97.30% to match PC-FFNN v3."
