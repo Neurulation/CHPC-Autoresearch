@@ -1,0 +1,31 @@
+{
+  "experiment": "mnist_snn_baseline_ttfs_adam",
+  "model": "SNN-FFNN TTFS",
+  "phase": "C",
+  "encoding": "ttfs",
+  "description": "SNN-FFNN with TTFS encoding: 784-512-256-10 LIF layers, T=25 timesteps, time-to-first-spike",
+  "dataset": "MNIST",
+  "seeds": [0, 1, 2, 3, 4],
+  "per_seed": [
+    {"seed": 0, "val_accuracy": 97.0667, "val_loss": 0.0976, "best_epoch": 20},
+    {"seed": 1, "val_accuracy": 96.9667, "val_loss": 0.1089, "best_epoch": 20},
+    {"seed": 2, "val_accuracy": 97.10,   "val_loss": 0.1043, "best_epoch": 20},
+    {"seed": 3, "val_accuracy": 97.0167, "val_loss": 0.1096, "best_epoch": 20},
+    {"seed": 4, "val_accuracy": 97.4667, "val_loss": 0.0992, "best_epoch": 20}
+  ],
+  "summary": {
+    "val_accuracy_mean": 97.1234,
+    "val_accuracy_std": 0.1985,
+    "n_seeds": 5,
+    "n_seeds_completed": 5
+  },
+  "comparison": {
+    "baseline_experiment": "mnist_snn_baseline_adam",
+    "baseline_model": "SNN-FFNN rate",
+    "baseline_iter": 2,
+    "baseline_val_accuracy_mean": 97.62,
+    "delta_pp": -0.49,
+    "conclusion": "TTFS is 0.49pp WORSE than rate coding for SNN-FFNN on static MNIST"
+  },
+  "notes": "All 5 seeds ran to epoch 20 max. TTFS encoding loses pixel intensity information — rate coding preserves graded intensity which is more informative for digit recognition."
+}

@@ -6,5 +6,7 @@ jobs:
     seeds: [0, 1, 2, 3, 4]
     epochs: 20
     submitted_at: "2026-04-12"
-    status: running
+    status: completed
+    completed_at: "2026-04-12"
+    result: "val_acc=97.12%+-0.20% (5/5 seeds), all epoch 20"
     notes: "SNN-FFNN TTFS: time-to-first-spike encoding, t_fire=floor((1-p)*T)"

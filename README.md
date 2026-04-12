@@ -102,6 +102,7 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 | ANP — SNN | 1 | SNN-CNN (2 Conv+LIF+Pool + 2 FC+LIF, T=25) | Adam | ✗ | 5 | **98.87% ± 0.13%** | rate-coded, spatial | ✅ |
 | ANP — SNN | 4 | **Hybrid**-GRU (LIF encoder + 2-layer GRU h=256, T=25) | Adam | ✗ | 5 | 98.75% ± 0.15%ᴮ | hybrid baseline — not fully spiking | ✅ |
 | ANP — SNN | 3 | **Hybrid**-LSTM (LIF encoder + 2-layer LSTM h=256, T=25) | Adam | ✗ | 5 | 98.68% ± 0.04%ᴮ | hybrid baseline — not fully spiking | ✅ |
+| ANP — SNN | 7 | SCNN TTFS (2 Conv+LIF+Pool + 2 FC+LIF, TTFS T=25) | Adam | ✗ | 5 | 98.41% ± 0.17%ᶜ | fully spiking, temporal coding | ✅ |
 | Image Processing NN | 1 | FFNN (784-256-128-10) | Adam | ✗ | 5 | 98.06% ± 0.15% | dense | ✅ |
 | ANP — RNN | 3 | Vanilla RNN (2-layer, h=256) | Adam | ✗ | 5 | 97.89% ± 0.35% | sequential (T=28) | ✅ |
 | ANP — SNN | 2 | SNN-FFNN (784-512-256-10 LIF, T=25) | Adam | ✗ | 5 | 97.62% ± 0.12%ᴬ | rate-coded (Phase B baseline) | ✅ |
@@ -109,13 +110,12 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 | ANP — PC-NN | 2 | PC-FFNN v2 + CE head (784-256-128-10) | Adam | ✗ | 5 | **97.21% ± 0.35%**³ | predictive coding | ✅ |
 | ANP — PC-NN | 9 | PC-EncDec v2 + cosine LR (784-256-128 enc+dec, β=0.1) | Adam+Cosine | ✗ | 5 | pending⁹ | target ≥97.30% | ⏳ |
 | ANP — PC-NN | 8 | PC-EncDec v2 @ 60ep (784-256-128 enc+dec, β=0.1) | Adam | ✗ | 5 | **97.14% ± 0.21%**⁸ | generative PC, 60ep ceiling | ✅ |
+| ANP — SNN | 6 | SFNN TTFS (784-512-256-10 LIF, TTFS T=25) | Adam | ✗ | 5 | 97.12% ± 0.20%ᶜ | fully spiking, temporal coding | ✅ |
 | ANP — PC-NN | 7 | PC-EncDec v2 (784-256-128 enc+dec, β=0.1) | Adam | ✗ | 5 | **96.59% ± 0.28%**⁷ | generative PC, ff-forward eval | ✅ |
 | ANP — PC-NN | 1 | PC-FFNN (784-256-128-10) | Adam | ✗ | 5 | ~96%¹ / 89.0% ± 4.7%² | predictive coding | ⚠️ |
 | ANP — PC-NN | 4 | PC-FFNN v4 + eps=0.01 (784-256-128-10) | Adam (eps=0.01) | ✗ | 5 | 93.95% ± 0.27%⁵ | not converged | ⚠️ |
 | ANP — PC-NN | 6 | PC-EncDec v1 (784-256-128 enc+dec) | Adam | ✗ | 5 | 93.13% ± 0.35%⁶ | train/val mismatch + β=1 | ⚠️ |
 | ANP — SNN | 5 | **Hybrid**-VanillaRNN (LIF encoder + 2-layer RNN h=256, T=25) | Adam | ✗ | 5 | pendingᴮ | hybrid baseline — not fully spiking | ⏳ |
-| ANP — SNN | 6 | SFNN TTFS (784-512-256-10 LIF, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | fully spiking, temporal coding | ⏳ |
-| ANP — SNN | 7 | SCNN TTFS (2 Conv+LIF+Pool + 2 FC+LIF, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | fully spiking, temporal coding | ⏳ |
 | ANP — SNN | 8 | **Hybrid**-LSTM TTFS (LIF encoder + LSTM, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | hybrid baseline — not fully spiking | ⏳ |
 | ANP — SNN | 9 | **Hybrid**-GRU TTFS (LIF encoder + GRU, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | hybrid baseline — not fully spiking | ⏳ |
 | ANP — SNN | 10 | **Hybrid**-VanillaRNN TTFS (LIF encoder + RNN, TTFS T=25) | Adam | ✗ | 5 | pendingᶜ | hybrid baseline — not fully spiking | ⏳ |
@@ -137,7 +137,12 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
   SNN-VanillaRNN (iter 5): still running (4/5 seeds complete: 97.45%±0.50% estimated; seed4 in progress).  
 ᶜ **ANP — SNN iters 6-10 (Phase C TTFS):** Jobs 7171613-7171617, queued behind Phase B.
   iters 6-7 (SFNN/SCNN TTFS) are fully spiking. iters 8-10 (LSTM/GRU/VanillaRNN TTFS) are hybrid baselines.
-  Tests whether TTFS temporal coding improves over rate coding for static/sequential MNIST.  
+  Tests whether TTFS temporal coding improves over rate coding for static/sequential MNIST.
+  Results (iters 6/7 complete): SFNN TTFS **97.12% ± 0.20%**, SCNN TTFS **98.41% ± 0.17%**.
+  TTFS is consistently WORSE than rate: −0.49pp (FFNN) and −0.46pp (CNN). Consistent gap across both
+  architectures suggests encoding-driven penalty, not architecture-specific. Root cause: LIF summation
+  discards spike timing order — TTFS is effectively binarized input vs. rate-coded intensity.
+  Iters 8-10 (TTFS hybrid): broken due to threshold=1.0 LIF silence bug; rerun as iter8b/9b/10b (threshold=0.9).  
 ᴰ **ANP — SNN iters 11-14 (fully spiking recurrent — planned):** Next priority after iters 3-10 complete.
   SRNN uses `snn.RLeaky(linear_features=256)` over T=28 MNIST rows — fully binary spikes throughout.
   SLSTM uses `snn.SLSTM(28, 256)` — standard LSTM gates internally but thresholded membrane output → binary spikes.
@@ -187,6 +192,7 @@ Results grouped by dataset. Val Acc = mean ± std across seeds where available. 
 **Key findings:**
 - *MNIST: CNN outperforms FFNN at 99.17% vs 98.06%. SNN-CNN (iter1, anp_snn) 98.87% ± 0.13% — only -0.30pp behind non-spiking CNN, confirming LIF neurons + rate coding are effective for spatial feature extraction. SNN-FFNN baseline (iter2, anp_snn) 97.62% ± 0.12% — -0.44pp vs non-spiking FFNN despite larger hidden dims (512-256 vs 256-128). Architecture gain: +1.25pp from adding convolutional spiking layers.*
 - *SNN Phase B (iters 3-4, anp_snn) — hybrid spiking recurrent results: SNN-GRU 98.75% ± 0.15% (iter4), SNN-LSTM 98.68% ± 0.04% (iter3). Rate-coded spiking input is near-lossless for sequential MNIST: only −0.31pp gap vs non-spiking GRU (99.06%). LIF spike-count features (T=25 Bernoulli) preserve almost all information needed for recurrent classification. SNN-GRU gap from LSTM (0.07pp) mirrors the non-spiking gap (0.11pp) — gating dynamics unaffected by spiking encoder.*
+- *SNN Phase C TTFS (iters 6-7, anp_snn) — TTFS is consistently WORSE than rate coding for static MNIST: SFNN TTFS 97.12% ± 0.20% vs rate 97.62% (−0.49pp, iter6); SCNN TTFS 98.41% ± 0.17% vs rate 98.87% (−0.46pp, iter7). Remarkably consistent ~0.47pp penalty across two different architectures points to the encoding itself, not the downstream model, as the cause. Mechanism: LIF spike-count integration discards temporal order information — TTFS spike-count = binarized image (pixel fires or not within T steps), whereas rate coding preserves graded intensity via Bernoulli sampling. For static MNIST, graded intensity > spike timing.*
 - *GRU (iter 2) beats LSTM (iter 1): 99.06% ± 0.14% vs 98.95% ± 0.11%, with 25% fewer parameters (617k vs ~821k). Gate reduction (4→3 gates) did not hurt — confirms GRU parity with LSTM on seq-MNIST (Chung et al. 2014).*
 - *Vanilla RNN (iter 3): 97.89% ± 0.35% — far better than predicted. Literature expects 10-20pp regression from LSTM for T>>10 (Bengio et al. 1994); actual gap from GRU is only 1.17pp. Adam's adaptive LR compensates for vanishing gradients at T=28, acting as a significant equaliser. Completes the RNN trilogy: GRU (99.06%) → LSTM (98.95%) → Vanilla (97.89%). Parameter efficiency: 207k vs 617k (GRU) for 1.17pp.*
 - *LSTM/GRU on sequential MNIST (T=28): competitive with CNN despite processing pixels row-by-row.*

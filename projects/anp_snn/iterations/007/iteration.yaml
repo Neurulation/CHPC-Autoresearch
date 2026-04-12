@@ -1,6 +1,6 @@
 iteration: 7
 project: anp_snn
-status: experiment
+status: completed
 goal: >
   SNN-CNN TTFS (Phase C) — temporal coding variant of the rate-coded SNN-CNN (iter 1, 98.87%±0.13%).
   TTFS applied to full image: each spatial pixel fires at most once over T=25 timesteps.
@@ -26,5 +26,27 @@ phases:
 
   experiment:
     started_at: "2026-04-12"
+    completed_at: "2026-04-12"
     notes: >
       Submitted to CHPC gpu_1 as job 7171614. 5 seeds (0–4), 20 epochs, patience=5 on val_loss.
+      Seeds 0-3 ran to epoch 20; seed4 early stopped at epoch 12 (valid result: 98.20%).
+      Seed4 status.json anomalous (in_progress) but wandb summary valid.
+
+  analyze:
+    completed_at: "2026-04-12"
+    notes: >
+      metrics.json written. Mean val_acc=98.41%+-0.17% (5 seeds).
+      Comparison: SNN-CNN rate (iter1) = 98.87%+-0.13%. TTFS is -0.46pp worse.
+      Pattern: TTFS consistently -0.46-0.49pp vs rate across both FFNN and CNN.
+
+  conclude:
+    completed_at: "2026-04-12"
+    notes: >
+      TTFS encoding is WORSE than rate coding for SNN-CNN on static MNIST (-0.46pp).
+      The -0.46pp (CNN) and -0.49pp (FFNN) gaps are remarkably consistent, suggesting
+      the penalty is a function of the ENCODING scheme, not the downstream architecture.
+      Root cause: TTFS converts pixel intensity to firing time, but LIF integration does
+      not exploit temporal ordering — it simply sums spikes, making TTFS equivalent to
+      a binarized image (threshold: pixel bright enough to fire within T steps). This
+      discards intensity gradients that rate coding preserves via Bernoulli sampling.
+      Conclusion: For static MNIST, rate > TTFS by ~0.47pp regardless of architecture.

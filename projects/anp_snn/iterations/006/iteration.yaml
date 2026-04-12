@@ -1,6 +1,6 @@
 iteration: 6
 project: anp_snn
-status: experiment
+status: completed
 goal: >
   SNN-FFNN TTFS (Phase C) — temporal coding variant of the rate-coded SNN-FFNN (iter 2, 97.62%±0.12%).
   Time-to-first-spike encoding: bright pixels fire at t≈0, dark pixels at t≈T-1 or not at all.
@@ -27,5 +27,22 @@ phases:
 
   experiment:
     started_at: "2026-04-12"
+    completed_at: "2026-04-12"
     notes: >
       Submitted to CHPC gpu_1 as job 7171613. 5 seeds (0–4), 20 epochs, patience=5 on val_loss.
+      All 5 seeds completed at epoch 20 (no early stopping triggered).
+
+  analyze:
+    completed_at: "2026-04-12"
+    notes: >
+      metrics.json written. Mean val_acc=97.12%+-0.20% (5 seeds, all epoch 20).
+      Comparison: SNN-FFNN rate (iter2) = 97.62%+-0.12%. TTFS is -0.49pp worse.
+
+  conclude:
+    completed_at: "2026-04-12"
+    notes: >
+      TTFS encoding is WORSE than rate coding for SNN-FFNN on static MNIST (-0.49pp).
+      Hypothesis confirmed: MNIST digit recognition benefits from graded pixel intensity
+      (preserved by rate coding) more than from spike timing order (TTFS). TTFS binarizes
+      effective information — fire or not within T steps — discarding the exact probability
+      that rate coding preserves via Bernoulli sampling. For static MNIST, rate coding wins.
