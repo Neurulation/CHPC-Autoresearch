@@ -1,0 +1,22 @@
+iteration: 9
+project: anp_snn
+status: implement
+goal: >
+  SNN-GRU TTFS (Phase C) — temporal coding variant of the rate-coded SNN-GRU (iter 4).
+  TTFS applied per-row within each image row's T=25-step window.
+  Tests: does TTFS maintain GRU's advantage over LSTM with temporal encoding?
+
+phases:
+  plan:
+    completed_at: "2026-04-12"
+    notes: >
+      GRU is Phase B's best sequential result. TTFS per-row test.
+      Comparison pair: SNN-GRU rate (iter4) vs SNN-GRU TTFS (iter9).
+
+  implement:
+    completed_at: "2026-04-12"
+    notes: >
+      Modified src/autoresearch/models/snn_gru.py: added encoding='rate'/'ttfs' param.
+      Created src/autoresearch/configs/model/snn_gru_ttfs.yaml.
+      Created src/autoresearch/configs/experiment/mnist_snn_gru_ttfs_adam.yaml.
+      Created experiments/anp_snn_iter9_snn_gru_ttfs_adam.pbs (gpu_1, 2h).

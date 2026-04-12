@@ -1,0 +1,26 @@
+iteration: 6
+project: anp_snn
+status: implement
+goal: >
+  SNN-FFNN TTFS (Phase C) — temporal coding variant of the rate-coded SNN-FFNN (iter 2, 97.62%±0.12%).
+  Time-to-first-spike encoding: bright pixels fire at t≈0, dark pixels at t≈T-1 or not at all.
+  Each neuron fires at most once per sample — maximum temporal information efficiency.
+  Tests: does TTFS improve over rate coding for static MNIST with a feedforward SNN?
+
+phases:
+  plan:
+    completed_at: "2026-04-12"
+    notes: >
+      Phase C: TTFS variants of all Phase B architectures. Starting with FFNN as the
+      simplest case. Added encoding='rate'/'ttfs' parameter to SNNBaseline model.
+      ttfs_encode() already implemented in utils/spike_encoding.py.
+      Hypothesis: TTFS may hurt performance on MNIST (static, intensity not temporal)
+      or be comparable — either way provides the crossover point data.
+
+  implement:
+    completed_at: "2026-04-12"
+    notes: >
+      Modified src/autoresearch/models/snn_baseline.py: added encoding='rate'/'ttfs' param.
+      Created src/autoresearch/configs/model/snn_baseline_ttfs.yaml (encoding: ttfs).
+      Created src/autoresearch/configs/experiment/mnist_snn_baseline_ttfs_adam.yaml.
+      Created experiments/anp_snn_iter6_snn_baseline_ttfs_adam.pbs (gpu_1, 1h).

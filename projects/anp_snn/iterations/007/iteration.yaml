@@ -1,0 +1,25 @@
+iteration: 7
+project: anp_snn
+status: implement
+goal: >
+  SNN-CNN TTFS (Phase C) — temporal coding variant of the rate-coded SNN-CNN (iter 1, 98.87%±0.13%).
+  TTFS applied to full image: each spatial pixel fires at most once over T=25 timesteps.
+  Spatial feature extraction with temporal spike timing rather than rate-coded spike counts.
+  Tests: does TTFS preserve spatial-feature-extraction advantage of convolutional spiking layers?
+
+phases:
+  plan:
+    completed_at: "2026-04-12"
+    notes: >
+      CNN is the strongest Phase B result (98.87%), making it the most important TTFS comparison.
+      TTFS applied globally to the image (not per-row) — each pixel fires at most once.
+      LIF convolutions process TTFS spike trains; output is spike-count logits (sum over T).
+
+  implement:
+    completed_at: "2026-04-12"
+    notes: >
+      Modified src/autoresearch/models/snn_cnn.py: added encoding='rate'/'ttfs' param.
+      _rate_encode replaced by _encode() that dispatches to rate_encode/ttfs_encode.
+      Created src/autoresearch/configs/model/snn_cnn_ttfs.yaml (encoding: ttfs).
+      Created src/autoresearch/configs/experiment/mnist_snn_cnn_ttfs_adam.yaml.
+      Created experiments/anp_snn_iter7_snn_cnn_ttfs_adam.pbs (gpu_1, 1h).

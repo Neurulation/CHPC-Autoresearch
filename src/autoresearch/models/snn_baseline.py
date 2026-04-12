@@ -26,6 +26,8 @@ import torch.nn as nn
 import snntorch as snn
 from snntorch import surrogate
 
+from autoresearch.utils.spike_encoding import rate_encode, ttfs_encode
+
 
 class SNNBaseline(nn.Module):
     """Two-hidden-layer feedforward SNN for MNIST classification.
@@ -39,6 +41,7 @@ class SNNBaseline(nn.Module):
         threshold:     LIF firing threshold.
         timesteps:     Number of simulation timesteps T for rate coding.
         flatten_input: If True, flatten spatial dimensions before processing.
+        encoding:      Spike encoding scheme — 'rate' (Bernoulli) or 'ttfs'.
     """
 
     def __init__(
@@ -51,12 +54,14 @@ class SNNBaseline(nn.Module):
         threshold: float = 1.0,
         timesteps: int = 25,
         flatten_input: bool = True,
+        encoding: str = "rate",
     ) -> None:
         super().__init__()
 
         self.input_size = input_size
         self.timesteps = timesteps
         self.flatten_input = flatten_input
+        self.encoding = encoding
 
         spike_grad = surrogate.fast_sigmoid(slope=25)
 
@@ -74,8 +79,8 @@ class SNNBaseline(nn.Module):
     # Internal helpers
     # ------------------------------------------------------------------
 
-    def _rate_encode(self, x: torch.Tensor) -> torch.Tensor:
-        """Convert a batch of images to Poisson rate-coded spike trains.
+    def _encode(self, x: torch.Tensor) -> torch.Tensor:
+        """Encode image batch to spike trains using the configured scheme.
 
         Args:
             x: Image batch ``(N, C, H, W)`` or ``(N, input_size)`` with
@@ -86,9 +91,9 @@ class SNNBaseline(nn.Module):
         """
         if self.flatten_input:
             x = x.view(x.size(0), -1)  # (N, input_size)
-        # Clamp to [0, 1] so Bernoulli probabilities are valid
-        x = x.clamp(0.0, 1.0)
-        return torch.bernoulli(x.unsqueeze(0).expand(self.timesteps, -1, -1))
+        if self.encoding == "ttfs":
+            return ttfs_encode(x, self.timesteps)
+        return rate_encode(x, self.timesteps)
 
     def _forward_snn(
         self, spikes: torch.Tensor
@@ -165,7 +170,7 @@ class SNNBaseline(nn.Module):
             Spike-count logits ``(N, num_classes)`` suitable for
             ``nn.CrossEntropyLoss``.
         """
-        spikes = self._rate_encode(x)
+        spikes = self._encode(x)
         spk_out, _, _ = self._forward_snn(spikes)
         return spk_out.sum(dim=0)  # (N, num_classes)
 
@@ -186,5 +191,5 @@ class SNNBaseline(nn.Module):
             - ``recordings`` dict: keys ``spk1``/``mem1``, ``spk2``/``mem2``,
               ``spk3``/``mem3``, each ``(T, N, layer_size)``
         """
-        spikes = self._rate_encode(x)
+        spikes = self._encode(x)
         return self._forward_snn(spikes)

@@ -26,6 +26,8 @@ import torch.nn as nn
 import snntorch as snn
 from snntorch import surrogate
 
+from autoresearch.utils.spike_encoding import rate_encode, ttfs_encode
+
 
 class SNNCNN(nn.Module):
     """Spiking CNN for MNIST — direct spiking analogue of the rate-coded CNN.
@@ -36,6 +38,8 @@ class SNNCNN(nn.Module):
         beta:           LIF membrane decay constant (0 < beta < 1).
         threshold:      LIF firing threshold.
         timesteps:      Number of simulation timesteps T for rate coding.
+        encoding:       Spike encoding scheme — 'rate' (Bernoulli) or 'ttfs'
+                        (time-to-first-spike). Default: 'rate'.
     """
 
     def __init__(
@@ -45,10 +49,12 @@ class SNNCNN(nn.Module):
         beta: float = 0.9,
         threshold: float = 1.0,
         timesteps: int = 25,
+        encoding: str = "rate",
     ) -> None:
         super().__init__()
 
         self.timesteps = timesteps
+        self.encoding = encoding
         spike_grad = surrogate.fast_sigmoid(slope=25)
 
         # Conv blocks
@@ -71,8 +77,8 @@ class SNNCNN(nn.Module):
     # Helpers
     # ------------------------------------------------------------------
 
-    def _rate_encode(self, x: torch.Tensor) -> torch.Tensor:
-        """Convert image batch to Poisson rate-coded spikes.
+    def _encode(self, x: torch.Tensor) -> torch.Tensor:
+        """Encode image batch to spike trains using the configured scheme.
 
         Args:
             x: (N, C, H, W) image batch with pixel values in [0, 1].
@@ -80,8 +86,9 @@ class SNNCNN(nn.Module):
         Returns:
             (T, N, C, H, W) binary spike tensor.
         """
-        x = x.clamp(0.0, 1.0)
-        return torch.bernoulli(x.unsqueeze(0).expand(self.timesteps, -1, -1, -1, -1))
+        if self.encoding == "ttfs":
+            return ttfs_encode(x, self.timesteps)
+        return rate_encode(x, self.timesteps)
 
     def _forward_snn(
         self, spikes: torch.Tensor
@@ -152,6 +159,6 @@ class SNNCNN(nn.Module):
         Returns:
             (N, num_classes) spike-count logits for nn.CrossEntropyLoss.
         """
-        spikes = self._rate_encode(x)
+        spikes = self._encode(x)
         spk_out, _ = self._forward_snn(spikes)
         return spk_out.sum(dim=0)   # (N, num_classes)
