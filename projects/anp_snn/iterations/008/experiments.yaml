@@ -6,5 +6,16 @@ jobs:
     seeds: [0, 1, 2, 3, 4]
     epochs: 20
     submitted_at: "2026-04-12"
-    status: running
-    notes: "SNN-LSTM TTFS: time-to-first-spike encoding, t_fire=floor((1-p)*T)"
+    status: broken
+    notes: "BROKEN: threshold=1.0 → LIF silent → spk_acc=0 → ~11% chance accuracy. All seeds invalid."
+
+  - job_id: null
+    name: anp_snn_iter8b_snn_lstm_ttfs_v2_adam
+    pbs_script: experiments/anp_snn_iter8b_snn_lstm_ttfs_v2_adam.pbs
+    queue: gpu_1
+    walltime: "02:00:00"
+    seeds: [0, 1, 2, 3, 4]
+    epochs: 30
+    submitted_at: null
+    status: pending
+    notes: "CORRECTED re-run: threshold=0.9. True TTFS baseline."

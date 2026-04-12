@@ -9,7 +9,7 @@ hidden_size: 256
 num_layers: 2
 num_classes: 10
 beta: 0.9
-threshold: 1.0
+threshold: 0.9  # must be < 1.0: TTFS spike amplitude=1.0, H(mem-thr)=H(0)=0 if thr=1.0 → silent LIF
 timesteps: 25
 dropout: 0.3
 encoding: ttfs

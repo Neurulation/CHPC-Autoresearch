@@ -1,0 +1,46 @@
+# @package _global_
+# ANP-SNN Iter 9b — SNN-GRU TTFS CORRECTED (threshold=0.9).
+# Bug fix: original iter9 used threshold=1.0; snntorch Heaviside H(0)=0 means
+# a TTFS spike of amplitude 1.0 never crosses threshold exactly. LIF silent → spk_acc=0.
+# Fix: threshold=0.9 so that input=1.0 gives mem=1.0 > 0.9 → LIF fires correctly.
+
+defaults:
+  - override /dataset: mnist
+  - override /model: snn_gru_ttfs
+
+experiment_group: mnist_snn_gru_ttfs_v2_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 30
+num_workers: 4
+validation_split: 0.1
+max_grad_norm: 1.0
+
+early_stopping:
+  enabled: true
+  patience: 7
+  min_delta: 0.001
+  metric: val_loss
+  mode: min
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - snn
+    - gru
+    - lif
+    - ttfs
+    - temporal-coding
+    - sequential
+    - adam
+    - anp
+    - anp-snn
+    - phase-c
+    - ttfs-threshold-fix
+  notes: "ANP-SNN Iter 9b — SNN-GRU TTFS corrected: threshold=0.9 (was 1.0, LIF was silent)."

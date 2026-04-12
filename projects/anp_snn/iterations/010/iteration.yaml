@@ -27,3 +27,5 @@ phases:
     started_at: "2026-04-12"
     notes: >
       Submitted to CHPC gpu_1 as job 7171617. 5 seeds (0–4), 20 epochs, patience=5 on val_loss.
+      BUG FOUND 2026-04-12: threshold=1.0 causes LIF silence → ~11% (chance).
+      FIX: threshold=0.9. Re-run as iter10b (mnist_snn_vanilla_rnn_ttfs_v2_adam).

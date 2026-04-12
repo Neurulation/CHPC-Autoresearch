@@ -29,3 +29,7 @@ phases:
     started_at: "2026-04-12"
     notes: >
       Submitted to CHPC gpu_1 as job 7171615. 5 seeds (0–4), 20 epochs, patience=5 on val_loss.
+      BUG FOUND 2026-04-12: threshold=1.0 causes LIF silence: TTFS spike amplitude=1.0,
+      snntorch H(mem-thr)=H(0)=0 (strict >) → LIF never fires → spk_acc=0 → ~11% (chance).
+      FIX: threshold=0.9 in snn_lstm_ttfs.yaml. Re-run as iter8b with new experiment_group
+      mnist_snn_lstm_ttfs_v2_adam (PBS: anp_snn_iter8b_snn_lstm_ttfs_v2_adam.pbs).
