@@ -99,32 +99,33 @@ Sorted by descending accuracy. Only valid, fully-converged results.
 | # | Project | Iter | Model | Val Acc | Notes |
 |---|---------|------|-------|---------|-------|
 | 1 | Image Processing NN | 1 | CNN (2 conv + 1 FC) | **99.17% ± 0.10%** | spatial |
-| 2 | ANP — RNN | 2 | GRU (2-layer, h=256) | **99.06% ± 0.14%** | sequential T=28 |
-| 3 | ANP — RNN | 1 | LSTM (2-layer, h=256) | 98.95% ± 0.11% | sequential T=28 |
-| 4 | ANP — SNN | 1 | SNN-CNN (rate, T=25) | 98.87% ± 0.13% ᴬ | fully spiking, spatial |
-| 5 | ANP — SNN | 4 | Hybrid-GRU (rate, T=25) | 98.75% ± 0.15% ᴮ | hybrid baseline |
-| 6 | ANP — SNN | 3 | Hybrid-LSTM (rate, T=25) | 98.68% ± 0.04% ᴮ | hybrid baseline |
-| 7 | ANP — SNN | 8b | Hybrid-LSTM TTFS (threshold=0.9) ᶜ | 98.67% ± 0.20% | corrected TTFS run; ~parity with rate |
-| 8 | ANP — SNN | 9b | Hybrid-GRU TTFS (threshold=0.9) ᶜ | 98.63% ± 0.19% | corrected TTFS run; -0.12pp vs rate |
-| 9 | ANP — SNN | 7 | SCNN TTFS (T=25) | 98.41% ± 0.17% ᶜ | fully spiking, temporal |
-| 10 | Image Processing NN | 1 | FFNN (784-256-128-10) | 98.06% ± 0.15% | dense |
-| 11 | ANP — RNN | 3 | Vanilla RNN (2-layer, h=256) | 97.89% ± 0.35% | sequential T=28 |
-| 12 | ANP — SNN | 2 | SNN-FFNN (rate, T=25) | 97.62% ± 0.12% ᴬ | fully spiking, dense |
-| 13 | ANP — PC-NN | 3 | PC-FFNN v3 + CE + grad clip | **97.30% ± 0.22%** | **best PC result** |
-| 14 | ANP — PC-NN | 2 | PC-FFNN v2 + CE head | 97.21% ± 0.35% | predictive coding |
-| 15 | ANP — SNN | 5 | Hybrid-VanillaRNN (rate, T=25) | 97.17% ± 0.52% ᴮ | hybrid baseline |
-| 16 | ANP — PC-NN | 8 | PC-EncDec v2 @ 60ep | **97.14% ± 0.21%** | **best PC-EncDec** |
-| 17 | ANP — SNN | 6 | SFNN TTFS (T=25) | 97.12% ± 0.20% ᶜ | fully spiking, temporal |
-| 18 | ANP — SNN | 10b | Hybrid-VanillaRNN TTFS (threshold=0.9) ᶜ | 96.87% ± 0.35% | corrected TTFS run; -0.31pp vs rate |
-| 19 | ANP — PC-NN | 10 | PC-EncDec v2 + cosine LR | 96.75% ± 0.19% | cosine LR degraded -0.39pp vs flat |
-| 20 | ANP — PC-NN | 7 | PC-EncDec v2 @ 30ep | 96.59% ± 0.28% | |
-| 21 | ANP — PC-NN | 11 | PC-CNN | 93.12% ± 0.56% | first PC-CNN; underperforms PC baselines |
+| 2 | ANP — PC-NN | 12 | PC-CNN v2 (energy schedule + clip=2.0) | **99.11% ± 0.08%** | **new best PC result; +5.99pp vs PC-CNN iter11** |
+| 3 | ANP — RNN | 2 | GRU (2-layer, h=256) | **99.06% ± 0.14%** | sequential T=28 |
+| 4 | ANP — RNN | 1 | LSTM (2-layer, h=256) | 98.95% ± 0.11% | sequential T=28 |
+| 5 | ANP — SNN | 1 | SNN-CNN (rate, T=25) | 98.87% ± 0.13% ᴬ | fully spiking, spatial |
+| 6 | ANP — SNN | 4 | Hybrid-GRU (rate, T=25) | 98.75% ± 0.15% ᴮ | hybrid baseline |
+| 7 | ANP — SNN | 3 | Hybrid-LSTM (rate, T=25) | 98.68% ± 0.04% ᴮ | hybrid baseline |
+| 8 | ANP — SNN | 8b | Hybrid-LSTM TTFS (threshold=0.9) ᶜ | 98.67% ± 0.20% | corrected TTFS run; ~parity with rate |
+| 9 | ANP — SNN | 9b | Hybrid-GRU TTFS (threshold=0.9) ᶜ | 98.63% ± 0.19% | corrected TTFS run; -0.12pp vs rate |
+| 10 | ANP — SNN | 7 | SCNN TTFS (T=25) | 98.41% ± 0.17% ᶜ | fully spiking, temporal |
+| 11 | Image Processing NN | 1 | FFNN (784-256-128-10) | 98.06% ± 0.15% | dense |
+| 12 | ANP — RNN | 3 | Vanilla RNN (2-layer, h=256) | 97.89% ± 0.35% | sequential T=28 |
+| 13 | ANP — SNN | 2 | SNN-FFNN (rate, T=25) | 97.62% ± 0.12% ᴬ | fully spiking, dense |
+| 14 | ANP — PC-NN | 3 | PC-FFNN v3 + CE + grad clip | 97.30% ± 0.22% | previous best PC result |
+| 15 | ANP — PC-NN | 2 | PC-FFNN v2 + CE head | 97.21% ± 0.35% | predictive coding |
+| 16 | ANP — SNN | 5 | Hybrid-VanillaRNN (rate, T=25) | 97.17% ± 0.52% ᴮ | hybrid baseline |
+| 17 | ANP — PC-NN | 8 | PC-EncDec v2 @ 60ep | 97.14% ± 0.21% | best PC-EncDec |
+| 18 | ANP — SNN | 6 | SFNN TTFS (T=25) | 97.12% ± 0.20% ᶜ | fully spiking, temporal |
+| 19 | ANP — SNN | 10b | Hybrid-VanillaRNN TTFS (threshold=0.9) ᶜ | 96.87% ± 0.35% | corrected TTFS run; -0.31pp vs rate |
+| 20 | ANP — PC-NN | 10 | PC-EncDec v2 + cosine LR | 96.75% ± 0.19% | cosine LR degraded -0.39pp vs flat |
+| 21 | ANP — PC-NN | 7 | PC-EncDec v2 @ 30ep | 96.59% ± 0.28% | |
+| 22 | ANP — PC-NN | 11 | PC-CNN | 93.12% ± 0.56% | first PC-CNN; underperforms PC baselines |
 
 ### MNIST — In Progress
 
 | Project | Iter | Model | Job | Status |
 |---------|------|-------|-----|--------|
-| ANP — PC-NN | 12 | PC-CNN v2 (energy schedule + clip=2.0) | 7173738 | Queued on gpu_1 (submitted 2026-04-12) |
+| None | - | - | - | No active MNIST jobs |
 
 ### MNIST — Planned
 
@@ -173,7 +174,7 @@ Excluded from the leaderboard. Listed for traceability.
 | Image Processing NN | 1 | ResNet-18 | Adam | ✗ | 5 | 83.56% ± 0.36% | ✅ |
 | Image Processing NN | 2 | ResNet-18 | SGD+Cosine | ✗ | 5 | 78.87% ± 0.94% | ✅ |
 
-*Updated 2026-04-12.*
+*Updated 2026-04-13.*
 
 **Key findings:**
 - *MNIST: CNN outperforms FFNN at 99.17% vs 98.06%. SNN-CNN (iter1, anp_snn) 98.87% ± 0.13% — only -0.30pp behind non-spiking CNN, confirming LIF neurons + rate coding are effective for spatial feature extraction. SNN-FFNN baseline (iter2, anp_snn) 97.62% ± 0.12% — -0.44pp vs non-spiking FFNN despite larger hidden dims (512-256 vs 256-128). Architecture gain: +1.25pp from adding convolutional spiking layers.*
@@ -182,6 +183,7 @@ Excluded from the leaderboard. Listed for traceability.
 - *GRU (iter 2) beats LSTM (iter 1): 99.06% ± 0.14% vs 98.95% ± 0.11%, with 25% fewer parameters (617k vs ~821k). Gate reduction (4→3 gates) did not hurt — confirms GRU parity with LSTM on seq-MNIST (Chung et al. 2014).*
 - *Vanilla RNN (iter 3): 97.89% ± 0.35% — far better than predicted. Literature expects 10-20pp regression from LSTM for T>>10 (Bengio et al. 1994); actual gap from GRU is only 1.17pp. Adam's adaptive LR compensates for vanishing gradients at T=28, acting as a significant equaliser. Completes the RNN trilogy: GRU (99.06%) → LSTM (98.95%) → Vanilla (97.89%). Parameter efficiency: 207k vs 617k (GRU) for 1.17pp.*
 - *LSTM/GRU on sequential MNIST (T=28): competitive with CNN despite processing pixels row-by-row.*
+- *PC-CNN v2 (iter 12): 99.11% ± 0.08% — major stabilization breakthrough over PC-CNN iter11 (93.12% ± 0.56%, +5.99pp). Normalized energy scheduling (max=0.1, warmup=10) plus relaxed gradient clipping (2.0) removed optimization suppression and made PC-CNN the strongest predictive-coding model in this repository, narrowly trailing ANN-CNN by only 0.06pp.*
 - *PC-FFNN v4 (iter 4): eps=0.01 fix CONFIRMED zero energy explosions across all 5 seeds (energy monotonically decreases to ~0.21 at ep30). However 93.95% is a convergence artifact — not a performance comparison. Adam eps=0.01 reduces effective step size in late training, needing ~50-75 epochs to match the single-seed diagnostic of 98.12%. A future re-run with epochs=75 will establish the PC-FFNN ceiling.*
 - *PC-FFNN v3 (iter 3): Gradient clipping (max_grad_norm=0.5) is a partial improvement — variance reduced (0.35→0.22pp), explosions delayed, mean accuracy +0.09pp to 97.30% ± 0.22%. Root cause: clipping bounds gradient magnitude but not the energy value itself.*
 - *PC-FFNN v1 (iter 1): train accuracy 100% from epoch 2 via supervised clamping, but val CE stuck at ~1.54 (uncalibrated). Root cause: training-evaluation objective mismatch between clamped and free inference.*
