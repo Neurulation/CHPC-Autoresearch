@@ -1,0 +1,50 @@
+# @package _global_
+# ANP-Contrastive Iter 5 — PC Contrastive on MNIST.
+# PC-FFNN encoder (T_pc=20 free inference) trained with NT-Xent contrastive loss.
+# The PC energy is used as an optional regulariser (energy_weight=0.0 = pure contrastive).
+# Addresses the SPC-FFNN dead end: no shared SNN/PC weights, cleaner gradient flow.
+# Baseline comparison: PC-FFNN supervised (97.30%).
+
+defaults:
+  - override /dataset: mnist
+  - override /model: pc_contrastive
+  - override /optimizer: adam
+
+experiment_group: mnist_pc_contrastive
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+num_workers: 4
+
+# Pre-training (T_pc=20 per batch — moderate compute)
+pretrain_epochs: 100
+pretrain_batch_size: 128
+temperature: 0.5
+energy_weight: 0.0  # pure contrastive; set >0 to add PC energy regularisation
+
+# Linear probe
+probe_epochs: 50
+probe_batch_size: 128
+probe_lr: 1.0e-2
+
+max_grad_norm: 2.0
+
+early_stopping:
+  enabled: true
+  patience: 15
+  min_delta: 0.001
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - simclr
+    - contrastive
+    - pc
+    - predictive_coding
+    - adam
+    - anp-contrastive
+  notes: "ANP-Contrastive Iter 5 — PC Contrastive (PC-FFNN encoder + NT-Xent) on MNIST. Addresses SPC-FFNN dead end."

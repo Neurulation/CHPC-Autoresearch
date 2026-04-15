@@ -1,0 +1,24 @@
+project: anp_contrastive
+iteration: 5
+status: planned
+goal: >
+  PC Contrastive — PC-FFNN encoder (T_pc=20 free inference steps) with NT-Xent
+  contrastive pre-training, followed by linear probe evaluation.
+  Addresses the SPC-FFNN dead end (anp_spcnn iters 2-5) by:
+    1. No shared weights between SNN and PC generative model.
+    2. Contrastive objective provides clean discriminative signal.
+    3. PC energy available as optional regulariser (energy_weight=0 by default).
+  Compare to supervised PC-FFNN (97.30%) and to Iter 1 (SimCLR FFNN, same topology).
+  Question: does PC free inference produce better representations for
+  contrastive learning than a standard MLP encoder?
+created: "2026-04-15"
+
+phases:
+  plan:
+    completed_at: "2026-04-15"
+    notes: >
+      Architecture: PC-FFNN encoder (784→512→256, T_pc=20 free inference, lr_pc=0.05)
+      + MLP projection head (256→256→128, L2-norm) + linear probe (256→10).
+      Training: pure contrastive (energy_weight=0), batch=128, 100 pretrain epochs.
+      Grad clipping: max_norm=2.0 (from PC-CNN v2 experience).
+      Walltime: 8h (T_pc=20 per batch × 100 pretrain + 50 probe × 5 seeds).

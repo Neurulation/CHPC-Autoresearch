@@ -1,0 +1,45 @@
+project: anp_contrastive
+iteration: 1
+status: implement
+goal: >
+  SimCLR FFNN (ANN baseline) — MLP encoder (784→512→256) with NT-Xent
+  contrastive pre-training on MNIST, followed by linear probe evaluation.
+  Establishes the ANN contrastive baseline before introducing spiking encoders.
+  Primary metric: linear probe val_accuracy after unsupervised pre-training.
+  Baseline comparison: supervised FFNN (97.30%).
+created: "2026-04-15"
+
+phases:
+  plan:
+    completed_at: "2026-04-15"
+    notes: >
+      Architecture: encoder (784→512→256, BN+ReLU) + projection head (256→128,
+      L2-norm) + linear probe (256→10). Two-phase training:
+        Phase 1: 100 epochs, NT-Xent (τ=0.5), batch=256, two augmented views.
+        Phase 2: 50 epochs, CE on frozen encoder, lr=0.01.
+      Augmentations: random crop (pad=4), h-flip (p=0.2), brightness/contrast
+      jitter, Gaussian noise, random erasing.
+      Walltime: 3h (100 pretrain + 50 probe epochs × 5 seeds; FFNN is fast).
+
+  implement:
+    completed_at: "2026-04-15"
+    notes: >
+      Created src/autoresearch/models/simclr_ffnn.py (SimCLRFFNN class).
+      Created src/autoresearch/models/simclr_cnn.py (SimCLRCNN class).
+      Created src/autoresearch/models/snn_simclr_ffnn.py (SNNSimCLRFFNN class).
+      Created src/autoresearch/models/snn_simclr_cnn.py (SNNSimCLRCNN class).
+      Created src/autoresearch/models/pc_contrastive.py (PCContrastive class).
+      Created src/autoresearch/utils/contrastive_loss.py (nt_xent_loss).
+      Created src/autoresearch/utils/augmentations.py (MNISTContrastiveAugmentation).
+      Created src/autoresearch/train_contrastive.py (two-phase training loop).
+      Created src/autoresearch/configs/train_contrastive.yaml (base config).
+      Created 5 model configs and 5 experiment configs.
+      Created experiments/anp_contrastive_iter{1-5}_*.pbs.
+      Exported all new models and utils in __init__.py files.
+      Smoke test passed (synthetic MNIST-like data, 1 pretrain + 1 probe epoch):
+        SimCLRFFNN:    NT-Xent=4.162, loop OK
+        SimCLRCNN:     NT-Xent=4.176, loop OK
+        SNNSimCLRFFNN: NT-Xent=4.132, loop OK
+        SNNSimCLRCNN:  NT-Xent=4.185, loop OK
+        PCContrastive: NT-Xent=4.136, loop OK
+      All 5 models ready for CHPC submission.

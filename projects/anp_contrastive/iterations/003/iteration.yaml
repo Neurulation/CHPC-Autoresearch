@@ -1,0 +1,21 @@
+project: anp_contrastive
+iteration: 3
+status: planned
+goal: >
+  SNN SimCLR FFNN — SNN-FFNN encoder (784→512→256, rate coding T=25) with
+  NT-Xent contrastive pre-training on MNIST, followed by linear probe evaluation.
+  Key question: can binary spike accumulations (sum over T timesteps) produce
+  useful representations for contrastive learning?
+  First fully spike-driven self-supervised representation learner in the project.
+created: "2026-04-15"
+
+phases:
+  plan:
+    completed_at: "2026-04-15"
+    notes: >
+      Architecture: SNN-FFNN encoder (LIF neurons, T=25) producing spike
+      accumulations (N, 256) + MLP projection head (256→128, L2-norm) +
+      linear probe (256→10). Augmentations applied to float images before
+      rate encoding → two independent spike realisations per view.
+      Smaller batch (128 vs 256) due to T=25 timestep overhead.
+      Walltime: 6h (T=25 × 100 pretrain + 50 probe epochs × 5 seeds).

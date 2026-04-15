@@ -1,0 +1,14 @@
+# @package _global_.model
+# SNN SimCLR CNN encoder — Iter 4 of anp_contrastive
+# SNN-CNN encoder (Conv1→Conv2→FC128, rate coding T=25) + MLP projection head + linear probe
+
+_target_: autoresearch.models.snn_simclr_cnn.SNNSimCLRCNN
+input_channels: 1
+repr_dim: 128
+proj_hidden: 256
+proj_out: 128
+num_classes: 10
+beta: 0.9
+threshold: 0.9
+timesteps: 25
+encoding: rate

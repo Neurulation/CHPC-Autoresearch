@@ -1,0 +1,45 @@
+# @package _global_
+# ANP-Contrastive Iter 2 — SimCLR CNN on MNIST.
+# CNN encoder (Conv1→Conv2→FC256) trained with NT-Xent contrastive loss.
+# Evaluation: linear probe accuracy after unsupervised pre-training.
+# Baseline comparison: supervised CNN (99.17%).
+
+defaults:
+  - override /dataset: mnist
+  - override /model: simclr_cnn
+  - override /optimizer: adam
+
+experiment_group: mnist_simclr_cnn
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+num_workers: 4
+
+# Pre-training
+pretrain_epochs: 100
+pretrain_batch_size: 256
+temperature: 0.5
+
+# Linear probe
+probe_epochs: 50
+probe_batch_size: 256
+probe_lr: 1.0e-2
+
+early_stopping:
+  enabled: true
+  patience: 15
+  min_delta: 0.001
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - simclr
+    - contrastive
+    - cnn
+    - adam
+    - anp-contrastive
+  notes: "ANP-Contrastive Iter 2 — SimCLR CNN (Conv1→Conv2→FC256) on MNIST. NT-Xent + linear probe evaluation."

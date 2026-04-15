@@ -1,0 +1,10 @@
+# @package _global_.model
+# SimCLR CNN encoder — Iter 2 of anp_contrastive
+# CNN encoder (Conv1→Conv2→FC256) + projection head (256→128) + linear probe (256→10)
+
+_target_: autoresearch.models.simclr_cnn.SimCLRCNN
+input_channels: 1
+repr_dim: 256
+proj_hidden: 256
+proj_out: 128
+num_classes: 10

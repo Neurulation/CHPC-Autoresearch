@@ -1,0 +1,19 @@
+project: anp_contrastive
+iteration: 2
+status: planned
+goal: >
+  SimCLR CNN (ANN baseline) — CNN encoder (Conv1→Conv2→FC256) with NT-Xent
+  contrastive pre-training on MNIST, followed by linear probe evaluation.
+  Compare to supervised CNN (99.17%) and to Iter 1 (SimCLR FFNN).
+  Question: do convolutional features benefit more from contrastive pre-training?
+created: "2026-04-15"
+
+phases:
+  plan:
+    completed_at: "2026-04-15"
+    notes: >
+      Architecture: CNN encoder (Conv1→BN→ReLU→Pool → Conv2→BN→ReLU→Pool →
+      FC(3136→256)→BN→ReLU) + projection head (256→256→128, L2-norm) +
+      linear probe (256→10).
+      Same training protocol as Iter 1: 100 pretrain + 50 probe epochs, 5 seeds.
+      Walltime: 3h (CNN slightly slower than FFNN but same batch sizes).

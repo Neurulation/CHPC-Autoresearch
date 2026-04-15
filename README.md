@@ -135,6 +135,11 @@ Sorted by descending accuracy. Only valid, fully-converged results.
 | ANP — SNN | 12 | **SLSTM** rate — `snn.SLSTM(28, 256)`, T=28 ᴰ | First truly fully spiking LSTM |
 | ANP — SNN | 13 | SRNN TTFS — `snn.RLeaky`, T=28 ᴰ | After iter 11 |
 | ANP — SNN | 14 | SLSTM TTFS — `snn.SLSTM`, T=28 ᴰ | After iter 12 |
+| ANP — Contrastive | 1 | SimCLR FFNN (784→512→256) ᴱ | NT-Xent + linear probe; ANN baseline |
+| ANP — Contrastive | 2 | SimCLR CNN (Conv→FC256) ᴱ | NT-Xent + linear probe; ANN baseline |
+| ANP — Contrastive | 3 | SNN SimCLR FFNN (T=25 rate) ᴱ | First spiking contrastive model |
+| ANP — Contrastive | 4 | SNN SimCLR CNN (T=25 rate) ᴱ | SNN vs ANN contrastive comparison |
+| ANP — Contrastive | 5 | PC Contrastive (T_pc=20 free inf.) ᴱ | Addresses SPC-FFNN dead end |
 
 ### Invalid / Abandoned
 
@@ -158,6 +163,8 @@ Excluded from the leaderboard. Listed for traceability.
 ᶜ **Phase C TTFS (anp_snn iters 6–10):** TTFS is consistently WORSE than rate across all tested architectures: SFNN −0.49pp (iter6), SCNN −0.46pp (iter7), Hybrid-LSTM −0.01pp (iter8b), Hybrid-GRU −0.12pp (iter9b), Hybrid-VanillaRNN −0.31pp (iter10b). LIF summation largely discards spike timing order, so TTFS behaves like a binarized proxy of input intensity and offers no gain over rate coding here.
 
 ᴰ **Fully spiking recurrent — planned (anp_snn iters 11–14):** SRNN uses `snn.RLeaky(linear_features=256)` over T=28 rows — binary spikes throughout, no standard RNN cells. SLSTM uses `snn.SLSTM(28, 256)` — standard LSTM gates internally, but thresholded membrane → binary output spikes. First genuinely fully spiking recurrent models in the ladder.
+
+ᴱ **Contrastive learning (anp_contrastive iters 1–5):** SimCLR-style NT-Xent pre-training followed by linear probe evaluation. Metric reported is linear probe val_accuracy (frozen encoder + trained linear head). Iters 1–2 (ANN): MLP and CNN baselines. Iters 3–4 (SNN): first fully spike-driven self-supervised representation learners. Iter 5 (PC+Contrastive): PC-FFNN encoder trained with NT-Xent — addresses the SPC-FFNN shared-weight dead end. Supervised comparison baselines: FFNN 97.30%, CNN 99.17%, SNN-FFNN 97.62%, SNN-CNN 98.87%.
 
 ⁸ **PC-EncDec v2 @ 60ep (iter8):** 97.14% ± 0.21% (+0.55pp vs 30ep). Training budget alone closed 78% of the gap to PC-FFNN v3. Seeds 0/3/4 needed all 60 epochs; slow convergence is the main bottleneck. Flat LR remains optimal — cosine LR (iter10) degraded performance by −0.39pp.
 

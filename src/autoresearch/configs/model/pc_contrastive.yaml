@@ -1,0 +1,13 @@
+# @package _global_.model
+# PC Contrastive — Iter 5 of anp_contrastive
+# PC encoder (784→512→256, T_pc=20 free inference) + projection head + linear probe
+# Optional: energy_weight in train_contrastive.yaml for PC energy regularisation.
+
+_target_: autoresearch.models.pc_contrastive.PCContrastive
+input_size: 784
+hidden_dims: [512, 256]
+proj_hidden: 256
+proj_out: 128
+num_classes: 10
+T_pc: 20
+lr_pc: 0.05

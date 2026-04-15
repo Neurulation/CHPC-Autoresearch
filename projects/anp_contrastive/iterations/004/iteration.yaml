@@ -1,0 +1,19 @@
+project: anp_contrastive
+iteration: 4
+status: planned
+goal: >
+  SNN SimCLR CNN — SNN-CNN encoder (Conv1→Conv2→FC128, rate coding T=25) with
+  NT-Xent contrastive pre-training on MNIST, followed by linear probe evaluation.
+  Direct ANN vs SNN comparison: Iter 4 (SNN-CNN) vs Iter 2 (ANN-CNN).
+  Compare to supervised SNN-CNN (98.87%).
+created: "2026-04-15"
+
+phases:
+  plan:
+    completed_at: "2026-04-15"
+    notes: >
+      Architecture: SNN-CNN encoder (same topology as SNNCNN from anp_snn iter 1
+      but without output LIF; FC hidden dim=128) + MLP projection head
+      (128→256→128, L2-norm) + linear probe (128→10).
+      Same protocol as Iter 3: batch=128, T=25, 100 pretrain + 50 probe, 5 seeds.
+      Walltime: 6h (matching Iter 3 — similar compute budget).

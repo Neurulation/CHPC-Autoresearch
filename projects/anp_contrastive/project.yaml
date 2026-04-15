@@ -1,0 +1,30 @@
+name: "ANP - Contrastive Learning"
+slug: anp_contrastive
+status: active
+created: "2026-04-15"
+description: >
+  Contrastive self-supervised representation learning on MNIST as a step
+  toward backprop-free, biologically plausible learning in the ANP roadmap.
+
+  SimCLR-style NT-Xent training followed by linear probing evaluation.
+  Progresses from ANN baselines (FFNN, CNN) through spiking encoders (SNN-FFNN,
+  SNN-CNN) to a PC + Contrastive hybrid (PC encoder + NT-Xent objective).
+
+  Addresses the SPC-FFNN dead end (anp_spcnn iters 2-5): a contrastive objective
+  does not require shared generative/discriminative weights, providing cleaner
+  gradient flow than the failed shared-weight PC+SNN approach.
+
+current_iteration: 1
+branch: "copilot/contrastive-learning-experiments"
+human_direction: >
+  Iter 1: SimCLR FFNN — MLP encoder (784→512→256) + NT-Xent + linear probe.
+           Compare linear probe accuracy to supervised FFNN baseline (97.30%).
+  Iter 2: SimCLR CNN — CNN encoder + NT-Xent + linear probe.
+           Compare to supervised CNN (99.17%).
+  Iter 3: SNN SimCLR FFNN — SNN-FFNN encoder (rate coding T=25) + NT-Xent.
+           Key question: can spike accumulations learn contrastive representations?
+  Iter 4: SNN SimCLR CNN — SNN-CNN encoder + NT-Xent.
+           Direct SNN vs ANN comparison (vs Iter 2).
+  Iter 5: PC Contrastive — PC-FFNN encoder (free inference) + NT-Xent.
+           Pure contrastive (energy_weight=0). Addresses SPC-FFNN dead end.
+best_result: null

@@ -1,0 +1,11 @@
+# @package _global_.model
+# SimCLR FFNN encoder — Iter 1 of anp_contrastive
+# MLP encoder (784→512→256) + projection head (256→128) + linear probe (256→10)
+
+_target_: autoresearch.models.simclr_ffnn.SimCLRFFNN
+input_size: 784
+encoder_dims: [512, 256]
+proj_hidden: 256
+proj_out: 128
+num_classes: 10
+dropout: 0.0

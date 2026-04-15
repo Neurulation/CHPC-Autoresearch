@@ -1,0 +1,47 @@
+# @package _global_
+# ANP-Contrastive Iter 4 — SNN SimCLR CNN on MNIST.
+# SNN-CNN encoder (Conv1→Conv2→FC128, rate coding T=25) trained with NT-Xent.
+# Direct SNN vs ANN comparison: Iter 4 (SNN-CNN) vs Iter 2 (ANN-CNN).
+# Baseline comparison: supervised SNN-CNN (98.87%).
+
+defaults:
+  - override /dataset: mnist
+  - override /model: snn_simclr_cnn
+  - override /optimizer: adam
+
+experiment_group: mnist_snn_simclr_cnn
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+num_workers: 4
+
+# Pre-training (smaller batch — SNN is more memory-intensive)
+pretrain_epochs: 100
+pretrain_batch_size: 128
+temperature: 0.5
+
+# Linear probe
+probe_epochs: 50
+probe_batch_size: 128
+probe_lr: 1.0e-2
+
+early_stopping:
+  enabled: true
+  patience: 15
+  min_delta: 0.001
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - simclr
+    - contrastive
+    - snn
+    - cnn
+    - rate-coding
+    - adam
+    - anp-contrastive
+  notes: "ANP-Contrastive Iter 4 — SNN SimCLR CNN (Conv1→Conv2→FC128, T=25 rate coding) on MNIST."

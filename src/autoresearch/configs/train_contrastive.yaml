@@ -1,0 +1,65 @@
+defaults:
+  - _self_
+  - dataset: mnist
+  - model: simclr_ffnn
+  - optimizer: adam
+  - scheduler: null
+  - experiment: null
+
+experiment_group: default_contrastive
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 42
+num_workers: 1
+
+# Phase 1: contrastive pre-training
+pretrain_epochs: 100
+pretrain_batch_size: 256
+temperature: 0.5
+energy_weight: 0.0  # optional PC energy regularisation weight (PCContrastive only)
+
+# Augmentation pipeline
+augmentation:
+  crop_size: 28
+  padding: 4
+  flip_p: 0.2
+  brightness: 0.4
+  contrast: 0.4
+  noise_std: 0.1
+  erasing_p: 0.3
+
+# Phase 2: linear probe
+probe_epochs: 50
+probe_batch_size: 256
+probe_lr: 1.0e-2
+
+max_grad_norm: null  # gradient clipping (null = disabled)
+
+early_stopping:
+  enabled: true
+  patience: 10
+  min_delta: 0.001
+
+checkpoint:
+  enabled: true
+  save_dir: null
+  save_frequency: 5
+  resume_from: null
+  save_best_only: false
+  save_initial_model: false
+
+wandb:
+  enabled: true
+  project: ${oc.env:WANDB_PROJECT,autoresearch}
+  entity: ${oc.env:WANDB_ENTITY,autoresearch}
+  group: ${experiment_group}
+  name: null
+  tags:
+    - contrastive
+    - simclr
+    - mnist
+  notes: null
+  log_frequency: 10
+
+hydra:
+  run:
+    dir: outputs/train/${experiment_group}/${seed}

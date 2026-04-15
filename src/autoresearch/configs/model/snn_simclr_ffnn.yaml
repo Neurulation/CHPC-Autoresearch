@@ -1,0 +1,15 @@
+# @package _global_.model
+# SNN SimCLR FFNN encoder — Iter 3 of anp_contrastive
+# SNN-FFNN encoder (784→512→256, rate coding T=25) + MLP projection head + linear probe
+
+_target_: autoresearch.models.snn_simclr_ffnn.SNNSimCLRFFNN
+input_size: 784
+hidden1: 512
+hidden2: 256
+proj_hidden: 256
+proj_out: 128
+num_classes: 10
+beta: 0.9
+threshold: 0.9
+timesteps: 25
+encoding: rate
