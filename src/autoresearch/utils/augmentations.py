@@ -96,6 +96,7 @@ class MNISTContrastiveAugmentation:
 
         # 6. Random erasing
         if random.random() < self.erasing_p:
+            # scale = fraction of image area to erase; sqrt gives side length
             scale = random.uniform(*self.erasing_scale)
             side = max(1, int(self.crop_size * scale ** 0.5))
             i_e = random.randint(0, self.crop_size - side)

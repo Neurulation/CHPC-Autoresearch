@@ -210,8 +210,8 @@ class PCContrastive(nn.Module):
             reps.append(h)
         for i, layer in enumerate(self.pc_layers):
             mu = self._act(layer(reps[i].detach()))
-            e = reps[i + 1].detach() - mu
-            energy = energy + 0.5 * (e ** 2).sum()
+            prediction_error = reps[i + 1].detach() - mu
+            energy = energy + 0.5 * (prediction_error ** 2).sum()
         return energy / B  # per-sample energy
 
     # ------------------------------------------------------------------
