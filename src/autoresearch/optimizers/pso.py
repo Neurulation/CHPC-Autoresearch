@@ -56,6 +56,13 @@ class PSO:
     v_max_ratio:
         Maximum velocity as a fraction of the search-space width per dim.
         Set to ``None`` to disable velocity clamping.
+    v_init_ratio:
+        Initial velocity magnitude as a fraction of the search-space width.
+        Particles are initialised with velocities uniformly drawn from
+        ``[-v_init_ratio × span, +v_init_ratio × span]``.  Default: 0.5.
+    stagnation_window:
+        Number of consecutive iterations without improvement (below
+        ``convergence_tol``) before early stopping is triggered.  Default: 10.
     seed:
         Optional random seed for reproducibility.
     """
@@ -70,6 +77,8 @@ class PSO:
         c2: float = 1.49445,
         w_min: Optional[float] = None,
         v_max_ratio: Optional[float] = 0.2,
+        v_init_ratio: float = 0.5,
+        stagnation_window: int = 10,
         seed: Optional[int] = None,
     ) -> None:
         self.n_particles = n_particles
@@ -80,6 +89,8 @@ class PSO:
         self.c1 = c1
         self.c2 = c2
         self.v_max_ratio = v_max_ratio
+        self.v_init_ratio = v_init_ratio
+        self.stagnation_window = stagnation_window
         self.rng = np.random.default_rng(seed)
 
         # Normalise bounds → shape (n_dims, 2)
@@ -118,10 +129,10 @@ class PSO:
             + self.lo
         )
 
-        # Velocities: ±0.5 × span (common heuristic)
+        # Velocities: ±v_init_ratio × span (common heuristic, configurable)
         self.velocities = self.rng.uniform(
-            -0.5 * self.span,
-            0.5 * self.span,
+            -self.v_init_ratio * self.span,
+            self.v_init_ratio * self.span,
             size=(self.n_particles, self.n_dims),
         )
 
@@ -203,7 +214,6 @@ class PSO:
 
         prev_best = float("inf")
         stagnant_count = 0
-        stagnation_window = 10
 
         for iteration in range(max_iter):
             # Evaluate all particles
@@ -240,7 +250,7 @@ class PSO:
             # Early stopping on stagnation
             if abs(prev_best - self.global_best_fit) < convergence_tol:
                 stagnant_count += 1
-                if stagnant_count >= stagnation_window:
+                if stagnant_count >= self.stagnation_window:
                     log.info(
                         "Converged at iteration %d (tol=%.2e)", iteration + 1, convergence_tol
                     )

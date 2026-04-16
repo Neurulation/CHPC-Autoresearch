@@ -1,7 +1,7 @@
 # @package _global_
 # PSO for direct weight optimisation of a tiny FFNN on MNIST (neuroevolution)
 # Iteration 3 of PSO research roadmap.
-# Uses a small 784-32-10 network to keep dimensionality manageable (~25 410 params).
+# Uses a small 784-32-10 network to keep dimensionality manageable (~25,410 params).
 
 defaults:
   - override /dataset: mnist

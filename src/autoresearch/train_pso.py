@@ -160,13 +160,21 @@ def make_hyperparams_fitness(cfg: DictConfig, device: torch.device):
 
     Trains a fresh FFNN for ``cfg.pso.hyperparams.epochs`` epochs and returns
     the final validation loss.
+
+    Search-space bounds (must match ``main``):
+      - x[0]: log10(lr)   in [-5, -1]
+      - x[1]: hidden_size in [16, 512]  (rounded to nearest int, min 16)
+      - x[2]: dropout     in [0, 0.9]
     """
     log.info("Setting up hyperparameter-PSO fitness...")
     hp_cfg = cfg.pso.hyperparams
 
+    # Minimum hidden size — must equal the lower bound set in main()
+    _MIN_HIDDEN_SIZE = 16
+
     def fitness(x: np.ndarray) -> float:
         log10_lr = float(x[0])
-        hidden_size = max(8, int(round(float(x[1]))))
+        hidden_size = max(_MIN_HIDDEN_SIZE, int(round(float(x[1]))))
         dropout = float(np.clip(x[2], 0.0, 0.9))
         lr = 10.0**log10_lr
 
