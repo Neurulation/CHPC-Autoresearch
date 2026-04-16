@@ -1,0 +1,60 @@
+iteration: 1
+project: pso_research
+status: implement
+goal: >
+  PSO on classic mathematical benchmark functions — Sphere, Rastrigin, and
+  Rosenbrock — across 5 random seeds each.  Establishes that the PSO engine
+  converges reliably and characterises algorithm behaviour on:
+    - Sphere: convex and separable (easy, expected near-zero final fitness)
+    - Rastrigin: highly multimodal (tests escape from local optima)
+    - Rosenbrock: unimodal but ill-conditioned narrow valley (tests exploitation)
+
+  Success criterion: mean final best-fitness < 1e-3 on Sphere; qualitative
+  convergence curves for Rastrigin and Rosenbrock documented.
+
+phases:
+  plan:
+    completed_at: "2026-04-16"
+    notes: >
+      Decided to implement a pure NumPy global-best PSO with linear inertia-
+      weight decay (w: 0.729 → 0.4, Clerc-Kennedy coefficients c1=c2=1.49445).
+      Three benchmark configs created.  CPU-only PBS template added.
+      No new Python dependencies required.
+
+  survey:
+    completed_at: "2026-04-16"
+    notes: >
+      Kennedy & Eberhart (1995) original PSO paper; Shi & Eberhart (1998)
+      inertia-weight variant; Clerc & Kennedy (2002) constriction factor.
+      Standard test suite: Sphere, Rastrigin, Rosenbrock, Ackley.
+      PSO hyperparameters: w=0.729, c1=c2=1.49445 are the canonical
+      constriction-factor values from Clerc & Kennedy (2002).
+
+  implement:
+    completed_at: "2026-04-16"
+    notes: >
+      Created src/autoresearch/optimizers/__init__.py + pso.py — PSO class
+      with linear inertia decay, velocity clamping, convergence detection.
+      Created src/autoresearch/benchmarks.py — Sphere, Rastrigin, Rosenbrock,
+      Ackley with known optima.
+      Created src/autoresearch/train_pso.py — Hydra entry point supporting
+      modes: benchmark | hyperparams | weights.
+      Created src/autoresearch/configs/pso.yaml — top-level PSO config.
+      Created pso_experiment/ configs: pso_benchmark_sphere.yaml,
+      pso_benchmark_rastrigin.yaml, pso_benchmark_rosenbrock.yaml,
+      pso_hyperparams_ffnn.yaml, pso_weights_ffnn.yaml.
+      Added templates/experiment_cpu.pbs.template for CPU-only jobs.
+      Added --cpu-only flag to scripts/generate_pbs.py.
+
+  experiment:
+    started_at: null
+    completed_at: null
+    notes: null
+
+  analyze:
+    completed_at: null
+    notes: null
+
+  conclude:
+    completed_at: null
+    notes: null

@@ -1,0 +1,38 @@
+name: "Particle Swarm Optimisation Research"
+slug: pso_research
+status: active
+created: "2026-04-16"
+description: >
+  A standalone research project exploring Particle Swarm Optimisation (PSO)
+  as a gradient-free alternative to backpropagation-based training.
+
+  The project follows a progressive roadmap:
+    Iter 1: PSO on classic mathematical benchmarks (Sphere, Rastrigin, Rosenbrock)
+            — establishes baseline convergence behaviour.
+    Iter 2: PSO for neural-network hyperparameter search (lr, hidden size, dropout)
+            — compares to grid/random search on MNIST FFNN.
+    Iter 3: PSO for direct weight optimisation of a tiny FFNN (neuroevolution)
+            — gradient-free training; compare accuracy vs Adam-trained equivalent.
+    Iter 4: PSO vs. gradient-descent head-to-head on MNIST FFNN.
+    Iter 5: Hybrid PSO + gradient fine-tuning (warm-start from PSO solution).
+    Iter 6: Bio-plausible relevance — link PSO to ANP roadmap as surrogate for
+            STDP/local-rule learning.
+
+  Infrastructure notes:
+    - Entry point: python -m autoresearch.train_pso
+    - Top-level config: src/autoresearch/configs/pso.yaml
+    - Experiment presets: src/autoresearch/configs/pso_experiment/
+    - PSO engine: src/autoresearch/optimizers/pso.py (pure NumPy, no extra deps)
+    - Benchmarks: src/autoresearch/benchmarks.py
+    - Benchmark experiments use CPU queue (serial) on CHPC — no GPU needed.
+    - Hyperparameter and weight experiments may optionally use gpu_1.
+
+current_iteration: 1
+branch: "project/pso-research"
+human_direction: >
+  New independent research project — separate from the ANP/SNN work.
+  Start with iteration 1: establish that PSO finds near-optimal solutions on
+  classic benchmark functions (Sphere, Rastrigin, Rosenbrock) across 5 seeds.
+  This validates the PSO engine before applying it to neural networks.
+
+best_result: null

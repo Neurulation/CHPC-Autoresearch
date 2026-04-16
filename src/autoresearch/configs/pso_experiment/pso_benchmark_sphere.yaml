@@ -1,0 +1,35 @@
+# @package _global_
+# PSO on Sphere function — convex, separable, easy baseline
+# Establishes baseline convergence speed and accuracy for PSO.
+
+experiment_group: pso_benchmark_sphere
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+
+pso:
+  mode: benchmark
+  n_particles: 30
+  max_iter: 200
+  w: 0.729
+  w_min: 0.4
+  c1: 1.49445
+  c2: 1.49445
+  convergence_tol: 1.0e-8
+  log_frequency: 20
+
+benchmark:
+  fn: sphere
+  n_dims: 10
+  bounds: [-5.12, 5.12]
+
+wandb:
+  tags:
+    - pso
+    - benchmark
+    - sphere
+  notes: "PSO on Sphere f(x)=sum(x_i^2), n_dims=10. Known optimum=0."
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)

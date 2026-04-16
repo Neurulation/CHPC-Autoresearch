@@ -1,0 +1,35 @@
+# @package _global_
+# PSO on Rastrigin function — highly multimodal, standard PSO stress test
+# Tests PSO's ability to escape local optima.
+
+experiment_group: pso_benchmark_rastrigin
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+
+pso:
+  mode: benchmark
+  n_particles: 40
+  max_iter: 500
+  w: 0.729
+  w_min: 0.4
+  c1: 1.49445
+  c2: 1.49445
+  convergence_tol: 1.0e-8
+  log_frequency: 50
+
+benchmark:
+  fn: rastrigin
+  n_dims: 10
+  bounds: [-5.12, 5.12]
+
+wandb:
+  tags:
+    - pso
+    - benchmark
+    - rastrigin
+  notes: "PSO on Rastrigin f(x)=10n+sum(x_i^2-10cos(2πx_i)), n_dims=10. Known optimum=0."
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)

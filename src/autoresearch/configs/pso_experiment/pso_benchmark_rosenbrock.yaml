@@ -1,0 +1,35 @@
+# @package _global_
+# PSO on Rosenbrock (banana) function — unimodal but ill-conditioned valley
+# Tests PSO's ability to follow a narrow curved valley.
+
+experiment_group: pso_benchmark_rosenbrock
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+
+pso:
+  mode: benchmark
+  n_particles: 40
+  max_iter: 500
+  w: 0.729
+  w_min: 0.4
+  c1: 1.49445
+  c2: 1.49445
+  convergence_tol: 1.0e-8
+  log_frequency: 50
+
+benchmark:
+  fn: rosenbrock
+  n_dims: 10
+  bounds: [-2.048, 2.048]
+
+wandb:
+  tags:
+    - pso
+    - benchmark
+    - rosenbrock
+  notes: "PSO on Rosenbrock f(x)=sum[100(x_{i+1}-x_i^2)^2+(1-x_i)^2], n_dims=10. Known optimum=0."
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)

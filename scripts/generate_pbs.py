@@ -27,6 +27,7 @@ def generate_pbs(
     mem: str = None,
     ngpus: str = None,
     output_dir: str = None,
+    cpu_only: bool = False,
 ) -> str:
     """Generate a PBS script from template.
 
@@ -37,13 +38,26 @@ def generate_pbs(
         walltime: Wall time limit (default from env)
         ncpus: Number of CPUs (default from env)
         mem: Memory allocation (default from env)
-        ngpus: Number of GPUs (default from env)
+        ngpus: Number of GPUs (default from env).  Ignored when cpu_only=True.
         output_dir: Output directory for PBS script
+        cpu_only: Use the CPU-only template (no GPU allocation).  Useful for
+            benchmark and PSO experiments that do not require a GPU.
 
     Returns:
         Path to generated PBS script
     """
-    template_path = project_root / "templates" / "experiment.pbs.template"
+    if cpu_only:
+        template_name = "experiment_cpu.pbs.template"
+        default_queue = get_env("AUTORESEARCH_CPU_QUEUE", "serial")
+        default_walltime = get_env("AUTORESEARCH_CPU_WALLTIME", "04:00:00")
+        default_mem = get_env("AUTORESEARCH_CPU_MEM", "16gb")
+    else:
+        template_name = "experiment.pbs.template"
+        default_queue = get_env("AUTORESEARCH_DEFAULT_QUEUE", "gpu_1")
+        default_walltime = get_env("AUTORESEARCH_DEFAULT_WALLTIME", "12:00:00")
+        default_mem = get_env("AUTORESEARCH_DEFAULT_MEM", "64gb")
+
+    template_path = project_root / "templates" / template_name
     if not template_path.exists():
         print(f"Error: Template not found at {template_path}", file=sys.stderr)
         sys.exit(1)
@@ -53,18 +67,21 @@ def generate_pbs(
     # Fill in values from args or env defaults
     values = {
         "job_name": name,
-        "queue": queue or get_env("AUTORESEARCH_DEFAULT_QUEUE", "gpu_1"),
+        "queue": queue or default_queue,
         "project_id": get_env("CHPC_PROJECT_ID", "CSCI0000"),
         "ncpus": ncpus or get_env("AUTORESEARCH_DEFAULT_NCPUS", "4"),
-        "mem": mem or get_env("AUTORESEARCH_DEFAULT_MEM", "64gb"),
-        "ngpus": ngpus or get_env("AUTORESEARCH_DEFAULT_NGPUS", "1"),
-        "walltime": walltime or get_env("AUTORESEARCH_DEFAULT_WALLTIME", "12:00:00"),
+        "mem": mem or default_mem,
+        "walltime": walltime or default_walltime,
         "lustre_path": get_env("CHPC_LUSTRE_PATH", "/mnt/lustre/users/USERNAME"),
         "repo_name": get_env("CHPC_REPO_NAME", "chpc_autoresearch"),
         "email": get_env("CHPC_EMAIL", "you@example.com"),
         "python_module": get_env("CHPC_MODULE_PYTHON", "chpc/python/anaconda/3-2024.10.1"),
         "commands": commands,
     }
+
+    # GPU-capable template also needs ngpus
+    if not cpu_only:
+        values["ngpus"] = ngpus or get_env("AUTORESEARCH_DEFAULT_NGPUS", "1")
 
     script = template.format(**values)
 
@@ -88,6 +105,11 @@ def main():
     parser.add_argument("--mem", help="Memory (default: from .env or 64gb)")
     parser.add_argument("--ngpus", help="Number of GPUs (default: from .env or 1)")
     parser.add_argument("--output-dir", help="Output directory (default: experiments/)")
+    parser.add_argument(
+        "--cpu-only",
+        action="store_true",
+        help="Use CPU-only template (no GPU); defaults to serial queue",
+    )
 
     args = parser.parse_args()
 
@@ -100,6 +122,7 @@ def main():
         mem=args.mem,
         ngpus=args.ngpus,
         output_dir=args.output_dir,
+        cpu_only=args.cpu_only,
     )
 
 

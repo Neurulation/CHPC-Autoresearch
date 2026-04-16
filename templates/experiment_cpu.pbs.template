@@ -1,0 +1,31 @@
+#!/bin/sh
+#PBS -N {job_name}
+#PBS -q {queue}
+#PBS -P {project_id}
+#PBS -l select=1:ncpus={ncpus}:mem={mem}
+#PBS -l walltime={walltime}
+#PBS -o {lustre_path}/{repo_name}/logs/{job_name}.out
+#PBS -e {lustre_path}/{repo_name}/logs/{job_name}.err
+#PBS -m abe -M {email}
+
+set -euo pipefail
+
+module purge
+module load {python_module}
+
+cd {lustre_path}/{repo_name}
+source .venv/bin/activate
+
+echo "=========================================="
+echo "Job: {job_name}"
+echo "=========================================="
+echo "Start time: $(date)"
+echo ""
+
+{commands}
+
+echo ""
+echo "=========================================="
+echo "JOB COMPLETED"
+echo "=========================================="
+echo "End time: $(date)"

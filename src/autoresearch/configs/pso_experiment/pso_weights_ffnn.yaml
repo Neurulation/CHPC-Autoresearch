@@ -1,0 +1,49 @@
+# @package _global_
+# PSO for direct weight optimisation of a tiny FFNN on MNIST (neuroevolution)
+# Iteration 3 of PSO research roadmap.
+# Uses a small 784-32-10 network to keep dimensionality manageable (~25 410 params).
+
+defaults:
+  - override /dataset: mnist
+  - override /loss_fn: cross_entropy
+
+experiment_group: pso_weights_ffnn
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 256
+validation_split: 0.1
+num_workers: 2
+
+model:
+  _target_: autoresearch.models.ffnn.FFNN
+  input_size: 784
+  hidden_units: [32, 10]
+  dropout: null
+  flatten_input: true
+
+pso:
+  mode: weights
+  n_particles: 20
+  max_iter: 100
+  w: 0.729
+  w_min: 0.4
+  c1: 1.49445
+  c2: 1.49445
+  weight_bound: 0.5
+  v_max_ratio: 0.1
+  convergence_tol: 1.0e-6
+  log_frequency: 10
+
+wandb:
+  tags:
+    - pso
+    - weights
+    - ffnn
+    - mnist
+    - neuroevolution
+  notes: "PSO direct weight optimisation of FFNN(784→32→10) on MNIST. ~25k params."
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)

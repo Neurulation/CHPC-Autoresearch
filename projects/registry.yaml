@@ -27,3 +27,7 @@ projects:
     status: active
     current_iteration: 1
     path: projects/anp_datasets
+  - slug: pso_research
+    status: active
+    current_iteration: 1
+    path: projects/pso_research

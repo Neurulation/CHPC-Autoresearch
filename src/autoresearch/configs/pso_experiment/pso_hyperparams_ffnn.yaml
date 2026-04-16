@@ -1,0 +1,42 @@
+# @package _global_
+# PSO for hyperparameter search — learning rate, hidden size, dropout for FFNN on MNIST
+# Iteration 2 of PSO research roadmap.
+
+defaults:
+  - override /dataset: mnist
+  - override /model: ffnn
+  - override /loss_fn: cross_entropy
+
+experiment_group: pso_hyperparams_ffnn
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+validation_split: 0.1
+num_workers: 2
+
+pso:
+  mode: hyperparams
+  n_particles: 15
+  max_iter: 30
+  w: 0.729
+  w_min: 0.4
+  c1: 1.49445
+  c2: 1.49445
+  convergence_tol: 1.0e-6
+  log_frequency: 5
+
+  hyperparams:
+    epochs: 3   # quick training per particle; enough to differentiate candidates
+
+wandb:
+  tags:
+    - pso
+    - hyperparams
+    - ffnn
+    - mnist
+  notes: "PSO hyperparameter search: log10(lr) in [-5,-1], hidden in [16,512], dropout in [0,0.9]"
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)

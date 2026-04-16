@@ -1,0 +1,53 @@
+defaults:
+  - _self_
+  - dataset: mnist
+  - model: ffnn
+  - loss_fn: cross_entropy
+  - pso_experiment: null
+
+experiment_group: default_pso
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 42
+batch_size: 128
+validation_split: 0.1
+num_workers: 1
+
+pso:
+  mode: benchmark        # benchmark | hyperparams | weights
+  n_particles: 30
+  max_iter: 100
+  w: 0.729              # inertia weight
+  w_min: 0.4            # linear decay target (set null to disable)
+  c1: 1.49445           # cognitive coefficient
+  c2: 1.49445           # social coefficient
+  v_max_ratio: 0.2      # velocity clamp as fraction of search-space width
+  convergence_tol: 1.0e-8
+  log_frequency: 10
+  weight_bound: 1.0     # ±bound for weight-PSO initialisation
+
+  # Hyperparameter PSO sub-config
+  hyperparams:
+    epochs: 3           # quick training epochs per particle evaluation
+
+benchmark:
+  fn: sphere
+  n_dims: 10
+  bounds: [-5.12, 5.12]
+
+wandb:
+  enabled: true
+  project: ${oc.env:WANDB_PROJECT,autoresearch}
+  entity: ${oc.env:WANDB_ENTITY,autoresearch}
+  group: ${experiment_group}
+  name: null
+  tags:
+    - pso
+  notes: null
+  log_frequency: 10
+
+hydra:
+  run:
+    dir: outputs/pso/${experiment_group}/${seed}
+  sweeper:
+    params:
+      seed: range(0,5)
