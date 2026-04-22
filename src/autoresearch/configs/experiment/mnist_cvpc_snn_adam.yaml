@@ -1,0 +1,46 @@
+# @package _global_
+# CVPC-SNN Iter 1 — Full model: Complex-Valued PC + STDP on MNIST.
+# CV-LIF spiking encoder (T=25) with separate PC generative weights.
+# Three-factor Complex STDP updates magnitude and phase of PC weights.
+# Temporal (phase) coding: spike latency encodes information in complex domain.
+
+defaults:
+  - override /dataset: mnist
+  - override /model: cvpc_snn
+
+experiment_group: mnist_cvpc_snn_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 30
+num_workers: 4
+validation_split: 0.1
+max_grad_norm: 1.0
+
+early_stopping:
+  enabled: true
+  patience: 7
+  min_delta: 0.001
+  metric: val_accuracy
+  mode: max
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - snn
+    - pc
+    - complex-valued
+    - stdp
+    - temporal-coding
+    - phase-coding
+    - cv-lif
+    - predictive-coding
+    - adam
+    - cvpc-snn
+    - cvpc-snn-iter1
+  notes: "CVPC-SNN Iter 1 — Full model: CV-LIF + PC hierarchy + three-factor Complex STDP on MNIST."

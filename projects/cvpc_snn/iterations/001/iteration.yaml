@@ -1,0 +1,43 @@
+iteration: 1
+project: cvpc_snn
+status: implement
+goal: >
+  Implement and smoke-test the full CVPC-SNN architecture on MNIST.
+  Three components: (1) CV-LIF bottom-up spiking encoder with complex temporal
+  coding (spike latency → complex phase), (2) separate PC generative weights with
+  complex free energy inference, (3) three-factor Complex STDP weight update rule
+  applied to PC generative weights after each gradient step.
+  Two experiment configs: full (PC + STDP) and pc_only ablation.
+  Submit 5-seed CHPC sweep for both configs (10 runs total).
+
+phases:
+  plan:
+    completed_at: "2026-04-22"
+    notes: >
+      Architecture design: separate SNN encoder weights (cv_lif_layers) from PC
+      generative weights (pc_layers). This avoids the shared-weight architectural
+      failure observed in anp_spcnn iters 2-5.
+      Mathematical formulation: CV-LIF dynamics, complex STDP, PC free energy,
+      three-factor learning rule (see PROMPT.md for full derivation).
+
+  implement:
+    completed_at: "2026-04-22"
+    notes: >
+      Created src/autoresearch/models/cvpc_snn.py:
+        - real_to_complex_temporal(): encodes pixel intensity as spike latency/phase
+        - ComplexLinear: nn.Linear with cfloat weights W = r·exp(jθ)
+        - ComplexLIFLayer: CV-LIF with magnitude thresholding and surrogate gradient
+        - ComplexSTDPUpdater: three-factor STDP on polar-decomposed complex weights
+        - CVPCSNNModel: full model with bottom-up pass, PC inference, STDP step
+      Created model configs: cvpc_snn.yaml, cvpc_snn_pc_only.yaml
+      Created experiment configs: mnist_cvpc_snn_adam.yaml, mnist_cvpc_snn_pc_only_adam.yaml
+      Modified train_pcnn.py: added post-optimizer stdp_step() hook for models that
+      implement it (backward-compatible, only called if model.stdp_step exists).
+      Exported CVPCSNNModel from models/__init__.py.
+
+  experiment:
+    notes: >
+      Pending CHPC submission. PBS scripts to be generated.
+      Configs: mnist_cvpc_snn_adam (full), mnist_cvpc_snn_pc_only_adam (ablation).
+      5 seeds each (seeds 0-4), 30 epochs, patience=7.
+      Estimated walltime: 2h per config (5 seeds sequential). Use gpu_1 queue.

@@ -1,0 +1,21 @@
+# @package _global_.model
+# CVPC-SNN — PC-only baseline (no STDP).
+# Ablation: complex-valued PC inference without Complex STDP.
+# Isolates the contribution of the CV-PC hierarchy from STDP.
+
+_target_: autoresearch.models.cvpc_snn.CVPCSNNModel
+input_size: 784
+hidden_dims: [256, 128]
+num_classes: 10
+T_pc: 20
+lr_pc: 0.05
+ce_weight: 1.0
+beta: 0.9
+threshold: 1.0
+timesteps: 25
+alpha: 3.0
+omega: 1.0
+mode: "pc_only"
+stdp_eta_r: 1.0e-4
+stdp_eta_th: 1.0e-4
+stdp_lam: 0.01

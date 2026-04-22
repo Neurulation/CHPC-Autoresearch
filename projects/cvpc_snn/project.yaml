@@ -1,0 +1,24 @@
+name: "Complex-Valued Predictive Coding SNN"
+slug: cvpc_snn
+status: active
+created: "2026-04-22"
+description: >
+  Investigate a neural architecture integrating Predictive Coding, Complex-Valued
+  Neural Networks, and Spike-Timing-Dependent Plasticity within a temporally encoded
+  spiking framework. Complex-valued synaptic weights W = r·exp(jθ) encode both
+  magnitude (efficacy) and phase (timing delay). Information is carried in spike
+  latency relative to a global reference oscillation. PC inference minimises a
+  complex free energy over hierarchical representations. Learning uses a three-factor
+  Complex STDP rule: Re[ε·Δ] updates magnitude, Im[ε·Δ]/r updates phase delay.
+current_iteration: 1
+branch: "copilot/research-complex-valued-predictive-coding"
+human_direction: >
+  Iter 1: Implement and validate the full CVPC-SNN architecture on MNIST.
+  Three configurations to compare:
+    1. Full model (CV-LIF + PC + Complex STDP): mnist_cvpc_snn_adam
+    2. PC-only ablation (no STDP): mnist_cvpc_snn_pc_only_adam
+  Key metrics to track: val_accuracy, PC energy per layer, phase coherence index,
+  mean spike count. Target: exceed chance level (>11%) and approach SPC-FFNN
+  baselines (~55-97% depending on mode). Separate SNN encoder and PC generative
+  weights to avoid the architectural dead-end observed in anp_spcnn iters 2-5.
+best_result: null

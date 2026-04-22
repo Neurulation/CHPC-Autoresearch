@@ -219,6 +219,11 @@ def train_one_epoch_pc(
             nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm)
         optimizer.step()
 
+        # Optional bio-plausible STDP update (e.g. CVPCSNNModel).
+        # Called after the gradient-based step so STDP refines weights post-update.
+        if hasattr(model, "stdp_step") and callable(model.stdp_step):
+            model.stdp_step()
+
         total_combined_loss += combined_loss.item()
         total_energy += energy.item()
         _, predicted = torch.max(logits, 1)

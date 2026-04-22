@@ -1,0 +1,23 @@
+# @package _global_.model
+# CVPC-SNN — Complex-Valued Predictive Coding SNN for MNIST.
+# Full model: CV-LIF bottom-up pass + PC inference + Complex STDP.
+# Complex weights W = r·exp(jθ): magnitude encodes efficacy, phase encodes timing delay.
+# Three-factor STDP: Re[ε·Δ] updates magnitude, Im[ε·Δ]/r updates phase.
+# PC hierarchy: 3 layers (784→256→128→10) with separate SNN and PC generative weights.
+
+_target_: autoresearch.models.cvpc_snn.CVPCSNNModel
+input_size: 784
+hidden_dims: [256, 128]
+num_classes: 10
+T_pc: 20
+lr_pc: 0.05
+ce_weight: 1.0
+beta: 0.9
+threshold: 1.0
+timesteps: 25
+alpha: 3.0
+omega: 1.0
+mode: "full"
+stdp_eta_r: 1.0e-4
+stdp_eta_th: 1.0e-4
+stdp_lam: 0.01

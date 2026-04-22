@@ -1,0 +1,44 @@
+# @package _global_
+# CVPC-SNN Iter 1 — PC-only baseline (no STDP) on MNIST.
+# Ablation: complex-valued PC inference without Complex STDP.
+# Isolates the contribution of the CV-PC hierarchy vs. STDP.
+
+defaults:
+  - override /dataset: mnist
+  - override /model: cvpc_snn_pc_only
+
+experiment_group: mnist_cvpc_snn_pc_only_adam
+experiment_name: ${experiment_group}_seed_${seed}
+seed: 0
+batch_size: 128
+epochs: 30
+num_workers: 4
+validation_split: 0.1
+max_grad_norm: 1.0
+
+early_stopping:
+  enabled: true
+  patience: 7
+  min_delta: 0.001
+  metric: val_accuracy
+  mode: max
+
+hydra:
+  sweeper:
+    params:
+      seed: range(0,5)
+
+wandb:
+  tags:
+    - mnist
+    - snn
+    - pc
+    - complex-valued
+    - temporal-coding
+    - cv-lif
+    - predictive-coding
+    - adam
+    - cvpc-snn
+    - cvpc-snn-iter1
+    - pc-only-ablation
+  notes: "CVPC-SNN Iter 1 — PC-only ablation: CV-LIF + PC hierarchy, no STDP."

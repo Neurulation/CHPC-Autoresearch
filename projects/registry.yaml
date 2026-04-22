@@ -27,3 +27,7 @@ projects:
     status: active
     current_iteration: 1
     path: projects/anp_datasets
+  - slug: cvpc_snn
+    status: active
+    current_iteration: 1
+    path: projects/cvpc_snn

@@ -1,5 +1,6 @@
 """Models package."""
 
+from autoresearch.models.cvpc_snn import CVPCSNNModel
 from autoresearch.models.cnn import CNN
 from autoresearch.models.ffnn import FFNN
 from autoresearch.models.gru import GRU
@@ -18,6 +19,7 @@ from autoresearch.models.spc_ffnn import SPCFFNNModel
 from autoresearch.models.vanilla_rnn import VanillaRNN
 
 __all__ = [
+    "CVPCSNNModel",
     "FFNN",
     "CNN",
     "GRU",
