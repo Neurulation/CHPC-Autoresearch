@@ -304,10 +304,16 @@ class ComplexSTDPUpdater:
 
         t_i ≈ 1 - |r_i| / (max_j |r_j| + eps)   ∈ [0, 1]
         Shape of r: (N, D).  Returns (N, D).
+
+        Guard: if max magnitude in a sample is near zero (all neurons silent),
+        the spike times default to 1.0 (all neurons fire last / no information).
         """
         mag = r.abs()
-        max_mag = mag.amax(dim=1, keepdim=True).clamp(min=self.eps)
-        return 1.0 - mag / max_mag
+        max_mag = mag.amax(dim=1, keepdim=True)
+        # Only normalise when there is meaningful dynamic range; otherwise use 1.0
+        has_signal = (max_mag > self.eps).float()
+        safe_max = (max_mag + self.eps)
+        return 1.0 - has_signal * (mag / safe_max)
 
     def _stdp_kernel(
         self, t_post: torch.Tensor, t_pre: torch.Tensor
@@ -364,7 +370,10 @@ class ComplexSTDPUpdater:
         r_ij_new = (r_ij + dr).clamp(min=0.0)
 
         # Phase update: dθ = η_θ · Im[ε·Δ] / r_ij
-        dtheta = self.eta_th * eps_Delta_mean.imag / r_ij  # (out, in)
+        # Use a minimum denominator of sqrt(eps) to avoid extreme amplification
+        # when weights are near zero, while still normalising by magnitude.
+        r_denom = r_ij.clamp(min=max(self.eps ** 0.5, 1e-3))
+        dtheta = self.eta_th * eps_Delta_mean.imag / r_denom  # (out, in)
 
         # Phase coherence regulariser: dθ -= λ · sin(θ_ij - θ̄)
         theta_mean = theta_ij.mean()
@@ -506,7 +515,10 @@ class CVPCSNNModel(nn.Module):
                 spk_acc = spk_acc + spk
                 spk_rec.append(spk)
 
-            # Average spike representation over timesteps (complex mean)
+            # Average spike representation over timesteps (complex mean).
+            # Detached: the CV-LIF encoder is isolated from the PC gradient graph,
+            # consistent with the two-timescale design (SNN encodes features;
+            # PC generative weights and cls_head are trained by autograd).
             r_l = (spk_acc / self.timesteps).detach()
             reps.append(r_l)
 
